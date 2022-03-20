@@ -7,6 +7,7 @@ import logging
 from typing import Callable, Optional, Text
 
 from ... import action, templates, terminal
+from ...constants import RuningStyle
 from ...scenes import PaddockScene
 from ...scenes.single_mode import RaceMenuScene
 from .. import Context, Race, RaceResult
@@ -23,7 +24,11 @@ def _choose_running_style(ctx: Context, race1: Race) -> None:
     for style, score in style_scores:
         _LOGGER.info("running style score:\t%.2f:\t%s", score, style)
 
-    scene.choose_runing_style(style_scores[0][0])
+    if g.force_running_style in set(item.value for item in RuningStyle):
+        force_running_style =  RuningStyle(g.force_running_style)
+        scene.choose_runing_style(force_running_style)
+    else:
+        scene.choose_runing_style(style_scores[0][0])
 
 
 _RACE_ORDER_TEMPLATES = {

@@ -1,7 +1,7 @@
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   Title="Auto Derby Launcher"
-  Height="650"
+  Height="700"
   Width="500"
   Topmost="True">
   <Grid>
@@ -11,6 +11,7 @@
       <RowDefinition Height="60" />
       <RowDefinition Height="60" />
       <RowDefinition Height="80" />
+      <RowDefinition Height="60" />
       <RowDefinition Height="60" />
       <RowDefinition Height="60" />
       <RowDefinition Height="60" />
@@ -43,8 +44,6 @@
       <Label>Job</Label>
       <ComboBox x:Name="comboBox1"
         ItemsSource="{Binding JobOptions1}"
-        SelectedValuePath="Value"
-        DisplayMemberPath="Label"
         SelectedValue="{Binding Job}" />
     </StackPanel>
 
@@ -94,15 +93,22 @@
     </StackPanel>
 
     <StackPanel Grid.Row="7">
+      <Label>Force running style</Label>
+      <ComboBox x:Name="comboBox4"
+        ItemsSource="{Binding ForceRunningStyleOptions1}"
+        SelectedValue="{Binding ForceRunningStyle}" />
+    </StackPanel>
+
+    <StackPanel Grid.Row="8">
       <Label>Plugins seperated by comma</Label>
       <TextBox Text="{Binding Plugins, UpdateSourceTrigger=PropertyChanged}"
         MaxLines="1" />
     </StackPanel>
 
     <Button x:Name="startButton"
-      Grid.Row="8">Start</Button>
+      Grid.Row="9">Start</Button>
 
-    <StackPanel Grid.Row="9"
+    <StackPanel Grid.Row="10"
       Margin="8"
       Orientation="Horizontal"
       HorizontalAlignment="Right">

@@ -102,6 +102,7 @@ $data | Format-List -Property (
     "TargetTrainingLevels",
     "ADBAddress",
     "PauseOnSpecifiedTurn",
+    "ForceRunningStyle",
     @{
         Name       = "Version"
         Expression = { $version }
@@ -133,6 +134,7 @@ if ($data.SingleModeChoicesDataPath) {
 
 $env:AUTO_DERBY_PAUSE_IF_RACE_ORDER_GT = $data.PauseIfRaceOrderGt
 $env:AUTO_DERBY_PAUSE_ON_SPECIFIED_TURN = $data.PauseOnSpecifiedTurn
+$env:AUTO_DERBY_FORCE_RUNNING_STYLE = [int]$data.ForceRunningStyle
 $env:AUTO_DERBY_PLUGINS = $data.Plugins
 $env:AUTO_DERBY_ADB_ADDRESS = $data.ADBAddress
 $env:AUTO_DERBY_SINGLE_MODE_TARGET_TRAINING_LEVELS = $data.TargetTrainingLevels
@@ -155,6 +157,7 @@ set "AUTO_DERBY_SINGLE_MODE_TRAINING_IMAGE_PATH=$($env:AUTO_DERBY_SINGLE_MODE_TR
 set "AUTO_DERBY_SINGLE_MODE_CHOICE_PATH=$($env:AUTO_DERBY_SINGLE_MODE_CHOICE_PATH)"
 set "AUTO_DERBY_PAUSE_IF_RACE_ORDER_GT=$($env:AUTO_DERBY_PAUSE_IF_RACE_ORDER_GT)"
 set "AUTO_DERBY_PAUSE_ON_SPECIFIED_TURN=$($env:AUTO_DERBY_PAUSE_ON_SPECIFIED_TURN)"
+set "AUTO_DERBY_FORCE_RUNNING_STYLE=$($env:AUTO_DERBY_FORCE_RUNNING_STYLE)"
 set "AUTO_DERBY_PLUGINS=$($env:AUTO_DERBY_PLUGINS)"
 set "AUTO_DERBY_SINGLE_MODE_TARGET_TRAINING_LEVELS=$($env:AUTO_DERBY_SINGLE_MODE_TARGET_TRAINING_LEVELS)"
 set "AUTO_DERBY_ADB_ADDRESS=$($env:AUTO_DERBY_ADB_ADDRESS)"

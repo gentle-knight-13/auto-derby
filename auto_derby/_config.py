@@ -147,6 +147,9 @@ class config:
     pause_on_specified_turn = int(
         os.getenv("AUTO_DERBY_PAUSE_ON_SPECIFIED_TURN", "-1")
     )
+    force_running_style = int(
+        os.getenv("AUTO_DERBY_FORCE_RUNNING_STYLE", "0")
+    )
 
     @classmethod
     def apply(cls) -> None:
@@ -183,6 +186,7 @@ class config:
         sc.g.on_command = cls.on_single_mode_command
         sc.g.on_race_result = cls.on_single_mode_race_result
         sc.g.should_retry_race = cls.single_mode_should_retry_race
+        sc.g.force_running_style = cls.force_running_style
         template.g.last_screenshot_save_path = cls.last_screenshot_save_path
         terminal.g.pause_sound_path = cls.terminal_pause_sound_path
         terminal.g.prompt_sound_path = cls.terminal_prompt_sound_path
