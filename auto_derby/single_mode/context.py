@@ -21,7 +21,7 @@ import numpy as np
 from PIL.Image import Image
 from PIL.Image import fromarray as image_from_array
 
-from .. import imagetools, mathtools, ocr, scenes, template, templates, texttools
+from .. import imagetools, mathtools, ocr, scenes, template, templates, texttools, terminal
 from ..constants import Mood, TrainingType
 from . import condition
 
@@ -30,6 +30,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class g:
     context_class: Type[Context]
+    pause_on_specified_turn: int = 0
 
 
 def _year4_date_text(ctx: Context) -> Iterator[Text]:
@@ -359,6 +360,10 @@ class Context:
         while self._next_turn_cb:
             self._next_turn_cb.pop()()
         _LOGGER.info("next turn: %s", self)
+
+        if g.pause_on_specified_turn > 0 and self.turn_count_v2() == g.pause_on_specified_turn:
+            _LOGGER.debug("Pause on turn count:\t%i", g.pause_on_specified_turn)
+            terminal.pause(f"Pause on specified turn")
 
     def defer_next_turn(self, cb: Callable[[], None]) -> None:
         self._next_turn_cb.append(cb)
