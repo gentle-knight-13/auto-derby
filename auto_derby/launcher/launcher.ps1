@@ -103,6 +103,7 @@ $data | Format-List -Property (
     "ADBAddress",
     "PauseOnSpecifiedTurn",
     "ForceRunningStyle",
+    "RacePluginFileInfo",
     @{
         Name       = "Version"
         Expression = { $version }
@@ -134,6 +135,12 @@ if ($data.SingleModeChoicesDataPath) {
     $env:AUTO_DERBY_SINGLE_MODE_CHOICE_PATH = $data.SingleModeChoicesDataPath
 }
 
+if($data.RacePluginFileInfo -ne "None") {
+    $pluginPath = Join-Path $WorkspaceFolder "plugins"
+    Copy-Item -Path $data.RacePluginFileInfo -Destination $pluginPath
+    $env:AUTO_DERBY_RACE_PLUGIN = [System.IO.Path]::GetFileNameWithoutExtension($data.RacePluginFileInfo)
+}
+
 $env:AUTO_DERBY_PAUSE_IF_RACE_ORDER_GT = $data.PauseIfRaceOrderGt
 $env:AUTO_DERBY_PAUSE_ON_SPECIFIED_TURN = $data.PauseOnSpecifiedTurn
 $env:AUTO_DERBY_FORCE_RUNNING_STYLE = [int]$data.ForceRunningStyle
@@ -159,6 +166,7 @@ set "AUTO_DERBY_OCR_IMAGE_PATH=$($env:AUTO_DERBY_OCR_IMAGE_PATH)"
 set "AUTO_DERBY_PAUSE_IF_RACE_ORDER_GT=$($env:AUTO_DERBY_PAUSE_IF_RACE_ORDER_GT)"
 set "AUTO_DERBY_PAUSE_ON_SPECIFIED_TURN=$($env:AUTO_DERBY_PAUSE_ON_SPECIFIED_TURN)"
 set "AUTO_DERBY_FORCE_RUNNING_STYLE=$($env:AUTO_DERBY_FORCE_RUNNING_STYLE)"
+set "AUTO_DERBY_RACE_PLUGIN=$($env:AUTO_DERBY_RACE_PLUGIN)"
 set "AUTO_DERBY_PLUGINS=$($env:AUTO_DERBY_PLUGINS)"
 set "AUTO_DERBY_SINGLE_MODE_CHOICE_PATH=$($env:AUTO_DERBY_SINGLE_MODE_CHOICE_PATH)"
 set "AUTO_DERBY_SINGLE_MODE_EVENT_IMAGE_PATH=$($env:AUTO_DERBY_SINGLE_MODE_EVENT_IMAGE_PATH)"

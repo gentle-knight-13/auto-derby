@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Collections.Generic;
 using System;
+using System.IO;
 
 namespace NateScarlet.AutoDerby
 {
@@ -138,6 +139,9 @@ namespace NateScarlet.AutoDerby
             this.MonthOptions1 = Enum.GetValues(typeof(Month)).Cast<Month>();
             this.PauseOnSpecifiedTurn = CalculateTurn(this.Year, this.Month);
             this.ForceRunningStyleOptions1 = Enum.GetValues(typeof(ForceRunningStyle)).Cast<ForceRunningStyle>();
+
+            this.RacePluginFileInfoList1 = LoadRacePluginFiles();
+            DeleteRacePluginFileFromPluginDirectory();
         }
         ~DataContext()
         {
@@ -358,5 +362,67 @@ namespace NateScarlet.AutoDerby
 
         public IEnumerable<ForceRunningStyle> ForceRunningStyleOptions1
         { get; set; }
+
+
+        public string RacePluginFileInfo
+        {
+            get
+            {
+                var racePluginFileInfo = (string)key.GetValue("RacePluginFileInfo", "None");
+                if(this.RacePluginFileInfoList1.Any(l => l.Value == racePluginFileInfo))
+                {
+                    return racePluginFileInfo;
+                }
+                return "None";
+            }
+            set
+            {
+                key.SetValue("RacePluginFileInfo", value);
+                OnPropertyChanged("RacePluginFileInfo");
+            }
+        }
+
+        public IEnumerable<KeyValuePair<string, string>> RacePluginFileInfoList1
+        { get; set; }
+
+        private IEnumerable<KeyValuePair<string, string>> LoadRacePluginFiles()
+        {
+            var racePluginPath = Path.Combine(Environment.CurrentDirectory, "plugins/race_plugins");
+            var racePluginFileInfoList = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("None", "None") };
+            if(!Directory.Exists(racePluginPath))
+            {
+                return (IEnumerable<KeyValuePair<string, string>>)racePluginFileInfoList;
+            }
+
+            var racePluginFiles = Directory.EnumerateFiles(racePluginPath, "*.py", SearchOption.TopDirectoryOnly);
+            foreach(var racePluginFile in racePluginFiles)
+            {
+                var fileName = Path.GetFileNameWithoutExtension(racePluginFile);
+                if(racePluginFileInfoList.All(l => l.Key != fileName))
+                {
+                    racePluginFileInfoList.Add(
+                        new KeyValuePair<string, string>(fileName, racePluginFile)
+                    );
+                }
+            }
+            return (IEnumerable<KeyValuePair<string, string>>)racePluginFileInfoList;
+        }
+
+        private void DeleteRacePluginFileFromPluginDirectory()
+        {
+            var pluginPath = Path.Combine(Environment.CurrentDirectory, "plugins");
+            foreach(var racePluginFileInfo in this.RacePluginFileInfoList1)
+            {
+                var racePluginFilePath = Path.Combine(pluginPath, Path.GetFileName(racePluginFileInfo.Value));
+                if(File.Exists(racePluginFilePath))
+                {
+                    var isSameFile = File.ReadLines(racePluginFilePath).SequenceEqual(File.ReadLines(racePluginFileInfo.Value));
+                    if(isSameFile)
+                    {
+                        File.Delete(racePluginFilePath);
+                    }
+                }
+            }
+        }
     }
 }
