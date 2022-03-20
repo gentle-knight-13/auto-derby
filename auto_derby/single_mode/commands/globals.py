@@ -41,3 +41,4 @@ class g:
     should_retry_race: Callable[
         [Context, RaceResult], bool
     ] = _default_should_retry_race
+    force_running_style: int = 0

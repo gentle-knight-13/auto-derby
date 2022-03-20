@@ -103,6 +103,15 @@ namespace NateScarlet.AutoDerby
         UraFinalResult  = 107,
     }
 
+    public enum ForceRunningStyle : short
+    {
+        None = 0,
+        Lead  = 1,
+        Head = 2,
+        Middle = 3,
+        Last = 4,
+    }
+
     public class DataContext : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
@@ -128,6 +137,7 @@ namespace NateScarlet.AutoDerby
             this.YearOptions1 = Enum.GetValues(typeof(Year)).Cast<Year>();
             this.MonthOptions1 = Enum.GetValues(typeof(Month)).Cast<Month>();
             this.PauseOnSpecifiedTurn = CalculateTurn(this.Year, this.Month);
+            this.ForceRunningStyleOptions1 = Enum.GetValues(typeof(ForceRunningStyle)).Cast<ForceRunningStyle>();
         }
         ~DataContext()
         {
@@ -328,5 +338,25 @@ namespace NateScarlet.AutoDerby
                 return (short)(_year + (short)Month.January_A);
             }
         }
+
+
+        public ForceRunningStyle ForceRunningStyle
+        {
+            get
+            {
+                var _value = (string)key.GetValue("ForceRunningStyle", "None");
+                ForceRunningStyle forceRunningStyle;
+                Enum.TryParse(_value, out forceRunningStyle);
+                return forceRunningStyle;
+            }
+            set
+            {
+                key.SetValue("ForceRunningStyle", value.ToString());
+                OnPropertyChanged("ForceRunningStyle");
+            }
+        }
+
+        public IEnumerable<ForceRunningStyle> ForceRunningStyleOptions1
+        { get; set; }
     }
 }
