@@ -140,7 +140,7 @@ namespace NateScarlet.AutoDerby
             this.PauseOnSpecifiedTurn = CalculateTurn(this.Year, this.Month);
             this.ForceRunningStyleOptions1 = Enum.GetValues(typeof(ForceRunningStyle)).Cast<ForceRunningStyle>();
 
-            this.RacePluginFileInfoList1 = LoadRacePluginFileInfo();
+            this.RacePluginFileInfoList1 = LoadRacePluginFiles();
             DeleteRacePluginFileFromPluginDirectory();
         }
         ~DataContext()
@@ -385,7 +385,7 @@ namespace NateScarlet.AutoDerby
         public IEnumerable<KeyValuePair<string, string>> RacePluginFileInfoList1
         { get; set; }
 
-        private IEnumerable<KeyValuePair<string, string>> LoadRacePluginFileInfo()
+        private IEnumerable<KeyValuePair<string, string>> LoadRacePluginFiles()
         {
             var racePluginPath = Path.Combine(Environment.CurrentDirectory, "plugins/race_plugins");
             var racePluginFileInfoList = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("None", "None") };
@@ -410,7 +410,6 @@ namespace NateScarlet.AutoDerby
 
         private void DeleteRacePluginFileFromPluginDirectory()
         {
-
             var pluginPath = Path.Combine(Environment.CurrentDirectory, "plugins");
             foreach(var racePluginFileInfo in this.RacePluginFileInfoList1)
             {
