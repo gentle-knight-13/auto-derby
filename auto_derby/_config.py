@@ -144,6 +144,10 @@ class config:
     )
     terminal_prompt_sound_path = terminal_pause_sound_path
 
+    pause_on_specified_turn = int(
+        os.getenv("AUTO_DERBY_PAUSE_ON_SPECIFIED_TURN", "-1")
+    )
+
     @classmethod
     def apply(cls) -> None:
         ADBClient.key_path = cls.adb_key_path
@@ -156,6 +160,7 @@ class config:
         single_mode.event.g.event_image_path = cls.single_mode_event_image_path
         single_mode.event.g.prompt_disabled = cls.single_mode_event_prompt_disabled
         single_mode.context.g.context_class = cls.single_mode_context_class
+        single_mode.context.g.pause_on_specified_turn = cls.pause_on_specified_turn
         single_mode.go_out.g.option_class = cls.single_mode_go_out_option_class
         single_mode.go_out.g.names = cls.single_mode_go_out_names
         single_mode.race.g.data_path = cls.single_mode_race_data_path
