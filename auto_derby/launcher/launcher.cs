@@ -61,16 +61,16 @@ namespace NateScarlet.AutoDerby
 
     public enum Year : short
     {
-        None = 0,
-        Junior  = 1,
-        Classic = 2,
-        Senior = 3,
-        UraFinal = 4,
+        None = -1,
+        Junior  = 0,
+        Classic = 1,
+        Senior = 2,
+        UraFinal = 3,
     }
 
     public enum Month : short
     {
-        None = 0,
+        None = -1,
         January_A = 1,
         January_B = 2,
         February_A = 3,
@@ -139,7 +139,7 @@ namespace NateScarlet.AutoDerby
             this.MonthOptions1 = Enum.GetValues(typeof(Month)).Cast<Month>();
             this.PauseOnSpecifiedTurn = CalculateTurn(this.Year, this.Month);
             this.ForceRunningStyleOptions1 = Enum.GetValues(typeof(ForceRunningStyle)).Cast<ForceRunningStyle>();
-
+            Console.WriteLine("this.PauseOnSpecifiedTurn: " + this.PauseOnSpecifiedTurn);
             this.RacePluginFileInfoList1 = LoadRacePluginFiles();
             DeleteRacePluginFileFromPluginDirectory();
         }

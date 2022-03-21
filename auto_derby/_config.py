@@ -148,7 +148,7 @@ class config:
     terminal_prompt_sound_path = terminal_pause_sound_path
 
     pause_on_specified_turn = int(
-        os.getenv("AUTO_DERBY_PAUSE_ON_SPECIFIED_TURN", "-1")
+        os.getenv("AUTO_DERBY_PAUSE_ON_SPECIFIED_TURN", "0")
     )
     force_running_style = int(
         os.getenv("AUTO_DERBY_FORCE_RUNNING_STYLE", "0")
