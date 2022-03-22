@@ -29,6 +29,7 @@ class Plugin(auto_derby.Plugin):
                 "スピード秘伝書",
             ],
         }
+
         stamina_up_item = {
             "status_limit": 1120,
             "list" : [
@@ -37,6 +38,7 @@ class Plugin(auto_derby.Plugin):
                 "スタミナ秘伝書",
             ],
         }
+
         power_up_item = {
             "status_limit": 1120,
             "list" : [
@@ -45,6 +47,7 @@ class Plugin(auto_derby.Plugin):
                 "パワー秘伝書",
             ],
         }
+
         guts_up_item = {
             "status_limit": 1120,
             "list" : [
@@ -53,6 +56,7 @@ class Plugin(auto_derby.Plugin):
                 "根性秘伝書",
             ],
         }
+
         wisdom_up_item = {
             "status_limit": 1120,
             "list" : [
@@ -69,12 +73,30 @@ class Plugin(auto_derby.Plugin):
             ],
         }
 
+        amulet_item = {
+            "list" : [
+                "健康祈願のお守り",
+            ],
+        }
+
+        vital_item = {
+            "list" : [
+                "バイタル20",
+                "バイタル40",
+                "バイタル65",
+                "ロイヤルビタージュース",
+                "エネドリンクMAX",
+            ],
+        }
+
         debuff_recovery_item = {
             "quantity": 1,
             "list" : [
                 "すやすや安眠枕",
                 "練習改善DVD",
                 "アロマディフューザー",
+                "うるおいハンドクリーム",
+                "ナンデモナオール",
             ],
         }
 
@@ -87,18 +109,16 @@ class Plugin(auto_derby.Plugin):
 
         ignore_item = {
             "list" : [
+                "根性トレーニング嘆願書",
                 "根性アンクルウェイト",
                 "チアメガホン",
                 "三色ペンライト",
                 "ロングエネドリンクMAX",
                 "ポケットスケジュール帳",
-                "うるおいハンドクリーム",
                 "アロマディフューザー",
-                "ナンデモナオール",
                 "スリムスキャナー",
             ],
         }
-
 
         class Item(auto_derby.config.single_mode_item_class):
             # high exchange score means high exchange priority
@@ -122,8 +142,7 @@ class Plugin(auto_derby.Plugin):
                     self.name in pretty_item["list"]
                     and pretty_item["condition"] in condition_list
                 ):
-                    ret -= 50
-
+                    ret = 0
 
                 if (
                     self.name in speed_up_item["list"]
@@ -131,7 +150,7 @@ class Plugin(auto_derby.Plugin):
                 ):
                     ret += 30
                 elif self.name in speed_up_item["list"]:
-                    ret -= 50
+                    ret = 0
 
                 if (
                     self.name in stamina_up_item["list"]
@@ -139,7 +158,7 @@ class Plugin(auto_derby.Plugin):
                 ):
                     ret += 30
                 elif self.name in stamina_up_item["list"]:
-                    ret -= 50
+                    ret = 0
 
                 if (
                     self.name in power_up_item["list"]
@@ -147,7 +166,7 @@ class Plugin(auto_derby.Plugin):
                 ):
                     ret += 30
                 elif self.name in power_up_item["list"]:
-                    ret -= 50
+                    ret = 0
 
                 if (
                     self.name in guts_up_item["list"]
@@ -155,7 +174,7 @@ class Plugin(auto_derby.Plugin):
                 ):
                     ret += 30
                 elif self.name in guts_up_item["list"]:
-                    ret -= 50
+                    ret = 0
 
                 if (
                     self.name in wisdom_up_item["list"]
@@ -163,10 +182,12 @@ class Plugin(auto_derby.Plugin):
                 ):
                     ret += 30
                 elif self.name in wisdom_up_item["list"]:
-                    ret -= 50
-
+                    ret = 0
 
                 if self.name in megaphone_item["list"]:
+                    ret += 30
+
+                if self.name in amulet_item["list"]:
                     ret += 30
 
                 if (
@@ -178,7 +199,7 @@ class Plugin(auto_derby.Plugin):
                     self.name in hummer_item["list"]
                     and ctx.items.get(self.id).quantity >= hummer_item["quantity"]
                 ):
-                    ret -= 50
+                    ret = 0
 
                 if (
                     self.name in debuff_recovery_item["list"]
@@ -189,10 +210,10 @@ class Plugin(auto_derby.Plugin):
                     self.name in debuff_recovery_item["list"]
                     and ctx.items.get(self.id).quantity >= debuff_recovery_item["quantity"]
                 ):
-                    ret -= 50
+                    ret = 0
 
                 if self.name in ignore_item["list"]:
-                    ret -= 100
+                    ret = 0
 
                 return ret
 
@@ -204,6 +225,48 @@ class Plugin(auto_derby.Plugin):
                 self, ctx: Context, command: Command, summary: EffectSummary
             ) -> float:
                 ret = super().effect_score(ctx, command, summary)
+
+                _LOGGER.info(
+                    "custom effect score: turn %d, quantity %d, name %s",
+                    ctx.turn_count_v2(),
+                    ctx.items.get(self.id).quantity,
+                    self.name
+                )
+
+                # Use amulet for high-efficiency training and low vitality.
+                if (
+                    isinstance(command, TrainingCommand)
+                    and self.name in amulet_item["list"]
+                    and ctx.items.get(self.id).quantity > 0
+                    and command.training.failure_rate >= 0.20
+                    and (
+                        command.training.speed > 20
+                        or command.training.stamina > 20
+                        or command.training.power > 20
+                        or command.training.guts > 20
+                        or command.training.wisdom > 20
+                    )
+                ):
+                    _LOGGER.info(
+                        "use amulet: turn %d, quantity %d, failure rate %f, score %d, name %s",
+                        ctx.turn_count_v2(),
+                        ctx.items.get(self.id).quantity,
+                        command.training.failure_rate,
+                        ret,
+                        self.name
+                    )
+                    ret += 100
+
+                if (
+                    self.name in vital_item["list"]
+                    and summary.training_no_failure
+                ):
+                    _LOGGER.info(
+                        "unused vital: turn %d, name %s",
+                        ctx.turn_count_v2(),
+                        self.name
+                    )
+                    ret = 0
 
                 # No hammers are used in races other than the Twinkle Star Climax Race.
                 if (
@@ -218,7 +281,7 @@ class Plugin(auto_derby.Plugin):
                     and self.name in hummer_item["list"]
                     and ctx.items.get(self.id).quantity <= 3
                 ):
-                    ret -= 50
+                    ret = 0
 
                 return ret
 

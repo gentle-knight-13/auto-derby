@@ -104,7 +104,6 @@ class Plugin(auto_derby.Plugin):
             30, # classic 03 month first half
             35, # classic 06 month first half
             45, # Classic 11 month first half
-            49, # senior  01 month second half, spare turn
         ]
 
         class Option(auto_derby.config.single_mode_go_out_option_class):
@@ -131,7 +130,12 @@ class Plugin(auto_derby.Plugin):
                 if self.name != _NAME:
                     return ret
 
-                if ctx.turn_count_v2() not in friend_turn_list:
+                if (
+                    ctx.turn_count_v2() not in friend_turn_list
+                    and ctx.turn_count_v2() <= friend_turn_list[-1]
+                ):
+                    return -50
+                if ctx.mood == ctx.MOOD_VERY_GOOD:
                     return -50
 
                 t = Training()
