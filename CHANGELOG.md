@@ -2,11 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.17.6](https://github.com/NateScarlet/auto-derby/compare/v1.17.5...v1.17.6) (2022-03-24)
+
+### Bug Fixes
+
+- wrong training length assertion ([ba20354](https://github.com/NateScarlet/auto-derby/commit/ba203545aac55064d16a166da8e924b26e850e97))
+
+## [1.17.5](https://github.com/NateScarlet/auto-derby/compare/v1.17.4...v1.17.5) (2022-03-24)
+
+### Bug Fixes
+
+- **single-mode:** handle locked training ([5ed76e4](https://github.com/NateScarlet/auto-derby/commit/5ed76e4e19002ff70eb75180fe0e6a39009bf454))
+
 ## [1.17.4](https://github.com/NateScarlet/auto-derby/compare/v1.17.3...v1.17.4) (2022-03-23)
 
 ### Bug Fixes
 
-- invalid syntax in **version**.py ([459a223](https://github.com/NateScarlet/auto-derby/commit/459a2231db8a02263cb5c942da8a14a74fb68b59))
+- invalid syntax in `__version__.py` ([459a223](https://github.com/NateScarlet/auto-derby/commit/459a2231db8a02263cb5c942da8a14a74fb68b59))
 
 ## [1.17.3](https://github.com/NateScarlet/auto-derby/compare/v1.17.2...v1.17.3) (2022-03-23)
 
