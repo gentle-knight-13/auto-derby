@@ -45,6 +45,8 @@
       <Label>Job</Label>
       <ComboBox x:Name="comboBox1"
         ItemsSource="{Binding JobOptions1}"
+        SelectedValuePath="Value"
+        DisplayMemberPath="Label"
         SelectedValue="{Binding Job}" />
     </StackPanel>
 
