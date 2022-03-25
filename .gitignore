@@ -24,3 +24,5 @@ single_mode_choices.csv
 
 plugins/race_plugins/*
 !plugins/race_plugins/.gitkeep
+
+.pytest_cache
