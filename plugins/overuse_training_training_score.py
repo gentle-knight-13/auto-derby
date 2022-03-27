@@ -1,5 +1,6 @@
 import auto_derby
 from auto_derby import single_mode
+from auto_derby.single_mode.commands.globals import g
 
 import logging
 
@@ -19,14 +20,20 @@ class Training(single_mode.Training):
         elif self.type == self.TYPE_STAMINA:
             if ctx.stamina >= climax_status_limit:
                 ret -= self.stamina
+            # else:
+            #     ret += self.stamina * 0.3
             if ctx.guts >= climax_status_limit:
                 ret -= self.guts
 
         elif self.type == self.TYPE_POWER:
             if ctx.power >= climax_status_limit:
                 ret -= self.power
+            else:
+                ret += self.power * 0.3
             if ctx.stamina >= climax_status_limit:
                 ret -= self.stamina
+            else:
+                ret += self.stamina * 0.3
 
         elif self.type == self.TYPE_GUTS:
             if ctx.guts >= climax_status_limit:
@@ -51,3 +58,12 @@ class Plugin(auto_derby.Plugin):
 
 
 auto_derby.plugin.register(__name__, Plugin())
+
+
+def ignore_training_commands(ctx: single_mode.Context) -> bool:
+    # _LOGGER.info("force ignore training commands to False")
+    if ctx.vitality < 0.05:
+        True
+    return False
+
+g.ignore_training_commands = ignore_training_commands

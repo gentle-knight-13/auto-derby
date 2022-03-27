@@ -89,6 +89,13 @@ class Plugin(auto_derby.Plugin):
             ],
         }
 
+        mood_item = {
+            "list" : [
+                "プレーンカップケーキ",
+                # "スイートカップケーキ",
+            ]
+        }
+
         debuff_recovery_item = {
             "quantity": 1,
             "list" : [
@@ -96,6 +103,7 @@ class Plugin(auto_derby.Plugin):
                 "練習改善DVD",
                 "アロマディフューザー",
                 "うるおいハンドクリーム",
+                "ポケットスケジュール帳",
                 "ナンデモナオール",
             ],
         }
@@ -109,18 +117,52 @@ class Plugin(auto_derby.Plugin):
 
         ignore_item = {
             "list" : [
+                "スピードのメモ帳",
+                "スタミナのメモ帳",
+                "パワーのメモ帳",
+                "根性のメモ帳",
+                "賢さのメモ帳",
+                "博学帽子",
+                # "スピードトレーニング嘆願書",
+                "スタミナトレーニング嘆願書",
+                # "パワートレーニング嘆願書",
                 "根性トレーニング嘆願書",
+                "賢さトレーニング嘆願書",
                 "根性アンクルウェイト",
                 "チアメガホン",
                 "三色ペンライト",
                 "ロングエネドリンクMAX",
-                "ポケットスケジュール帳",
-                "アロマディフューザー",
-                "スリムスキャナー",
+                # "ポケットスケジュール帳",
+                # "アロマディフューザー",
+                # "スリムスキャナー",
             ],
         }
 
         class Item(auto_derby.config.single_mode_item_class):
+            def get_owned_item_quantity_by_name(self, ctx: Context, name: str):
+                item_list = list(filter(lambda i : i.name == name, ctx.items))
+                if item_list:
+                    return item_list[0].quantity
+                return 0
+
+            def print_effect(self, summary: EffectSummary):
+                explain = "print effect:\n"
+                explain += f"   speed:        {summary.speed}\n"
+                explain += f"   statmia:      {summary.statmia}\n"
+                explain += f"   power:        {summary.power}\n"
+                explain += f"   guts:         {summary.guts}\n"
+                explain += f"   wisdom:       {summary.wisdom}\n"
+                explain += f"   vitality:     {summary.vitality}\n"
+                explain += f"   max_vitality: {summary.max_vitality}\n"
+                explain += f"   mood:         {summary.mood}\n"
+                explain += f"   training_partner_reassign: {summary.training_partner_reassign}\n"
+                explain += f"   training_no_failure:       {summary.training_no_failure}\n"
+                for key, value in summary.training_effect_buff.items():
+                    explain += f"   training_effect_buff {key.name}:\t{value.total_rate()}\n"
+                for key, value in summary.training_vitality_debuff.items():
+                    explain += f"   training_vitality_debuff {key.name}::\t{value.total_rate()}\n"
+                _LOGGER.info(explain)
+
             # high exchange score means high exchange priority
             def exchange_score(self, ctx: Context) -> float:
                 ret = super().exchange_score(ctx)
@@ -191,6 +233,12 @@ class Plugin(auto_derby.Plugin):
                     ret += 30
 
                 if (
+                    self.name in mood_item["list"]
+                    and self.get_owned_item_quantity_by_name(ctx, "ロイヤルビタージュース") > ctx.items.get(self.id).quantity
+                ):
+                    ret += 30
+
+                if (
                     self.name in hummer_item["list"]
                     and ctx.items.get(self.id).quantity < hummer_item["quantity"]
                 ):
@@ -226,46 +274,42 @@ class Plugin(auto_derby.Plugin):
             ) -> float:
                 ret = super().effect_score(ctx, command, summary)
 
-                _LOGGER.info(
-                    "custom effect score: turn %d, quantity %d, name %s",
-                    ctx.turn_count_v2(),
-                    ctx.items.get(self.id).quantity,
-                    self.name
-                )
-
                 # Use amulet for high-efficiency training and low vitality.
                 if (
                     isinstance(command, TrainingCommand)
                     and self.name in amulet_item["list"]
                     and ctx.items.get(self.id).quantity > 0
                     and command.training.failure_rate >= 0.20
+                    and summary.vitality == 0
                     and (
-                        command.training.speed > 20
-                        or command.training.stamina > 20
-                        or command.training.power > 20
-                        or command.training.guts > 20
-                        or command.training.wisdom > 20
+                        command.training.speed > 25
+                        or command.training.stamina > 25
+                        or command.training.power > 25
+                        or command.training.guts > 25
+                        or command.training.wisdom > 25
                     )
                 ):
-                    _LOGGER.info(
-                        "use amulet: turn %d, quantity %d, failure rate %f, score %d, name %s",
-                        ctx.turn_count_v2(),
-                        ctx.items.get(self.id).quantity,
-                        command.training.failure_rate,
-                        ret,
-                        self.name
-                    )
-                    ret += 100
+                    ret += 30
 
                 if (
-                    self.name in vital_item["list"]
+                    isinstance(command, TrainingCommand)
+                    and self.name in vital_item["list"]
                     and summary.training_no_failure
                 ):
-                    _LOGGER.info(
-                        "unused vital: turn %d, name %s",
-                        ctx.turn_count_v2(),
-                        self.name
-                    )
+                    ret = 0
+
+                # Use mood item
+                if (
+                    isinstance(command, TrainingCommand)
+                    and self.name in mood_item["list"]
+                    and summary.mood < 0
+                    and summary.vitality == 100
+                ):
+                    ret += 30
+                elif(
+                    isinstance(command, RaceCommand)
+                    and self.name in mood_item["list"]
+                ):
                     ret = 0
 
                 # No hammers are used in races other than the Twinkle Star Climax Race.
