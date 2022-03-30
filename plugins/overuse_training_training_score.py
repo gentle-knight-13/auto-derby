@@ -63,7 +63,7 @@ auto_derby.plugin.register(__name__, Plugin())
 def ignore_training_commands(ctx: single_mode.Context) -> bool:
     # _LOGGER.info("force ignore training commands to False")
     if ctx.vitality < 0.05:
-        True
+        return True
     return False
 
 g.ignore_training_commands = ignore_training_commands
