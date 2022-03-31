@@ -60,8 +60,14 @@ class Plugin(auto_derby.Plugin):
 auto_derby.plugin.register(__name__, Plugin())
 
 
+def _item_can_improve_failure_rate(i: single_mode.item.Item):
+    es = i.effect_summary()
+    return es.vitality > 0 or es.training_no_failure
+
+
 def ignore_training_commands(ctx: single_mode.Context) -> bool:
-    # _LOGGER.info("force ignore training commands to False")
+    if any(_item_can_improve_failure_rate(i) for i in ctx.items):
+        return False
     if ctx.vitality < 0.05:
         return True
     return False
