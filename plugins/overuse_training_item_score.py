@@ -1,3 +1,4 @@
+from math import ceil
 import auto_derby
 from auto_derby.constants import TrainingType
 from auto_derby.single_mode.commands import Command, TrainingCommand, RaceCommand
@@ -66,9 +67,26 @@ class Plugin(auto_derby.Plugin):
             ],
         }
 
-        megaphone_item = {
+        uncle_item = {
+            "quantity": 4,
+            "turn_limit" : 49, # senior  01 month second half
+            "list" : [
+                "スピードアンクルウェイト",
+                # "スタミナアンクルウェイト",
+                "パワーアンクルウェイト",
+                # "根性アンクルウェイト",
+            ],
+        }
+
+        sparta_megaphone_item = {
+            "turn_limit" : 61, # senior  07 month first half
             "list" : [
                 "スパルタメガホン",
+            ],
+        }
+
+        camp_megaphone_item = {
+            "list" : [
                 "ブートキャンプメガホン",
             ],
         }
@@ -97,13 +115,13 @@ class Plugin(auto_derby.Plugin):
         }
 
         debuff_recovery_item = {
-            "quantity": 1,
+            "quantity": 2,
             "list" : [
-                "すやすや安眠枕",
-                "練習改善DVD",
-                "アロマディフューザー",
+                # "すやすや安眠枕",
+                # "練習改善DVD",
+                # "アロマディフューザー",
                 "うるおいハンドクリーム",
-                "ポケットスケジュール帳",
+                # "ポケットスケジュール帳",
                 "ナンデモナオール",
             ],
         }
@@ -226,7 +244,22 @@ class Plugin(auto_derby.Plugin):
                 elif self.name in wisdom_up_item["list"]:
                     ret = 0
 
-                if self.name in megaphone_item["list"]:
+                if self.name in camp_megaphone_item["list"]:
+                    ret += 30
+
+                if (
+                    self.name in sparta_megaphone_item["list"]
+                    and ctx.turn_count_v2() <= sparta_megaphone_item["turn_limit"]
+                ):
+                    ret += 30
+                elif self.name in sparta_megaphone_item["list"]:
+                    ret = 0
+
+                if (
+                    self.name in uncle_item["list"]
+                    and ctx.items.get(self.id).quantity < uncle_item["quantity"]
+                    and ctx.turn_count_v2() <= uncle_item["turn_limit"]
+                ):
                     ret += 30
 
                 if self.name in amulet_item["list"]:
