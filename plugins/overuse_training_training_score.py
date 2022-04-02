@@ -30,12 +30,12 @@ class Training(single_mode.Training):
         elif self.type == self.TYPE_POWER:
             if ctx.power >= climax_status_limit:
                 ret -= self.power
-            # else:
-            #     ret += self.power * 0.3
+            else:
+                ret += self.power * 0.3
             if ctx.stamina >= climax_status_limit:
                 ret -= self.stamina
-            # else:
-            #     ret += self.stamina * 0.3
+            else:
+                ret += self.stamina * 0.3
 
         elif self.type == self.TYPE_GUTS:
             if ctx.guts >= climax_status_limit:
@@ -48,12 +48,12 @@ class Training(single_mode.Training):
         elif self.type == self.TYPE_WISDOM:
             if ctx.wisdom >= climax_status_limit:
                 ret -= self.wisdom
-            else:
-                ret += self.wisdom
+            # else:
+            #     ret += self.wisdom
             if ctx.speed >= climax_status_limit:
                 ret -= self.speed
-            else:
-                ret += self.speed
+            # else:
+            #     ret += self.speed
 
         return ret
 
@@ -77,6 +77,7 @@ def sum_item_vitality(items: single_mode.item.ItemList):
         es = i.effect_summary()
         vitality += es.vitality
     return vitality
+
 
 def ignore_training_commands(ctx: single_mode.Context) -> bool:
     if any(_amulet_can_improve_failure_rate(i) for i in ctx.items):
