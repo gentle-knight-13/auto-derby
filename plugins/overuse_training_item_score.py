@@ -393,7 +393,7 @@ class Plugin(auto_derby.Plugin):
                 # Use speed uncle
                 if (
                     isinstance(command, TrainingCommand)
-                    and self.name in speed_uncle_item
+                    and self.name in speed_uncle_item["list"]
                     and command.training.type == speed_uncle_item["type"]
                     and command.training.speed > 25
                 ):
@@ -401,14 +401,14 @@ class Plugin(auto_derby.Plugin):
                     _LOGGER.info(f"use speed uncle: turn {ctx.turn_count_v2()}")
                 elif(
                     isinstance(command, TrainingCommand)
-                    and self.name in speed_uncle_item
+                    and self.name in speed_uncle_item["list"]
                 ):
                     ret = 0
 
                 # Use stamina uncle
                 if (
                     isinstance(command, TrainingCommand)
-                    and self.name in stamina_uncle_item
+                    and self.name in stamina_uncle_item["list"]
                     and command.training.type == stamina_uncle_item["type"]
                     and command.training.stamina > 25
                 ):
@@ -416,14 +416,14 @@ class Plugin(auto_derby.Plugin):
                     _LOGGER.info(f"use stamina uncle: turn {ctx.turn_count_v2()}")
                 elif(
                     isinstance(command, TrainingCommand)
-                    and self.name in stamina_uncle_item
+                    and self.name in stamina_uncle_item["list"]
                 ):
                     ret = 0
 
                 # Use power uncle
                 if (
                     isinstance(command, TrainingCommand)
-                    and self.name in power_uncle_item
+                    and self.name in power_uncle_item["list"]
                     and command.training.type == power_uncle_item["type"]
                     and command.training.power > 25
                 ):
@@ -431,14 +431,14 @@ class Plugin(auto_derby.Plugin):
                     _LOGGER.info(f"use stamina uncle: turn {ctx.turn_count_v2()}")
                 elif(
                     isinstance(command, TrainingCommand)
-                    and self.name in power_uncle_item
+                    and self.name in power_uncle_item["list"]
                 ):
                     ret = 0
 
                 # Use guts uncle
                 if (
                     isinstance(command, TrainingCommand)
-                    and self.name in guts_uncle_item
+                    and self.name in guts_uncle_item["list"]
                     and command.training.type == guts_uncle_item["type"]
                     and command.training.guts > 25
                 ):
@@ -446,7 +446,7 @@ class Plugin(auto_derby.Plugin):
                     _LOGGER.info(f"use guts uncle: turn {ctx.turn_count_v2()}")
                 elif(
                     isinstance(command, TrainingCommand)
-                    and self.name in guts_uncle_item
+                    and self.name in guts_uncle_item["list"]
                 ):
                     ret = 0
 
