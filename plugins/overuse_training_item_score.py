@@ -338,7 +338,7 @@ class Plugin(auto_derby.Plugin):
             ) -> float:
                 ret = super().effect_score(ctx, command, summary)
 
-                self.print_effect(ctx, summary)
+                # self.print_effect(ctx, summary)
 
                 # Use amulet for high-efficiency training and low vitality.
                 if (
@@ -356,7 +356,6 @@ class Plugin(auto_derby.Plugin):
                     )
                 ):
                     ret += 30
-                    _LOGGER.info(f"use amulet: turn {ctx.turn_count_v2()}")
                 elif (
                     isinstance(command, TrainingCommand)
                     and self.name in amulet_item["list"]
@@ -380,7 +379,6 @@ class Plugin(auto_derby.Plugin):
                     and not all([i.total_rate() >= 0.4 for i in summary.training_effect_buff.values()])
                 ):
                     ret += 30
-                    _LOGGER.info(f"use boot camp megaphone: turn {ctx.turn_count_v2()}")
                 elif (
                     isinstance(command, TrainingCommand)
                     and self.name in camp_megaphone_item["list"]
@@ -398,7 +396,6 @@ class Plugin(auto_derby.Plugin):
                     and command.training.speed > 25
                 ):
                     ret += 30
-                    _LOGGER.info(f"use speed uncle: turn {ctx.turn_count_v2()}")
                 elif(
                     isinstance(command, TrainingCommand)
                     and self.name in speed_uncle_item["list"]
@@ -428,7 +425,6 @@ class Plugin(auto_derby.Plugin):
                     and command.training.power > 25
                 ):
                     ret += 30
-                    _LOGGER.info(f"use stamina uncle: turn {ctx.turn_count_v2()}")
                 elif(
                     isinstance(command, TrainingCommand)
                     and self.name in power_uncle_item["list"]
@@ -443,7 +439,6 @@ class Plugin(auto_derby.Plugin):
                     and command.training.guts > 25
                 ):
                     ret += 30
-                    _LOGGER.info(f"use guts uncle: turn {ctx.turn_count_v2()}")
                 elif(
                     isinstance(command, TrainingCommand)
                     and self.name in guts_uncle_item["list"]
