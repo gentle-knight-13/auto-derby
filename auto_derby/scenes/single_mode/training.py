@@ -98,6 +98,9 @@ def _recognize_base_effect(img: Image) -> int:
     )
     text_img = np.array(np.maximum(text_img, text_img_extra))
     imagetools.fill_area(text_img, (0,), size_lt=48)
+    if cv2.countNonZero(text_img) < 100:
+        # ignore skin match result
+        return 0
 
     if os.getenv("DEBUG") == __name__:
         cv2.imshow("cv_img", cv_img)
@@ -205,7 +208,7 @@ def _recognize_red_effect(img: Image) -> int:
     )
     text_img = np.array(np.maximum(text_img_base, text_img_extra))
     h = cv_img.shape[0]
-    imagetools.fill_area(text_img, (0,), size_lt=round(h * 0.2 ** 2))
+    imagetools.fill_area(text_img, (0,), size_lt=round(h * 0.2**2))
 
     if os.getenv("DEBUG") == __name__:
         cv2.imshow("cv_img", cv_img)
