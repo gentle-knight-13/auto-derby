@@ -12,12 +12,12 @@ _LOGGER = logging.getLogger(__name__)
 class Plugin(auto_derby.Plugin):
     def install(self) -> None:
         bondup_item = {
-            "turn_limit" : 49, # senior  01 month second half
+            "turn_limit" : 49, # senior 01 month second half
             "list" : ["にんじんBBQセット",],
         }
 
         pretty_item = {
-            "turn_limit" : 49, # senior  01 month second half
+            "turn_limit" : 49, # senior 01 month second half
             "list" : ["プリティーミラー",],
             "condition" : "愛嬌○"
         }
@@ -69,7 +69,7 @@ class Plugin(auto_derby.Plugin):
 
         uncle_item = {
             "quantity": 4,
-            "turn_limit" : 49, # senior  01 month second half
+            "turn_limit" : 49, # senior 01 month second half
             "list" : [
                 "スピードアンクルウェイト",
                 # "スタミナアンクルウェイト",
@@ -78,14 +78,43 @@ class Plugin(auto_derby.Plugin):
             ],
         }
 
+        speed_uncle_item = {
+            "type" : TrainingType.SPEED,
+            "list" : [
+                "スピードアンクルウェイト",
+            ],
+        }
+
+        stamina_uncle_item = {
+            "type" : TrainingType.STAMINA,
+            "list" : [
+                "スタミナアンクルウェイト",
+            ],
+        }
+
+        power_uncle_item = {
+            "type" : TrainingType.POWER,
+            "list" : [
+                "パワーアンクルウェイト",
+            ],
+        }
+
+        guts_uncle_item = {
+            "type" : TrainingType.GUTS,
+            "list" : [
+                "根性アンクルウェイト",
+            ],
+        }
+
         sparta_megaphone_item = {
-            "turn_limit" : 61, # senior  07 month first half
+            "turn_limit" : 61, # senior 07 month first half
             "list" : [
                 "スパルタメガホン",
             ],
         }
 
         camp_megaphone_item = {
+            "turn_limit" : 64, # senior 08 month first half
             "list" : [
                 "ブートキャンプメガホン",
             ],
@@ -146,6 +175,7 @@ class Plugin(auto_derby.Plugin):
                 # "パワートレーニング嘆願書",
                 "根性トレーニング嘆願書",
                 "賢さトレーニング嘆願書",
+                "スタミナアンクルウェイト",
                 "根性アンクルウェイト",
                 "チアメガホン",
                 "三色ペンライト",
@@ -163,8 +193,9 @@ class Plugin(auto_derby.Plugin):
                     return item_list[0].quantity
                 return 0
 
-            def print_effect(self, summary: EffectSummary):
+            def print_effect(self, ctx: Context, summary: EffectSummary):
                 explain = "print effect:\n"
+                explain += f"   turn:         {ctx.turn_count_v2()}\n"
                 explain += f"   speed:        {summary.speed}\n"
                 explain += f"   statmia:      {summary.statmia}\n"
                 explain += f"   power:        {summary.power}\n"
@@ -307,6 +338,8 @@ class Plugin(auto_derby.Plugin):
             ) -> float:
                 ret = super().effect_score(ctx, command, summary)
 
+                self.print_effect(ctx, summary)
+
                 # Use amulet for high-efficiency training and low vitality.
                 if (
                     isinstance(command, TrainingCommand)
@@ -323,11 +356,97 @@ class Plugin(auto_derby.Plugin):
                     )
                 ):
                     ret += 30
+                    _LOGGER.info(f"use amulet: turn {ctx.turn_count_v2()}")
+                elif (
+                    isinstance(command, TrainingCommand)
+                    and self.name in amulet_item["list"]
+                ):
+                    ret = 0
 
+                # Do not use recovery items when amulet are active
                 if (
                     isinstance(command, TrainingCommand)
                     and self.name in vital_item["list"]
                     and summary.training_no_failure
+                ):
+                    ret = 0
+
+                # Priority use of boot camp megaphone in summer camp
+                if (
+                    isinstance(command, TrainingCommand)
+                    and self.name in camp_megaphone_item["list"]
+                    and ctx.is_summer_camp
+                    and len(summary.training_effect_buff) == 5
+                    and not all([i.total_rate() >= 0.4 for i in summary.training_effect_buff.values()])
+                ):
+                    ret += 30
+                    _LOGGER.info(f"use boot camp megaphone: turn {ctx.turn_count_v2()}")
+                elif (
+                    isinstance(command, TrainingCommand)
+                    and self.name in camp_megaphone_item["list"]
+                    and ctx.items.get(self.id).quantity <= 2
+                    and not ctx.is_summer_camp
+                    and ctx.turn_count_v2() <= camp_megaphone_item["turn_limit"]
+                ):
+                    ret = 0
+
+                # Use speed uncle
+                if (
+                    isinstance(command, TrainingCommand)
+                    and self.name in speed_uncle_item
+                    and command.training.type == speed_uncle_item["type"]
+                    and command.training.speed > 25
+                ):
+                    ret += 30
+                    _LOGGER.info(f"use speed uncle: turn {ctx.turn_count_v2()}")
+                elif(
+                    isinstance(command, TrainingCommand)
+                    and self.name in speed_uncle_item
+                ):
+                    ret = 0
+
+                # Use stamina uncle
+                if (
+                    isinstance(command, TrainingCommand)
+                    and self.name in stamina_uncle_item
+                    and command.training.type == stamina_uncle_item["type"]
+                    and command.training.stamina > 25
+                ):
+                    ret += 30
+                    _LOGGER.info(f"use stamina uncle: turn {ctx.turn_count_v2()}")
+                elif(
+                    isinstance(command, TrainingCommand)
+                    and self.name in stamina_uncle_item
+                ):
+                    ret = 0
+
+                # Use power uncle
+                if (
+                    isinstance(command, TrainingCommand)
+                    and self.name in power_uncle_item
+                    and command.training.type == power_uncle_item["type"]
+                    and command.training.power > 25
+                ):
+                    ret += 30
+                    _LOGGER.info(f"use stamina uncle: turn {ctx.turn_count_v2()}")
+                elif(
+                    isinstance(command, TrainingCommand)
+                    and self.name in power_uncle_item
+                ):
+                    ret = 0
+
+                # Use guts uncle
+                if (
+                    isinstance(command, TrainingCommand)
+                    and self.name in guts_uncle_item
+                    and command.training.type == guts_uncle_item["type"]
+                    and command.training.guts > 25
+                ):
+                    ret += 30
+                    _LOGGER.info(f"use guts uncle: turn {ctx.turn_count_v2()}")
+                elif(
+                    isinstance(command, TrainingCommand)
+                    and self.name in guts_uncle_item
                 ):
                     ret = 0
 

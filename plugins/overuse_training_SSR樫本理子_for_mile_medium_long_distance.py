@@ -136,12 +136,6 @@ class Plugin(auto_derby.Plugin):
                 ):
                     return -50
 
-                if (
-                    ctx.mood == ctx.MOOD_VERY_GOOD
-                    and ctx.turn_count_v2() > friend_turn_list[-1]
-                ):
-                    return -50
-
                 t = Training()
                 c = self.current_event_count
                 t.speed = _SPD[c]

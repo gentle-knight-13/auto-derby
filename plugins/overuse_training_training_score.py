@@ -24,6 +24,8 @@ class Training(single_mode.Training):
             #     ret += self.stamina * 0.3
             if ctx.guts >= climax_status_limit:
                 ret -= self.guts
+            # else:
+            #     ret += self.guts * 0.3
 
         elif self.type == self.TYPE_POWER:
             if ctx.power >= climax_status_limit:
