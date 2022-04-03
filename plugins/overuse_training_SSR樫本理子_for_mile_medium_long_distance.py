@@ -100,10 +100,10 @@ class Plugin(auto_derby.Plugin):
 
         friend_turn_list = [
             21, # junior  11 month first half
-            25, # classic 01 month first half
+            28, # classic 02 month second half
             32, # classic 04 month second half
-            36, # classic 06 month second half
-            45, # Classic 11 month first half
+            35, # classic 06 month first half
+            43, # Classic 10 month first half
         ]
 
         class Option(auto_derby.config.single_mode_go_out_option_class):
