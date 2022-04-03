@@ -151,7 +151,7 @@ class Plugin(auto_derby.Plugin):
                 # "アロマディフューザー",
                 "うるおいハンドクリーム",
                 # "ポケットスケジュール帳",
-                "ナンデモナオール",
+                # "ナンデモナオール",
             ],
         }
 
@@ -393,7 +393,7 @@ class Plugin(auto_derby.Plugin):
                     isinstance(command, TrainingCommand)
                     and self.name in speed_uncle_item["list"]
                     and command.training.type == speed_uncle_item["type"]
-                    and command.training.speed > 25
+                    and command.training.speed > 30
                 ):
                     ret += 30
                 elif(
@@ -410,7 +410,6 @@ class Plugin(auto_derby.Plugin):
                     and command.training.stamina > 25
                 ):
                     ret += 30
-                    _LOGGER.info(f"use stamina uncle: turn {ctx.turn_count_v2()}")
                 elif(
                     isinstance(command, TrainingCommand)
                     and self.name in stamina_uncle_item["list"]
