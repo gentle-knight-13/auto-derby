@@ -17,18 +17,26 @@ from .globals import g
 _LOGGER = logging.getLogger(__name__)
 
 
+# NOTE: Variables are reset at the end of auto-derby
+can_choose_running_style = True
+
+
 def _choose_running_style(ctx: Context, race1: Race) -> None:
+    # NOTE: Since the scene transition after the race will not go well,
+    #       it will transition to the paddock scene.
     scene = PaddockScene.enter(ctx)
-    style_scores = sorted(race1.style_scores_v2(ctx), key=lambda x: x[1], reverse=True)
+    global can_choose_running_style
+    if can_choose_running_style:
+        style_scores = sorted(race1.style_scores_v2(ctx), key=lambda x: x[1], reverse=True)
+        for style, score in style_scores:
+            _LOGGER.info("running style score:\t%.2f:\t%s", score, style)
 
-    for style, score in style_scores:
-        _LOGGER.info("running style score:\t%.2f:\t%s", score, style)
-
-    if g.force_running_style in set(item.value for item in RuningStyle):
-        force_running_style =  RuningStyle(g.force_running_style)
-        scene.choose_runing_style(force_running_style)
-    else:
-        scene.choose_runing_style(style_scores[0][0])
+        if g.force_running_style in set(item.value for item in RuningStyle):
+            force_running_style =  RuningStyle(g.force_running_style)
+            scene.choose_runing_style(force_running_style)
+        else:
+            scene.choose_runing_style(style_scores[0][0])
+        can_choose_running_style = False
 
 
 _RACE_ORDER_TEMPLATES = {
