@@ -393,7 +393,7 @@ class Plugin(auto_derby.Plugin):
                     isinstance(command, TrainingCommand)
                     and self.name in speed_uncle_item["list"]
                     and command.training.type == speed_uncle_item["type"]
-                    and command.training.speed > 30
+                    and command.training.speed > 25
                 ):
                     ret += 30
                 elif(

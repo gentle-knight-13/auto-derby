@@ -86,11 +86,14 @@ def sum_item_vitality(items: single_mode.item.ItemList):
 
 
 def ignore_training_commands(ctx: single_mode.Context) -> bool:
-    if any(_amulet_can_improve_failure_rate(i) for i in ctx.items):
+    if (
+        any(_amulet_can_improve_failure_rate(i) for i in ctx.items)
+        and ctx.vitality <= 0.50
+    ):
         False
 
     estimate_vitality = ctx.vitality + (sum_item_vitality(ctx.items) / 100)
-    if estimate_vitality > 0.5:
+    if estimate_vitality >= 0.50:
         return False
 
     if ctx.vitality < 0.20:
