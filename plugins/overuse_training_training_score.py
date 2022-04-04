@@ -10,7 +10,7 @@ class Training(single_mode.Training):
     def score(self, ctx: single_mode.Context) -> float:
         ret = super().score(ctx)
 
-        climax_status_limit = 1120
+        climax_status_limit = 1140
         if self.type == self.TYPE_SPEED:
             if ctx.speed >= climax_status_limit:
                 ret -= self.speed
@@ -40,20 +40,26 @@ class Training(single_mode.Training):
         elif self.type == self.TYPE_GUTS:
             if ctx.guts >= climax_status_limit:
                 ret -= self.guts
+            # else:
+            #     ret += self.guts * 0.3
             if ctx.speed >= climax_status_limit:
                 ret -= self.speed
+            # else:
+            #     ret += self.speed * 0.3
             if ctx.power >= climax_status_limit:
                 ret -= self.power
+            # else:
+            #     ret += self.power * 0.3
 
         elif self.type == self.TYPE_WISDOM:
             if ctx.wisdom >= climax_status_limit:
                 ret -= self.wisdom
             # else:
-            #     ret += self.wisdom
+            #     ret += self.wisdom * 0.3
             if ctx.speed >= climax_status_limit:
                 ret -= self.speed
             # else:
-            #     ret += self.speed
+            #     ret += self.speed * 0.3
 
         return ret
 

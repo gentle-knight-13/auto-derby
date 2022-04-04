@@ -23,7 +23,7 @@ class Plugin(auto_derby.Plugin):
         }
 
         speed_up_item = {
-            "status_limit": 1120,
+            "status_limit": 1140,
             "list" : [
                 # "スピードトレーニング嘆願書",
                 "スピード戦術書",
@@ -32,7 +32,7 @@ class Plugin(auto_derby.Plugin):
         }
 
         stamina_up_item = {
-            "status_limit": 1120,
+            "status_limit": 1140,
             "list" : [
                 # "スタミナトレーニング嘆願書",
                 "スタミナ戦術書",
@@ -41,7 +41,7 @@ class Plugin(auto_derby.Plugin):
         }
 
         power_up_item = {
-            "status_limit": 1120,
+            "status_limit": 1140,
             "list" : [
                 "パワートレーニング嘆願書",
                 "パワー戦術書",
@@ -50,7 +50,7 @@ class Plugin(auto_derby.Plugin):
         }
 
         guts_up_item = {
-            "status_limit": 1120,
+            "status_limit": 1140,
             "list" : [
                 # "根性トレーニング嘆願書",
                 "根性戦術書",
@@ -59,7 +59,7 @@ class Plugin(auto_derby.Plugin):
         }
 
         wisdom_up_item = {
-            "status_limit": 1120,
+            "status_limit": 1140,
             "list" : [
                 # "賢さトレーニング嘆願書",
                 "賢さ戦術書",
