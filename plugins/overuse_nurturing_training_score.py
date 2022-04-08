@@ -14,8 +14,13 @@ class Training(single_mode.Training):
         if self.type == self.TYPE_SPEED:
             if ctx.speed >= climax_status_limit:
                 ret -= self.speed
+            # else:
+            #     ret += self.speed * 0.3
+
             if ctx.power >= climax_status_limit:
                 ret -= self.power
+            # else:
+            #     ret += self.power * 0.3
 
         elif self.type == self.TYPE_STAMINA:
             if ctx.stamina >= climax_status_limit:
