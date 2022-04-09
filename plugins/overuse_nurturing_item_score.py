@@ -220,7 +220,7 @@ class Plugin(auto_derby.Plugin):
                     self.name in bondup_item["list"]
                     and ctx.turn_count_v2() <= bondup_item["turn_limit"]
                 ):
-                    ret += 30
+                    ret += 20
 
                 condition_list = [condition.get(i).name for i in ctx.conditions]
                 if (
@@ -228,7 +228,7 @@ class Plugin(auto_derby.Plugin):
                     and ctx.turn_count_v2() <= pretty_item["turn_limit"]
                     and pretty_item["condition"] not in condition_list
                 ):
-                    ret += 30
+                    ret += 20
                 elif (
                     self.name in pretty_item["list"]
                     and pretty_item["condition"] in condition_list
@@ -239,7 +239,7 @@ class Plugin(auto_derby.Plugin):
                     self.name in speed_up_item["list"]
                     and ctx.speed < speed_up_item["status_limit"]
                 ):
-                    ret += 30
+                    ret += 20
                 elif self.name in speed_up_item["list"]:
                     ret = 0
 
@@ -247,7 +247,7 @@ class Plugin(auto_derby.Plugin):
                     self.name in stamina_up_item["list"]
                     and ctx.stamina < stamina_up_item["status_limit"]
                 ):
-                    ret += 30
+                    ret += 20
                 elif self.name in stamina_up_item["list"]:
                     ret = 0
 
@@ -255,7 +255,7 @@ class Plugin(auto_derby.Plugin):
                     self.name in power_up_item["list"]
                     and ctx.power < power_up_item["status_limit"]
                 ):
-                    ret += 30
+                    ret += 20
                 elif self.name in power_up_item["list"]:
                     ret = 0
 
@@ -263,7 +263,7 @@ class Plugin(auto_derby.Plugin):
                     self.name in guts_up_item["list"]
                     and ctx.guts < guts_up_item["status_limit"]
                 ):
-                    ret += 30
+                    ret += 20
                 elif self.name in guts_up_item["list"]:
                     ret = 0
 
@@ -271,18 +271,18 @@ class Plugin(auto_derby.Plugin):
                     self.name in wisdom_up_item["list"]
                     and ctx.wisdom < wisdom_up_item["status_limit"]
                 ):
-                    ret += 30
+                    ret += 20
                 elif self.name in wisdom_up_item["list"]:
                     ret = 0
 
                 if self.name in camp_megaphone_item["list"]:
-                    ret += 30
+                    ret += 20
 
                 if (
                     self.name in sparta_megaphone_item["list"]
                     and ctx.turn_count_v2() <= sparta_megaphone_item["turn_limit"]
                 ):
-                    ret += 30
+                    ret += 20
                 elif self.name in sparta_megaphone_item["list"]:
                     ret = 0
 
@@ -291,22 +291,22 @@ class Plugin(auto_derby.Plugin):
                     and ctx.items.get(self.id).quantity < uncle_item["quantity"]
                     and ctx.turn_count_v2() <= uncle_item["turn_limit"]
                 ):
-                    ret += 30
+                    ret += 20
 
                 if self.name in amulet_item["list"]:
-                    ret += 30
+                    ret += 20
 
                 if (
                     self.name in mood_item["list"]
                     and self.get_owned_item_quantity_by_name(ctx, "ロイヤルビタージュース") > ctx.items.get(self.id).quantity
                 ):
-                    ret += 30
+                    ret += 20
 
                 if (
                     self.name in hummer_item["list"]
                     and ctx.items.get(self.id).quantity < hummer_item["quantity"]
                 ):
-                    ret += 30
+                    ret += 20
                 elif (
                     self.name in hummer_item["list"]
                     and ctx.items.get(self.id).quantity >= hummer_item["quantity"]
@@ -317,7 +317,7 @@ class Plugin(auto_derby.Plugin):
                     self.name in debuff_recovery_item["list"]
                     and ctx.items.get(self.id).quantity < debuff_recovery_item["quantity"]
                 ):
-                    ret += 30
+                    ret += 20
                 elif (
                     self.name in debuff_recovery_item["list"]
                     and ctx.items.get(self.id).quantity >= debuff_recovery_item["quantity"]
@@ -355,7 +355,7 @@ class Plugin(auto_derby.Plugin):
                         or command.training.wisdom > 25
                     )
                 ):
-                    ret += 30
+                    ret += 20
                 elif (
                     isinstance(command, TrainingCommand)
                     and self.name in amulet_item["list"]
@@ -378,7 +378,7 @@ class Plugin(auto_derby.Plugin):
                     and len(summary.training_effect_buff) == 5
                     and not all([i.total_rate() >= 0.4 for i in summary.training_effect_buff.values()])
                 ):
-                    ret += 30
+                    ret += 20
                 elif (
                     isinstance(command, TrainingCommand)
                     and self.name in camp_megaphone_item["list"]
@@ -395,7 +395,7 @@ class Plugin(auto_derby.Plugin):
                     and command.training.type == speed_uncle_item["type"]
                     and command.training.speed > 25
                 ):
-                    ret += 30
+                    ret += 20
                 elif(
                     isinstance(command, TrainingCommand)
                     and self.name in speed_uncle_item["list"]
@@ -409,7 +409,7 @@ class Plugin(auto_derby.Plugin):
                     and command.training.type == stamina_uncle_item["type"]
                     and command.training.stamina > 25
                 ):
-                    ret += 30
+                    ret += 20
                 elif(
                     isinstance(command, TrainingCommand)
                     and self.name in stamina_uncle_item["list"]
@@ -423,7 +423,7 @@ class Plugin(auto_derby.Plugin):
                     and command.training.type == power_uncle_item["type"]
                     and command.training.power > 25
                 ):
-                    ret += 30
+                    ret += 20
                 elif(
                     isinstance(command, TrainingCommand)
                     and self.name in power_uncle_item["list"]
@@ -437,7 +437,7 @@ class Plugin(auto_derby.Plugin):
                     and command.training.type == guts_uncle_item["type"]
                     and command.training.guts > 25
                 ):
-                    ret += 30
+                    ret += 20
                 elif(
                     isinstance(command, TrainingCommand)
                     and self.name in guts_uncle_item["list"]
@@ -451,7 +451,7 @@ class Plugin(auto_derby.Plugin):
                     and summary.mood < 0
                     and summary.vitality == 100
                 ):
-                    ret += 30
+                    ret += 20
                 elif(
                     isinstance(command, RaceCommand)
                     and self.name in mood_item["list"]
@@ -465,7 +465,7 @@ class Plugin(auto_derby.Plugin):
                     and ctx.date[0] == 4
                     and ctx.items.get(self.id).quantity > 0
                 ):
-                    ret += 30
+                    ret += 20
                 elif (
                     isinstance(command, RaceCommand)
                     and self.name in hummer_item["list"]
