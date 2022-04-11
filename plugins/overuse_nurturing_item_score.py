@@ -68,7 +68,7 @@ class Plugin(auto_derby.Plugin):
         }
 
         uncle_item = {
-            "quantity": 4,
+            "quantity": 5,
             "turn_limit" : 49, # senior 01 month second half
             "list" : [
                 "スピードアンクルウェイト",
@@ -145,6 +145,7 @@ class Plugin(auto_derby.Plugin):
 
         debuff_recovery_item = {
             "quantity": 2,
+            "turn_limit" : 49, # senior 01 month second half
             "list" : [
                 # "すやすや安眠枕",
                 # "練習改善DVD",
@@ -157,6 +158,7 @@ class Plugin(auto_derby.Plugin):
 
         hummer_item = {
             "quantity": 3,
+            "turn_limit" : 72, # ura qualifying first half
             "list" : [
                 "蹄鉄ハンマー・極",
             ],
@@ -169,7 +171,7 @@ class Plugin(auto_derby.Plugin):
                 "パワーのメモ帳",
                 "根性のメモ帳",
                 "賢さのメモ帳",
-                "博学帽子",
+                # "博学帽子",
                 # "スピードトレーニング嘆願書",
                 "スタミナトレーニング嘆願書",
                 # "パワートレーニング嘆願書",
@@ -220,7 +222,7 @@ class Plugin(auto_derby.Plugin):
                     self.name in bondup_item["list"]
                     and ctx.turn_count_v2() <= bondup_item["turn_limit"]
                 ):
-                    ret += 20
+                    ret += 30
 
                 condition_list = [condition.get(i).name for i in ctx.conditions]
                 if (
@@ -228,7 +230,7 @@ class Plugin(auto_derby.Plugin):
                     and ctx.turn_count_v2() <= pretty_item["turn_limit"]
                     and pretty_item["condition"] not in condition_list
                 ):
-                    ret += 20
+                    ret += 30
                 elif (
                     self.name in pretty_item["list"]
                     and pretty_item["condition"] in condition_list
@@ -239,7 +241,7 @@ class Plugin(auto_derby.Plugin):
                     self.name in speed_up_item["list"]
                     and ctx.speed < speed_up_item["status_limit"]
                 ):
-                    ret += 20
+                    ret += 10
                 elif self.name in speed_up_item["list"]:
                     ret = 0
 
@@ -247,7 +249,7 @@ class Plugin(auto_derby.Plugin):
                     self.name in stamina_up_item["list"]
                     and ctx.stamina < stamina_up_item["status_limit"]
                 ):
-                    ret += 20
+                    ret += 10
                 elif self.name in stamina_up_item["list"]:
                     ret = 0
 
@@ -255,7 +257,7 @@ class Plugin(auto_derby.Plugin):
                     self.name in power_up_item["list"]
                     and ctx.power < power_up_item["status_limit"]
                 ):
-                    ret += 20
+                    ret += 10
                 elif self.name in power_up_item["list"]:
                     ret = 0
 
@@ -263,7 +265,7 @@ class Plugin(auto_derby.Plugin):
                     self.name in guts_up_item["list"]
                     and ctx.guts < guts_up_item["status_limit"]
                 ):
-                    ret += 20
+                    ret += 10
                 elif self.name in guts_up_item["list"]:
                     ret = 0
 
@@ -271,18 +273,18 @@ class Plugin(auto_derby.Plugin):
                     self.name in wisdom_up_item["list"]
                     and ctx.wisdom < wisdom_up_item["status_limit"]
                 ):
-                    ret += 20
+                    ret += 10
                 elif self.name in wisdom_up_item["list"]:
                     ret = 0
 
                 if self.name in camp_megaphone_item["list"]:
-                    ret += 20
+                    ret += 30
 
                 if (
                     self.name in sparta_megaphone_item["list"]
                     and ctx.turn_count_v2() <= sparta_megaphone_item["turn_limit"]
                 ):
-                    ret += 20
+                    ret += 30
                 elif self.name in sparta_megaphone_item["list"]:
                     ret = 0
 
@@ -291,22 +293,23 @@ class Plugin(auto_derby.Plugin):
                     and ctx.items.get(self.id).quantity < uncle_item["quantity"]
                     and ctx.turn_count_v2() <= uncle_item["turn_limit"]
                 ):
-                    ret += 20
+                    ret += 30
 
                 if self.name in amulet_item["list"]:
-                    ret += 20
+                    ret += 30
 
                 if (
                     self.name in mood_item["list"]
                     and self.get_owned_item_quantity_by_name(ctx, "ロイヤルビタージュース") > ctx.items.get(self.id).quantity
                 ):
-                    ret += 20
+                    ret += 30
 
                 if (
                     self.name in hummer_item["list"]
                     and ctx.items.get(self.id).quantity < hummer_item["quantity"]
+                    and ctx.turn_count_v2() <= hummer_item["turn_limit"]
                 ):
-                    ret += 20
+                    ret += 30
                 elif (
                     self.name in hummer_item["list"]
                     and ctx.items.get(self.id).quantity >= hummer_item["quantity"]
@@ -316,8 +319,9 @@ class Plugin(auto_derby.Plugin):
                 if (
                     self.name in debuff_recovery_item["list"]
                     and ctx.items.get(self.id).quantity < debuff_recovery_item["quantity"]
+                    and ctx.turn_count_v2() < debuff_recovery_item["turn_limit"]
                 ):
-                    ret += 20
+                    ret += 30
                 elif (
                     self.name in debuff_recovery_item["list"]
                     and ctx.items.get(self.id).quantity >= debuff_recovery_item["quantity"]
@@ -355,7 +359,7 @@ class Plugin(auto_derby.Plugin):
                         or command.training.wisdom > 25
                     )
                 ):
-                    ret += 20
+                    ret += 30
                 elif (
                     isinstance(command, TrainingCommand)
                     and self.name in amulet_item["list"]
