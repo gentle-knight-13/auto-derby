@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.21.1](https://github.com/NateScarlet/auto-derby/compare/v1.21.0...v1.21.1) (2022-04-09)
+
+### Bug Fixes
+
+- **plugin:** race_campaign: wrong race data ([aee2ef7](https://github.com/NateScarlet/auto-derby/commit/aee2ef7d843d267428bb103f9d0127d605a85dd8))
+- **single-mode:** error while recognizing training scene ([570c03a](https://github.com/NateScarlet/auto-derby/commit/570c03a0df25daa19c736cd841fb09bd9859f0ca)), closes [#289](https://github.com/NateScarlet/auto-derby/issues/289)
+
+## [1.21.0](https://github.com/NateScarlet/auto-derby/compare/v1.20.2...v1.21.0) (2022-04-09)
+
+### Features
+
+- **single-mode:** recognize condition `愛嬌○` ([b0f477b](https://github.com/NateScarlet/auto-derby/commit/b0f477b14260ae68bbcd3da84f6bbde0ddc085b3))
+
+### Bug Fixes
+
+- **single-mode:** recognize scenario on adb device ([39ce646](https://github.com/NateScarlet/auto-derby/commit/39ce64699eb3bae2d9ebc1002a4c8f3b920945e4)), closes [#288](https://github.com/NateScarlet/auto-derby/issues/288)
+
 ## [1.20.2](https://github.com/NateScarlet/auto-derby/compare/v1.20.1...v1.20.2) (2022-04-05)
 
 ### Bug Fixes

@@ -194,8 +194,18 @@ def _recognize_property(img: Image) -> int:
 
 def _recognize_scenario(rp: mathtools.ResizeProxy, img: Image) -> Text:
     spec = (
-        (templates.SINGLE_MODE_CLIMAX_GRADE_POINT_ICON, Context.SCENARIO_CLIMAX),
-        (templates.SINGLE_MODE_CLIMAX_RANK_POINT_ICON, Context.SCENARIO_CLIMAX),
+        (
+            template.Specification(
+                templates.SINGLE_MODE_CLIMAX_GRADE_POINT_ICON, threshold=0.8
+            ),
+            Context.SCENARIO_CLIMAX,
+        ),
+        (
+            template.Specification(
+                templates.SINGLE_MODE_CLIMAX_RANK_POINT_ICON, threshold=0.8
+            ),
+            Context.SCENARIO_CLIMAX,
+        ),
         (templates.SINGLE_MODE_AOHARU_CLASS_DETAIL_BUTTON, Context.SCENARIO_AOHARU),
         (templates.SINGLE_MODE_CLASS_DETAIL_BUTTON, Context.SCENARIO_URA),
     )
@@ -226,8 +236,9 @@ class Context:
     MOOD_GOOD = Mood.GOOD
     MOOD_VERY_GOOD = Mood.VERY_GOOD
 
-    CONDITION_HEADACHE = 5
     CONDITION_OVERWEIGHT = 4
+    CONDITION_HEADACHE = 5
+    CONDITION_CHARM = 8
 
     STATUS_S = (8, "S")
     STATUS_A = (7, "A")
@@ -688,6 +699,7 @@ g.context_class = Context
 _CONDITION_TEMPLATES = {
     templates.SINGLE_MODE_CONDITION_HEADACHE: Context.CONDITION_HEADACHE,
     templates.SINGLE_MODE_CONDITION_OVERWEIGHT: Context.CONDITION_OVERWEIGHT,
+    templates.SINGLE_MODE_CONDITION_CHARM: Context.CONDITION_CHARM,
 }
 
 
