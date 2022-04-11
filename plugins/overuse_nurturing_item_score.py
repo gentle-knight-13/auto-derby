@@ -156,11 +156,19 @@ class Plugin(auto_derby.Plugin):
             ],
         }
 
-        hummer_item = {
-            "quantity": 3,
+        kiwami_hummer_item = {
+            "quantity": 5,
             "turn_limit" : 72, # ura qualifying first half
             "list" : [
                 "蹄鉄ハンマー・極",
+            ],
+        }
+
+        takumi_hummer_item = {
+            "quantity": 5,
+            "turn_limit" : 72, # ura qualifying first half
+            "list" : [
+                "蹄鉄ハンマー・匠",
             ],
         }
 
@@ -211,7 +219,8 @@ class Plugin(auto_derby.Plugin):
                 for key, value in summary.training_effect_buff.items():
                     explain += f"   training_effect_buff {key.name}:\t{value.total_rate()}\n"
                 for key, value in summary.training_vitality_debuff.items():
-                    explain += f"   training_vitality_debuff {key.name}::\t{value.total_rate()}\n"
+                    explain += f"   training_vitality_debuff {key.name}:\t{value.total_rate()}\n"
+                explain += f"   race_reward_buff: {summary.race_reward_buff.total_rate()}\n"
                 _LOGGER.info(explain)
 
             # high exchange score means high exchange priority
@@ -305,14 +314,26 @@ class Plugin(auto_derby.Plugin):
                     ret += 30
 
                 if (
-                    self.name in hummer_item["list"]
-                    and ctx.items.get(self.id).quantity < hummer_item["quantity"]
-                    and ctx.turn_count_v2() <= hummer_item["turn_limit"]
+                    self.name in kiwami_hummer_item["list"]
+                    and ctx.items.get(self.id).quantity < kiwami_hummer_item["quantity"]
+                    and ctx.turn_count_v2() <= kiwami_hummer_item["turn_limit"]
                 ):
                     ret += 30
                 elif (
-                    self.name in hummer_item["list"]
-                    and ctx.items.get(self.id).quantity >= hummer_item["quantity"]
+                    self.name in kiwami_hummer_item["list"]
+                    and ctx.items.get(self.id).quantity >= kiwami_hummer_item["quantity"]
+                ):
+                    ret = 0
+
+                if (
+                    self.name in takumi_hummer_item["list"]
+                    and ctx.items.get(self.id).quantity < takumi_hummer_item["quantity"]
+                    and ctx.turn_count_v2() <= takumi_hummer_item["turn_limit"]
+                ):
+                    ret += 20
+                elif (
+                    self.name in takumi_hummer_item["list"]
+                    and ctx.items.get(self.id).quantity >= takumi_hummer_item["quantity"]
                 ):
                     ret = 0
 
@@ -465,15 +486,37 @@ class Plugin(auto_derby.Plugin):
                 # No hammers are used in races other than the Twinkle Star Climax Race.
                 if (
                     isinstance(command, RaceCommand)
-                    and self.name in hummer_item["list"]
+                    and self.name in kiwami_hummer_item["list"]
                     and ctx.date[0] == 4
                     and ctx.items.get(self.id).quantity > 0
+                    and summary.race_reward_buff.total_rate() == 0.0
                 ):
                     ret += 20
                 elif (
                     isinstance(command, RaceCommand)
-                    and self.name in hummer_item["list"]
-                    and ctx.items.get(self.id).quantity <= 3
+                    and self.name in kiwami_hummer_item["list"]
+                    and command.race.grade == command.race.GRADE_G1
+                    and ctx.items.get(self.id).quantity > 3
+                    and summary.race_reward_buff.total_rate() == 0.0
+                ):
+                    ret = 20
+                elif (
+                    isinstance(command, RaceCommand)
+                    and self.name in kiwami_hummer_item["list"]
+                ):
+                    ret = 0
+
+                if (
+                    isinstance(command, RaceCommand)
+                    and self.name in takumi_hummer_item["list"]
+                    and command.race.grade < command.race.GRADE_OP
+                    and ctx.items.get(self.id).quantity > 0
+                    and summary.race_reward_buff.total_rate() == 0.0
+                ):
+                    ret += 20
+                elif (
+                    isinstance(command, RaceCommand)
+                    and self.name in takumi_hummer_item["list"]
                 ):
                     ret = 0
 
