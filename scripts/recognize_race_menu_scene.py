@@ -34,6 +34,7 @@ def main():
     args = parser.parse_args()
     if args.debug:
         logging.getLogger("auto_derby").setLevel(logging.DEBUG)
+        os.environ["DEBUG"] = "auto_derby.single_mode.race.game_data"
     image_path = args.image
     scenario = {
         "ura": Context.SCENARIO_URA,
@@ -49,8 +50,9 @@ def main():
     ctx.date = date
     race_iter = race.find_by_race_menu_image(ctx, image)
     for _race, _pos in race_iter:
-        print(f"race: {_race}")
-        print(f"pos : {_pos}")
+        print(f"race  : {_race}")
+        print(f"pos   : {_pos}")
+        print(f"rival : {_race.with_rival}")
 
 
 if __name__ == "__main__":

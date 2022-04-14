@@ -92,6 +92,7 @@ class Race:
         self.characters: Set[Text] = set()
         self.grade_points: Tuple[int, ...] = ()
         self.shop_coins: Tuple[int, ...] = ()
+        self.with_rival = False
 
         self.raward_buff = 0.0
 
