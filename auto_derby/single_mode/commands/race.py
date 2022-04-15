@@ -2,7 +2,6 @@
 # pyright: strict
 
 from __future__ import annotations
-from copy import deepcopy
 
 import logging
 from typing import Callable, Optional, Text
@@ -115,7 +114,7 @@ def _handle_race_result(ctx: Context, race: Race):
 
 
 def _choose_high_score_race(ctx: Context, race: Race, rival_races: list[Race]) -> Race:
-    races = deepcopy(rival_races)
+    races = rival_races
     races.append(race)
     races.sort(
         key=lambda x: x.score(ctx),
