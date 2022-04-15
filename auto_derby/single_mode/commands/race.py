@@ -115,13 +115,14 @@ def _handle_race_result(ctx: Context, race: Race):
 
 def _choose_high_score_race(ctx: Context, race: Race, rival_races: list[Race]) -> Race:
     races = rival_races
-    races.append(race)
+    if race.name not in [i.name for i in races]:
+        races.append(race)
     races.sort(
         key=lambda x: x.score(ctx),
         reverse=True,
     )
     for race in races:
-        _LOGGER.info("score:\t%2.2f\t%s", race.score(ctx), race)
+        _LOGGER.info("score:\t%2.2f\t%s\trival %s", race.score(ctx), race, race.with_rival)
     return races[0]
 
 

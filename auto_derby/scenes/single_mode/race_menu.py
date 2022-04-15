@@ -79,13 +79,14 @@ class RaceMenuScene(Scene):
         races: list[Race] = []
         prev_races: list[Race] = []
         while self._scroll.next():
-            new_races = list(
-                i[0]
-                for i in find_by_race_menu_image(ctx, template.screenshot())
-                if i[0] not in races
-            )
-            if new_races == prev_races:
+            next_races = [i[0] for i in find_by_race_menu_image(ctx, template.screenshot())]
+            next_races.sort(key=lambda x: x.name)           
+            if next_races == prev_races:
                 break
-            races.extend(new_races)
-            prev_races = new_races
+            for r in next_races:
+                if r.name not in [i.name for i in races]:
+                    races.append(r)
+            prev_races = next_races
+        self._scroll.on_end()
+        self._scroll.complete()
         return [i for i in races if i.with_rival]
