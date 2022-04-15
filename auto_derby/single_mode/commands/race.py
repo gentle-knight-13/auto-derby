@@ -125,7 +125,8 @@ class RaceCommand(Command):
         g.on_command(ctx, self)
         scene = RaceMenuScene.enter(ctx)
         if not self.selected:        
-            self.race = scene.score_with_rival(ctx)
+            if ctx.scenario == ctx.SCENARIO_CLIMAX:
+                self.race = scene.score_with_rival(ctx)
             scene.choose_race(ctx, self.race)
             self.selected = True
         race1 = self.race
