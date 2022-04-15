@@ -2,6 +2,7 @@
 # pyright: strict
 
 from __future__ import annotations
+from copy import deepcopy
 
 import logging
 from typing import Callable, Optional, Text
@@ -113,6 +114,18 @@ def _handle_race_result(ctx: Context, race: Race):
         _handle_race_result(ctx, race)
 
 
+def _choose_high_score_race(ctx: Context, race: Race, rival_races: list[Race]) -> Race:
+    races = deepcopy(rival_races)
+    races.append(race)
+    races.sort(
+        key=lambda x: x.score(ctx),
+        reverse=True,
+    )
+    for race in races:
+        _LOGGER.info("score:\t%2.2f\t%s", race.score(ctx), race)
+    return races[0]
+
+
 class RaceCommand(Command):
     def __init__(self, race: Race, *, selected: bool = False):
         self.race = race
@@ -124,9 +137,9 @@ class RaceCommand(Command):
     def execute(self, ctx: Context) -> None:
         g.on_command(ctx, self)
         scene = RaceMenuScene.enter(ctx)
-        if not self.selected:        
+        if not self.selected:
             if ctx.scenario == ctx.SCENARIO_CLIMAX:
-                self.race = scene.score_with_rival(ctx)
+                self.race = _choose_high_score_race(ctx, self.race, scene.find_race_with_rival(ctx))
             scene.choose_race(ctx, self.race)
             self.selected = True
         race1 = self.race

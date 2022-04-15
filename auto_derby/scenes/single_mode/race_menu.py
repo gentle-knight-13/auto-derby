@@ -75,7 +75,7 @@ class RaceMenuScene(Scene):
                     return
         raise ValueError("not found: %s" % race)
 
-    def score_with_rival(self, ctx: single_mode.Context) -> Race:
+    def find_race_with_rival(self, ctx: single_mode.Context) -> list[Race]:
         races: list[Race] = []
         prev_races: list[Race] = []
         while self._scroll.next():
@@ -88,12 +88,4 @@ class RaceMenuScene(Scene):
                 break
             races.extend(new_races)
             prev_races = new_races
-
-        races.sort(
-            key=lambda x: x.score(ctx),
-            reverse=True,
-        )
-        for race2 in races:
-            LOGGER.info("score:\t%2.2f\t%s", race2.score(ctx), race2)
-        return races[0]
-
+        return [i for i in races if i.with_rival]
