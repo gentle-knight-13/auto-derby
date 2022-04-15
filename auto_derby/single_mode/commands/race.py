@@ -124,7 +124,8 @@ class RaceCommand(Command):
     def execute(self, ctx: Context) -> None:
         g.on_command(ctx, self)
         scene = RaceMenuScene.enter(ctx)
-        if not self.selected:
+        if not self.selected:        
+            self.race = scene.score_with_rival(ctx)
             scene.choose_race(ctx, self.race)
             self.selected = True
         race1 = self.race
