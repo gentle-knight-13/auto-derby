@@ -138,7 +138,10 @@ class RaceCommand(Command):
         g.on_command(ctx, self)
         scene = RaceMenuScene.enter(ctx)
         if not self.selected:
-            if ctx.scenario == ctx.SCENARIO_CLIMAX:
+            if (
+                ctx.scenario == ctx.SCENARIO_CLIMAX
+                and self.race.grade > Race.GRADE_G1
+            ):
                 self.race = _choose_high_score_race(ctx, self.race, scene.find_race_with_rival(ctx))
             scene.choose_race(ctx, self.race)
             self.selected = True
