@@ -87,6 +87,4 @@ class RaceMenuScene(Scene):
                 if r.name not in [i.name for i in races]:
                     races.append(r)
             prev_races = next_races
-        self._scroll.on_end()
-        self._scroll.complete()
         return [i for i in races if i.with_rival]
