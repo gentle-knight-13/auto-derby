@@ -80,11 +80,16 @@ class RaceMenuScene(Scene):
         prev_races: list[Race] = []
         while self._scroll.next():
             next_races = [i[0] for i in find_by_race_menu_image(ctx, template.screenshot())]
-            next_races.sort(key=lambda x: x.name)           
-            if next_races == prev_races:
-                break
+            next_races.sort(key=lambda x: x.name)
             for r in next_races:
                 if r.name not in [i.name for i in races]:
                     races.append(r)
+            if next_races == prev_races:
+                break
+            if any([r for r in next_races if r.grade > Race.GRADE_G3]):
+                break
             prev_races = next_races
+
+        self._scroll.on_end()
+        self._scroll.complete()
         return [i for i in races if i.with_rival]
