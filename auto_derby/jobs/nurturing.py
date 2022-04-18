@@ -39,7 +39,7 @@ def _handle_option():
 
 
 def _handle_shop(ctx: Context, cs: CommandScene):
-    if not (cs.has_shop and ctx.shop_coin):
+    if not (cs.has_shop and ctx.shop_coin >= 15):
         return
     scene = ShopScene.enter(ctx)
     scene.recognize(ctx)
