@@ -135,10 +135,30 @@ if ($data.SingleModeChoicesDataPath) {
     $env:AUTO_DERBY_SINGLE_MODE_CHOICE_PATH = $data.SingleModeChoicesDataPath
 }
 
-if($data.RacePluginFileInfo -ne "None") {
+if($data.NurturingPresetName -ne "None") {
+    $presetInfo = $data.NurturingPresetInfoList1 | Where-Object { $_.Name -eq $data.NurturingPresetName }
     $pluginPath = Join-Path $WorkspaceFolder "plugins"
-    Copy-Item -Path $data.RacePluginFileInfo -Destination $pluginPath
-    $env:AUTO_DERBY_RACE_PLUGIN = [System.IO.Path]::GetFileNameWithoutExtension($data.RacePluginFileInfo)
+    $pluginNames = New-Object System.Collections.Generic.List[string]
+    foreach ($presetFile in $presetInfo.PluginFiles)
+    {
+        Copy-Item -Path $presetFile -Destination $pluginPath
+        $pluginNames.Add([System.IO.Path]::GetFileNameWithoutExtension($presetFile))
+    }
+
+    $env:AUTO_DERBY_NURTURING_PLUGINS = $pluginNames -join ","
+}
+
+if($data.RacePresetName -ne "None") {
+    $presetInfo = $data.RacePresetInfoList1 | Where-Object { $_.Name -eq $data.RacePresetName }
+    $pluginPath = Join-Path $WorkspaceFolder "plugins"
+    $pluginNames = New-Object System.Collections.Generic.List[string]
+    foreach ($presetFile in $presetInfo.PluginFiles)
+    {
+        Copy-Item -Path $presetFile -Destination $pluginPath
+        $pluginNames.Add([System.IO.Path]::GetFileNameWithoutExtension($presetFile))
+    }
+
+    $env:AUTO_DERBY_RACE_PLUGINS = $pluginNames -join ","
 }
 
 $env:AUTO_DERBY_PAUSE_IF_RACE_ORDER_GT = $data.PauseIfRaceOrderGt
@@ -166,7 +186,8 @@ set "AUTO_DERBY_OCR_IMAGE_PATH=$($env:AUTO_DERBY_OCR_IMAGE_PATH)"
 set "AUTO_DERBY_PAUSE_IF_RACE_ORDER_GT=$($env:AUTO_DERBY_PAUSE_IF_RACE_ORDER_GT)"
 set "AUTO_DERBY_PAUSE_ON_SPECIFIED_TURN=$($env:AUTO_DERBY_PAUSE_ON_SPECIFIED_TURN)"
 set "AUTO_DERBY_FORCE_RUNNING_STYLE=$($env:AUTO_DERBY_FORCE_RUNNING_STYLE)"
-set "AUTO_DERBY_RACE_PLUGIN=$($env:AUTO_DERBY_RACE_PLUGIN)"
+set "AUTO_DERBY_NURTURING_PLUGINS=$($env:AUTO_DERBY_NURTURING_PLUGINS)"
+set "AUTO_DERBY_RACE_PLUGINS=$($env:AUTO_DERBY_RACE_PLUGINS)"
 set "AUTO_DERBY_PLUGINS=$($env:AUTO_DERBY_PLUGINS)"
 set "AUTO_DERBY_SINGLE_MODE_CHOICE_PATH=$($env:AUTO_DERBY_SINGLE_MODE_CHOICE_PATH)"
 set "AUTO_DERBY_SINGLE_MODE_EVENT_IMAGE_PATH=$($env:AUTO_DERBY_SINGLE_MODE_EVENT_IMAGE_PATH)"

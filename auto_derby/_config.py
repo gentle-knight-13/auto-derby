@@ -61,7 +61,8 @@ class config:
     LOG_PATH = os.getenv("AUTO_DERBY_LOG_PATH", "auto_derby.log")
     PLUGINS = (
         tuple(i for i in os.getenv("AUTO_DERBY_PLUGINS", "").split(",") if i )
-        + tuple(i for i in os.getenv("AUTO_DERBY_RACE_PLUGIN", "").split(",") if i )
+        + tuple(i for i in os.getenv("AUTO_DERBY_NURTURING_PLUGINS", "").split(",") if i )
+        + tuple(i for i in os.getenv("AUTO_DERBY_RACE_PLUGINS", "").split(",") if i )
     )
     ADB_ADDRESS = os.getenv("AUTO_DERBY_ADB_ADDRESS", "")
     CHECK_UPDATE = os.getenv("AUTO_DERBY_CHECK_UPDATE", "").lower() == "true"

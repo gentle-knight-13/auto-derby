@@ -113,6 +113,25 @@ namespace NateScarlet.AutoDerby
         Last = 4,
     }
 
+    public class PresetInfo
+    {
+        public string Name
+        { get; set; }
+
+        public string Path
+        { get; set; }
+
+        public List<string> PluginFiles
+        { get; set; }
+
+        public PresetInfo()
+        {
+            this.Name = "None";
+            this.Path = "None";
+            this.PluginFiles = new List<string>();
+        }
+    }
+
     public class DataContext : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
@@ -139,9 +158,9 @@ namespace NateScarlet.AutoDerby
             this.MonthOptions1 = Enum.GetValues(typeof(Month)).Cast<Month>();
             this.PauseOnSpecifiedTurn = CalculateTurn(this.Year, this.Month);
             this.ForceRunningStyleOptions1 = Enum.GetValues(typeof(ForceRunningStyle)).Cast<ForceRunningStyle>();
-
-            this.RacePluginFileInfoList1 = LoadRacePluginFiles();
-            DeleteRacePluginFileFromPluginDirectory();
+            this.NurturingPresetInfoList1 = LoadPresetFiles(@"plugins\nurturing_preset");
+            this.RacePresetInfoList1 = LoadPresetFiles(@"plugins\race_preset");
+            DeletePresetPluginFileFromPluginDirectory(this.RacePresetInfoList1);
         }
         ~DataContext()
         {
@@ -363,63 +382,90 @@ namespace NateScarlet.AutoDerby
         public IEnumerable<ForceRunningStyle> ForceRunningStyleOptions1
         { get; set; }
 
-
-        public string RacePluginFileInfo
+        public string NurturingPresetName
         {
             get
             {
-                var racePluginFileInfo = (string)key.GetValue("RacePluginFileInfo", "None");
-                if(this.RacePluginFileInfoList1.Any(l => l.Value == racePluginFileInfo))
+                var nurturingPresetName = (string)key.GetValue("NurturingPresetName", "None");
+                if(this.NurturingPresetInfoList1.Any(l => l.Name == nurturingPresetName))
                 {
-                    return racePluginFileInfo;
+                    return nurturingPresetName;
                 }
                 return "None";
             }
             set
             {
-                key.SetValue("RacePluginFileInfo", value);
-                OnPropertyChanged("RacePluginFileInfo");
+                key.SetValue("NurturingPresetName", value);
+                OnPropertyChanged("NurturingPresetName");
             }
         }
 
-        public IEnumerable<KeyValuePair<string, string>> RacePluginFileInfoList1
+        public IEnumerable<PresetInfo> NurturingPresetInfoList1
         { get; set; }
 
-        private IEnumerable<KeyValuePair<string, string>> LoadRacePluginFiles()
+        public string RacePresetName
         {
-            var racePluginPath = Path.Combine(Environment.CurrentDirectory, "plugins/race_plugins");
-            var racePluginFileInfoList = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("None", "None") };
-            if(!Directory.Exists(racePluginPath))
+            get
             {
-                return (IEnumerable<KeyValuePair<string, string>>)racePluginFileInfoList;
-            }
-
-            var racePluginFiles = Directory.EnumerateFiles(racePluginPath, "*.py", SearchOption.TopDirectoryOnly);
-            foreach(var racePluginFile in racePluginFiles)
-            {
-                var fileName = Path.GetFileNameWithoutExtension(racePluginFile);
-                if(racePluginFileInfoList.All(l => l.Key != fileName))
+                var racePresetName = (string)key.GetValue("RacePresetName", "None");
+                if(this.RacePresetInfoList1.Any(l => l.Name == racePresetName))
                 {
-                    racePluginFileInfoList.Add(
-                        new KeyValuePair<string, string>(fileName, racePluginFile)
-                    );
+                    return racePresetName;
                 }
+                return "None";
             }
-            return (IEnumerable<KeyValuePair<string, string>>)racePluginFileInfoList;
+            set
+            {
+                key.SetValue("RacePresetName", value);
+                OnPropertyChanged("RacePresetName");
+            }
         }
 
-        private void DeleteRacePluginFileFromPluginDirectory()
+        public IEnumerable<PresetInfo> RacePresetInfoList1
+        { get; set; }
+
+        private IEnumerable<PresetInfo> LoadPresetFiles(string path)
+        {
+            var presetPath = Path.Combine(Environment.CurrentDirectory, path);
+            var presetInfoList = new List<PresetInfo>() { new PresetInfo() };
+            if(!Directory.Exists(presetPath))
+            {
+                return (IEnumerable<PresetInfo>)presetInfoList;
+            }
+
+            var directories = Directory.GetDirectories(presetPath);
+            foreach(var dir in directories)
+            {
+                var pluginFiles = Directory.EnumerateFiles(dir, "*.py", SearchOption.TopDirectoryOnly);
+                if(pluginFiles.Count() == 0)
+                {
+                    continue;
+                }
+                var info = new PresetInfo();
+                info.Name = Path.GetFileName(dir);
+                info.Path = dir;
+                info.PluginFiles.AddRange(pluginFiles);
+                presetInfoList.Add(info);
+            }
+
+            return (IEnumerable<PresetInfo>)presetInfoList;
+        }
+
+        private void DeletePresetPluginFileFromPluginDirectory(IEnumerable<PresetInfo> presetInfoList)
         {
             var pluginPath = Path.Combine(Environment.CurrentDirectory, "plugins");
-            foreach(var racePluginFileInfo in this.RacePluginFileInfoList1)
+            foreach(var racePresetInfo in presetInfoList)
             {
-                var racePluginFilePath = Path.Combine(pluginPath, Path.GetFileName(racePluginFileInfo.Value));
-                if(File.Exists(racePluginFilePath))
+                foreach(var racePresetFile in racePresetInfo.PluginFiles)
                 {
-                    var isSameFile = File.ReadLines(racePluginFilePath).SequenceEqual(File.ReadLines(racePluginFileInfo.Value));
-                    if(isSameFile)
+                    var racePluginFilePath = Path.Combine(pluginPath, Path.GetFileName(racePresetFile));
+                    if(File.Exists(racePluginFilePath))
                     {
-                        File.Delete(racePluginFilePath);
+                        var isSameFile = File.ReadLines(racePluginFilePath).SequenceEqual(File.ReadLines(racePresetFile));
+                        if(isSameFile)
+                        {
+                            File.Delete(racePluginFilePath);
+                        }
                     }
                 }
             }
