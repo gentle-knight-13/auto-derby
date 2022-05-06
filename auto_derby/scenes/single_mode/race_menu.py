@@ -4,12 +4,15 @@
 from __future__ import annotations
 
 import time
+import logging
 
 from ... import action, single_mode, template, templates
 from ...single_mode.race import Race, find_by_race_menu_image
 from ..scene import Scene, SceneHolder
 from ..vertical_scroll import VerticalScroll
 from .command import CommandScene
+
+LOGGER = logging.getLogger(__name__)
 
 
 class RaceTurnsIncorrect(ValueError):
@@ -71,3 +74,22 @@ class RaceMenuScene(Scene):
                     action.tap(pos)
                     return
         raise ValueError("not found: %s" % race)
+
+    def find_race_with_rival(self, ctx: single_mode.Context) -> list[Race]:
+        races: list[Race] = []
+        prev_races: list[Race] = []
+        while self._scroll.next():
+            next_races = [i[0] for i in find_by_race_menu_image(ctx, template.screenshot())]
+            next_races.sort(key=lambda x: x.name)
+            for r in next_races:
+                if r.name not in [i.name for i in races]:
+                    races.append(r)
+            if next_races == prev_races:
+                break
+            if any([r for r in next_races if r.grade > Race.GRADE_G3]):
+                break
+            prev_races = next_races
+
+        self._scroll.on_end()
+        self._scroll.complete()
+        return [i for i in races if i.with_rival]

@@ -158,6 +158,11 @@ def _recognize_grade(
     raise ValueError("_recognize_grade: unknown grade color: %s" % (img.getpixel(pos),))
 
 
+def _recognize_rival(img: PIL.Image.Image) -> bool:
+    res = tuple(template.match(img, templates.SINGLE_MODE_CLIMAX_VS_RIVAL_ICON))
+    return len(res) == 1
+
+
 def _match_scenario(ctx: Context, race: Race) -> bool:
 
     if ctx.scenario != ctx.SCENARIO_CLIMAX and race.name.startswith("トゥインクルスタークライマックス"):
@@ -176,6 +181,7 @@ def _find_by_spec(
     track: int,
     no1_fan_count: int,
     grades: Tuple[int, ...],
+    with_rival: bool,
 ):
     full_spec = (stadium, ground, distance, turn, track, no1_fan_count)
     for i in find_by_date(ctx.date):
@@ -191,6 +197,7 @@ def _find_by_spec(
             i.track,
             i.fan_counts[0],
         ):
+            i.with_rival = with_rival
             yield i
 
 
@@ -215,7 +222,7 @@ def find_by_race_detail_image(ctx: Context, screenshot: PIL.Image.Image) -> Race
     )
     stadium, ground, distance, turn, track = _recognize_spec(screenshot.crop(spec_bbox))
     no1_fan_count = _recognize_fan_count(screenshot.crop(no1_fan_count_bbox))
-
+    with_rival = False
     full_spec = (
         stadium,
         ground,
@@ -224,6 +231,7 @@ def find_by_race_detail_image(ctx: Context, screenshot: PIL.Image.Image) -> Race
         track,
         no1_fan_count,
         grades,
+        with_rival,
     )
     for i in _find_by_spec(ctx, *full_spec):
         LOGGER.info("image match: %s", i)
@@ -250,15 +258,25 @@ def _grade_color_pos(ctx: Context, rp: mathtools.ResizeProxy):
     return rp.vector2((198, 29), 540)
 
 
+def _vs_rival_icon_bbox(rp: mathtools.ResizeProxy):
+    return rp.vector4((354, 3, 369, 15), 492)
+
+
 def _find_by_race_menu_item(ctx: Context, img: PIL.Image.Image) -> Iterator[Race]:
     rp = mathtools.ResizeProxy(img.width)
     spec_bbox = _spec_bbox(ctx, rp)
     no1_fan_count_bbox = _no1_fan_count_bbox(ctx, rp)
     grade_color_pos = _grade_color_pos(ctx, rp)
+    vs_rival_icon_bbox = _vs_rival_icon_bbox(rp)
 
     stadium, ground, distance, turn, track = _recognize_spec(img.crop(spec_bbox))
     no1_fan_count = _recognize_fan_count(img.crop(no1_fan_count_bbox))
     grades = _recognize_grade(img, grade_color_pos)
+
+    with_rival = False
+    if ctx.scenario == ctx.SCENARIO_CLIMAX:
+        with_rival = _recognize_rival(img.crop(vs_rival_icon_bbox))
+    
     full_spec = (
         stadium,
         ground,
@@ -267,6 +285,7 @@ def _find_by_race_menu_item(ctx: Context, img: PIL.Image.Image) -> Iterator[Race
         track,
         no1_fan_count,
         grades,
+        with_rival,
     )
     match_count = 0
     for i in _find_by_spec(ctx, *full_spec):

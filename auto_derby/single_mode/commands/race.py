@@ -113,6 +113,19 @@ def _handle_race_result(ctx: Context, race: Race):
         _handle_race_result(ctx, race)
 
 
+def _choose_high_score_race(ctx: Context, race: Race, rival_races: list[Race]) -> Race:
+    races = rival_races
+    if race.name not in [i.name for i in races]:
+        races.append(race)
+    races.sort(
+        key=lambda x: x.score(ctx),
+        reverse=True,
+    )
+    for race in races:
+        _LOGGER.info("score:\t%2.2f\t%s\trival %s", race.score(ctx), race, race.with_rival)
+    return races[0]
+
+
 class RaceCommand(Command):
     def __init__(self, race: Race, *, selected: bool = False):
         self.race = race
@@ -125,6 +138,11 @@ class RaceCommand(Command):
         g.on_command(ctx, self)
         scene = RaceMenuScene.enter(ctx)
         if not self.selected:
+            if (
+                ctx.scenario == ctx.SCENARIO_CLIMAX
+                and self.race.grade > Race.GRADE_G1
+            ):
+                self.race = _choose_high_score_race(ctx, self.race, scene.find_race_with_rival(ctx))
             scene.choose_race(ctx, self.race)
             self.selected = True
         race1 = self.race
