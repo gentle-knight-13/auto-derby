@@ -13,7 +13,7 @@ from PIL.Image import Image
 
 from ... import action, imagetools, mathtools, ocr, template, templates
 from ...single_mode import Context, item
-from ...single_mode.item import Item, ItemList
+from ...single_mode.item import Item, ItemList, EffectSummary
 from ..scene import Scene, SceneHolder
 from ..vertical_scroll import VerticalScroll
 from .command import CommandScene
@@ -204,9 +204,13 @@ class ItemMenuScene(Scene):
             action.wait_tap_image(templates.SINGLE_MODE_SHOP_USE_CONFIRM_BUTTON)
             action.wait_tap_image(templates.SINGLE_MODE_ITEM_USE_BUTTON)
             self._after_use_confirm(ctx)
+            es = EffectSummary()
             for i in selected:
                 ctx.items.remove(i.id, 1)
                 ctx.item_history.append(ctx, i)
+                es.add(i)
+            if es.condition_add:
+                ctx.conditions.update(es.condition_add)
 
         for i in remains:
             _LOGGER.warning("use remain: %s", i)
