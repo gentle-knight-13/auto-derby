@@ -159,6 +159,9 @@ if($data.NurturingPresetName -ne "None") {
 
     $env:AUTO_DERBY_NURTURING_PLUGINS = $pluginNames -join ","
 }
+else {
+    $env:AUTO_DERBY_NURTURING_PLUGINS = ""
+}
 
 if($data.RacePresetName -ne "None") {
     $presetInfo = $data.RacePresetInfoList1 | Where-Object { $_.Name -eq $data.RacePresetName }
@@ -171,6 +174,9 @@ if($data.RacePresetName -ne "None") {
     }
 
     $env:AUTO_DERBY_RACE_PLUGINS = $pluginNames -join ","
+}
+else {
+    $env:AUTO_DERBY_RACE_PLUGINS = ""
 }
 
 $env:AUTO_DERBY_PAUSE_IF_RACE_ORDER_GT = $data.PauseIfRaceOrderGt
