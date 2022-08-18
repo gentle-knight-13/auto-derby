@@ -2,6 +2,7 @@
 # pyright: strict
 
 import time
+import random
 from typing import Callable, Iterable, Iterator, Text, Tuple, TypeVar, Union
 
 from . import app, mathtools, template
@@ -107,7 +108,7 @@ def tap_image(
         tmpl, pos = next(template.match(app.device.screenshot(), tmpl))
         img = template.load(tmpl.name)
         w, h = resize_proxy().vector2((img.width, img.height), template.TARGET_WIDTH)
-        app.device.tap((pos[0] + x, pos[1] + y, w - x, h - y))
+        random_tap((pos[0] + x, pos[1] + y, w - x, h - y))
         return True
     except StopIteration:
         return False
@@ -124,7 +125,37 @@ def wait_tap_image(
         last_pos = pos
     img = template.load(tmpl.name)
     w, h = resize_proxy().vector2((img.width, img.height), template.TARGET_WIDTH)
-    app.device.tap((pos[0] + x, pos[1] + y, w - x, h - y))
+    random_tap((pos[0] + x, pos[1] + y, w - x, h - y))
+
+
+def get_random_pos() -> Tuple[int, int]:
+    random.seed()
+    x = random.randint(-5, 5)
+    random.seed()
+    y = random.randint(-5, 5)
+    return (x, y)
+
+
+def random_tap(rect: Tuple[int, int, int, int]):
+    x, y, w, h = rect
+    random_x, random_y = get_random_pos()
+    app.log.text(f"tap point: x={x}+{random_x}, y={y}+{random_y}")
+
+    x += random_x
+    y += random_y
+    w -= random_x
+    h -= random_y
+    app.device.tap((x, y, w, h))
+
+
+def random_legacy_tap(point: Tuple[int, int]):
+    x, y = point
+    random_x, random_y = get_random_pos()
+    app.log.text(f"tap point: x={x}+{random_x}, y={y}+{random_y}")
+
+    x += random_x
+    y += random_y
+    app.device.tap((x, y, 5, 5))
 
 
 # DEPRECATED
@@ -135,8 +166,7 @@ def _legacy_reset_client_size() -> None:
 
 
 def _legacy_tap(point: Tuple[int, int]):
-    x, y = point
-    app.device.tap((x, y, 5, 5))
+    random_legacy_tap(point)
 
 
 def _legacy_swipe(
