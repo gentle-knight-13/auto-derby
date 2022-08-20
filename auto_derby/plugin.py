@@ -12,13 +12,17 @@ from typing import Dict
 
 import cast_unknown as cast
 
-LOGGER = logging.getLogger(__name__)
+from . import app
 
 
 class Plugin(ABC):
     @abstractmethod
     def install(self) -> None:
         ...
+
+
+class _g:
+    deprecations: Dict[str, str] = {}
 
 
 class g:
@@ -40,9 +44,30 @@ def reload():
         module = importlib.util.module_from_spec(spec)
         loader = cast.instance(spec.loader, SourceFileLoader)
         loader.exec_module(module)
-    LOGGER.debug("loaded: %s", ", ".join(g.plugins.keys()))
+    app.log.text("loaded: %s" % ", ".join(g.plugins.keys()), level=app.DEBUG)
+
+
+def deprecate(name: str, reason: str):
+    _g.deprecations[name] = reason
+
+
+def is_deprecated(name: str) -> bool:
+    return name in _g.deprecations
+
+
+def get_deprecation_reason(name: str) -> str:
+    return _g.deprecations.get(name, "")
 
 
 def install(name: str) -> None:
+    if is_deprecated(name):
+        app.log.text(
+            f"plugin '{name}' is deprecated: {get_deprecation_reason(name)}",
+            level=app.WARN,
+        )
     g.plugins[name].install()
-    LOGGER.info("installed: %s", name)
+    app.log.text("installed: %s" % name, level=app.DEBUG)
+
+
+# DEPRECATED
+globals()["LOGGER"] = logging.getLogger(__name__)

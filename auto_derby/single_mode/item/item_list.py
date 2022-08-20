@@ -2,15 +2,22 @@
 # pyright: strict
 
 from __future__ import annotations
+
+import copy
 from typing import Dict, Iterator
 
-from .item import Item
 from . import game_data
+from .item import Item
 
 
 class ItemList:
     def __init__(self) -> None:
         self._m: Dict[int, Item] = {}
+
+    def clone(self) -> ItemList:
+        obj = copy.copy(self)
+        obj._m = self._m.copy()
+        return obj
 
     def __contains__(self, value: Item) -> bool:
         return self.get(value.id).quantity > 0

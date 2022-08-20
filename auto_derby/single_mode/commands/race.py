@@ -3,19 +3,15 @@
 
 from __future__ import annotations
 
-import logging
 from typing import Callable, Optional, Text
 
-from ... import action, templates, terminal
-from ...constants import RuningStyle
+from ... import action, templates, terminal, app
+from ...constants import RunningStyle
 from ...scenes import PaddockScene
 from ...scenes.single_mode import RaceMenuScene
 from .. import Context, Race, RaceResult
 from .command import Command
 from .globals import g
-
-_LOGGER = logging.getLogger(__name__)
-
 
 # NOTE: Variables are reset at the end of auto-derby
 can_choose_running_style = True
@@ -29,13 +25,13 @@ def _choose_running_style(ctx: Context, race1: Race) -> None:
     if can_choose_running_style:
         style_scores = sorted(race1.style_scores_v2(ctx), key=lambda x: x[1], reverse=True)
         for style, score in style_scores:
-            _LOGGER.info("running style score:\t%.2f:\t%s", score, style)
+            app.log.text("running style score:\t%.2f:\t%s" % (score, style))
 
-        if g.force_running_style in set(item.value for item in RuningStyle):
-            force_running_style =  RuningStyle(g.force_running_style)
-            scene.choose_runing_style(force_running_style)
+        if g.force_running_style in set(item.value for item in RunningStyle):
+            force_running_style =  RunningStyle(g.force_running_style)
+            scene.choose_running_style(force_running_style)
         else:
-            scene.choose_runing_style(style_scores[0][0])
+            scene.choose_running_style(style_scores[0][0])
         can_choose_running_style = False
 
 
@@ -69,8 +65,10 @@ def _handle_race_result(ctx: Context, race: Race):
     res.race = race
 
     tmpl, pos = action.wait_image(*_RACE_ORDER_TEMPLATES.keys())
+    order_img = app.device.screenshot()
+
     res.order = _RACE_ORDER_TEMPLATES[tmpl.name]
-    action.tap(pos)
+    app.device.tap(action.template_rect(tmpl, pos))
 
     if ctx.scenario == ctx.SCENARIO_CLIMAX and ctx.date[0] < 4:
         tmpl, pos = action.wait_image_stable(
@@ -79,10 +77,10 @@ def _handle_race_result(ctx: Context, race: Race):
             templates.SINGLE_MODE_CLIMAX_RIVAL_RACE_DRAW,
             templates.SINGLE_MODE_CLIMAX_RIVAL_RACE_LOSE,
         )
-        action.tap(pos)
+        app.device.tap(action.template_rect(tmpl, pos))
         if tmpl.name != templates.CLOSE_BUTTON:
             _, pos = action.wait_image_stable(templates.CLOSE_BUTTON)
-            action.tap(pos)
+            app.device.tap(action.template_rect(tmpl, pos))
 
     tmpl, pos = action.wait_image_stable(
         templates.GREEN_NEXT_BUTTON,
@@ -90,7 +88,7 @@ def _handle_race_result(ctx: Context, race: Race):
     )
 
     res.is_failed = tmpl.name == templates.SINGLE_MODE_CONTINUE
-    _LOGGER.info("race result: %s", res)
+    app.log.image("race result: %s" % res, order_img)
     g.on_race_result(ctx, res)
     res.write()
 
@@ -101,7 +99,7 @@ def _handle_race_result(ctx: Context, race: Race):
             _handle_race_result(ctx, race)
             return
 
-    action.tap(pos)
+    app.device.tap(action.template_rect(tmpl, pos))
     if res.is_failed:
         ctx.mood = {
             ctx.MOOD_VERY_BAD: ctx.MOOD_BAD,
@@ -122,7 +120,7 @@ def _choose_high_score_race(ctx: Context, race: Race, rival_races: list[Race]) -
         reverse=True,
     )
     for race in races:
-        _LOGGER.info("score:\t%2.2f\t%s\trival %s", race.score(ctx), race, race.with_rival)
+        app.log.text("score:\t%2.2f\t%s\trival %s" % (race.score(ctx), race, race.with_rival))
     return races[0]
 
 
@@ -161,7 +159,7 @@ class RaceCommand(Command):
             )
             if tmpl.name == templates.RACE_RESULT_BUTTON:
                 break
-            action.tap(pos)
+            app.device.tap(action.template_rect(tmpl, pos))
         ctx.race_turns.add(ctx.turn_count())
         ctx.race_history.append(ctx, self.race)
 

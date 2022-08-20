@@ -3,20 +3,17 @@
 
 from __future__ import annotations
 
-import logging
-from copy import deepcopy
+import copy
 from typing import TYPE_CHECKING, Any, Dict, Text, Tuple
 
 import numpy as np
 
-from ... import mathtools
+from ... import app, mathtools
 from .. import condition, race, training
 from ..training import Training
 from .effect import Effect
 from .effect_summary import EffectSummary
 from .globals import g
-
-_LOGGER = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from ..commands import Command
@@ -42,6 +39,10 @@ class Item:
         self.quantity = 0
         self.disabled = False
 
+    def clone(self) -> Item:
+        obj = copy.copy(self)
+        return obj
+
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Item) and self._equal_key() == other._equal_key()
 
@@ -54,6 +55,8 @@ class Item:
             msg += f"@{self.price}"
         if self.quantity:
             msg += f"x{self.quantity}"
+        if self.disabled:
+            msg += "(disabled)"
         return f"Item<{self.name}#{self.id}{msg}>"
 
     def __bool__(self) -> bool:
@@ -82,9 +85,6 @@ class Item:
         v.effect_priority = d["effectPriority"]
         v.effects = tuple(Effect.from_dict(i) for i in d["effects"])
         return v
-
-    def clone(self):
-        return deepcopy(self)
 
     def effect_summary(self) -> EffectSummary:
         es = EffectSummary()
@@ -142,8 +142,9 @@ class Item:
             explain = "{s:.2f} by max vitality"
 
         if g.explain_score and explain:
-            _LOGGER.debug(
-                "%s effect score: %.2f for %s: %s", self, ret, command, explain
+            app.log.text(
+                "%s effect score: %.2f for %s: %s" % (self, ret, command, explain),
+                level=app.DEBUG,
             )
         return ret
 
@@ -182,7 +183,10 @@ class Item:
             ret *= 1 + r
 
         if g.explain_score and explain:
-            _LOGGER.debug("%s expected effect score: %.2f: %s", self, ret, explain)
+            app.log.text(
+                "%s expected effect score: %.2f: %s" % (self, ret, explain),
+                level=app.DEBUG,
+            )
         assert ret >= 0, ret
         return ret
 
@@ -284,7 +288,7 @@ class Item:
                 f"{s:.2f} by {len(race_scores)} sample races from {sample_source};"
             )
             ret += s
-        # atleast one race reward buff for year4
+        # at least one race reward buff for year4
         if es.race_reward_buff.total_rate() > 0.3 and self not in ctx.items:
             s = 10
             explain += f"{s:.2f} by race reward buff;"
@@ -381,7 +385,9 @@ class Item:
             ret *= 1 + r
 
         if g.explain_score and explain:
-            _LOGGER.debug("%s exchange score: %.2f: %s", self, ret, explain)
+            app.log.text(
+                "%s exchange score: %.2f: %s" % (self, ret, explain), level=app.DEBUG
+            )
         return ret
 
     def expected_exchange_score(self, ctx: Context) -> float:
@@ -418,7 +424,10 @@ class Item:
             ret *= 1 + r
 
         if g.explain_score and explain:
-            _LOGGER.debug("%s expected exchange score: %.2f: %s", self, ret, explain)
+            app.log.text(
+                "%s expected exchange score: %.2f: %s" % (self, ret, explain),
+                level=app.DEBUG,
+            )
         assert ret >= 0, ret
         return ret
 
@@ -445,6 +454,16 @@ class Item:
         if es.mood:
             return False
         return True
+
+    def can_be_auto_used(self) -> bool:
+        """auto used item by setting
+        ※自動使用の対象となる育成グッズは、「基礎能力アップ」「トレーニングLvアップ」
+        の効果がある育成グッズです。 see https://dmg.umamusume.jp/news/detail?id=831
+        """
+        es = self.effect_summary()
+        if es.training_levels:
+            return True
+        return (es.speed + es.stamina + es.power + es.guts + es.wisdom) > 0
 
 
 g.item_class = Item

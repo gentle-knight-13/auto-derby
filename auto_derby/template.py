@@ -1,8 +1,8 @@
 # -*- coding=UTF-8 -*-
 # pyright: strict
 """template matching.  """
+from __future__ import annotations
 
-import datetime as dt
 import logging
 import os
 import pathlib
@@ -13,40 +13,27 @@ import numpy as np
 from PIL.Image import Image
 from PIL.Image import open as open_image
 
-from . import clients, imagetools, mathtools, filetools
+from . import imagetools, mathtools, app
 
-LOGGER = logging.getLogger(__name__)
 
 TARGET_WIDTH = 540
 
 
-class _g:
-    cached_screenshot = (dt.datetime.fromtimestamp(0), Image())
-
-
-def invalidate_screeshot():
-    _g.cached_screenshot = (dt.datetime.fromtimestamp(0), Image())
-
-
 class g:
     last_screenshot_save_path: str = ""
-    screenshot_width = TARGET_WIDTH
 
+    @property
+    def _legacy_screenshot_width(self):
+        import warnings
 
-def screenshot(*, max_age: float = 1) -> Image:
-    cached_time, _ = _g.cached_screenshot
-    if cached_time < dt.datetime.now() - dt.timedelta(seconds=max_age):
-        new_img = clients.current().screenshot()
-        g.screenshot_width = new_img.width
-        new_img = new_img.convert("RGB")
-        if g.last_screenshot_save_path:
-            with filetools.atomic_save_path(
-                g.last_screenshot_save_path,
-            ) as p:
-                new_img.save(p, format="PNG")
-        LOGGER.debug("screenshot")
-        _g.cached_screenshot = (dt.datetime.now(), new_img)
-    return _g.cached_screenshot[1]
+        warnings.warn("use app.device.width() instead", DeprecationWarning)
+        return app.device.width()
+
+    @_legacy_screenshot_width.setter
+    def _legacy_screenshot_width(self, v: int):
+        import warnings
+
+        warnings.warn("use app.device.width() instead", DeprecationWarning)
 
 
 _LOADED_TEMPLATES: Dict[Text, Image] = {}
@@ -58,10 +45,8 @@ def _cv_image(img: Image):
 
 def load(name: Text) -> Image:
     if name not in _LOADED_TEMPLATES:
-        LOGGER.debug("load: %s", name)
-        # rp = mathtools.ResizeProxy(_g.screenshot_width)
+        app.log.text("load: %s" % name, level=app.DEBUG)
         img = open_image(pathlib.Path(__file__).parent / "templates" / name)
-        # img = imagetools.resize(img, width=rp.vector(img.width, TARGET_WIDTH))
         _LOADED_TEMPLATES[name] = img
     return _LOADED_TEMPLATES[name]
 
@@ -75,7 +60,7 @@ def try_load(name: Text) -> Optional[Image]:
     try:
         return load(name)
     except Exception as ex:
-        LOGGER.debug("can not load: %s: %s", name, ex)
+        app.log.text("can not load: %s: %s" % (name, ex), level=app.DEBUG)
         _NOT_EXISTED_NAMES.add(name)
         return None
 
@@ -87,6 +72,12 @@ def add_middle_ext(name: Text, value: Text) -> Text:
 
 
 class Specification:
+    @classmethod
+    def from_input(cls, input: Input) -> Specification:
+        if isinstance(input, Specification):
+            return input
+        return Specification(input)
+
     def __init__(
         self,
         name: Text,
@@ -121,8 +112,10 @@ class Specification:
                 min_diff *= -1
 
             lightness_similarity = 1 - (abs(max_diff + min_diff) / 2)
-            LOGGER.debug(
-                "lightness match: tmpl=%s, similarity=%.3f", self, lightness_similarity
+            app.log.text(
+                "lightness match: tmpl=%s, similarity=%.3f"
+                % (self, lightness_similarity),
+                level=app.DEBUG,
             )
             if lightness_similarity < self.threshold:
                 return False
@@ -135,11 +128,12 @@ class Specification:
         return f"tmpl<{self.name}+{self.pos}>" if self.pos else f"tmpl<{self.name}>"
 
 
+Input = Union[Text, Specification]
 _DEBUG_TMPL = os.getenv("DEBUG_TMPL") or "debug.png"
 
 
 def _match_one(
-    img: Image, tmpl: Union[Text, Specification]
+    img: Image, tmpl: Input
 ) -> Iterator[Tuple[Specification, Tuple[int, int]]]:
     rp = mathtools.ResizeProxy(TARGET_WIDTH)
     cv_img = _cv_image(
@@ -147,12 +141,11 @@ def _match_one(
             img,
             width=rp.vector(
                 img.width,
-                g.screenshot_width,
+                app.device.width(),
             ),
         )
     )
-    if not isinstance(tmpl, Specification):
-        tmpl = Specification(tmpl)
+    tmpl = Specification.from_input(tmpl)
 
     pos = tmpl.load_pos()
     pil_tmpl = load(tmpl.name)
@@ -164,23 +157,28 @@ def _match_one(
         cv_pos = np.full(cv_img.shape[:2], 255.0, dtype=np.uint8)
     res = cv2.matchTemplate(cv_img, cv_tmpl, cv2.TM_CCOEFF_NORMED)
     if tmpl.name == _DEBUG_TMPL:
-        cv2.imshow("cv_img", cv_img)
-        cv2.imshow("cv_tmpl", cv_tmpl)
-        cv2.imshow("match", res)
-        cv2.waitKey()
-        cv2.destroyAllWindows()
-    reverse_rp = mathtools.ResizeProxy(g.screenshot_width)
+        app.log.image(
+            "match template",
+            cv_img,
+            layers={"tmpl": cv_tmpl, "match": res.astype(np.uint8)},
+            level=app.DEBUG,
+        )
+    reverse_rp = mathtools.ResizeProxy(app.device.width())
     while True:
         mask = cv_pos[0 : res.shape[0], 0 : res.shape[1]]
         _, max_val, _, max_loc = cv2.minMaxLoc(res, mask=mask)
         x, y = max_loc
         client_pos = reverse_rp.vector2((x, y), TARGET_WIDTH)
         if max_val < tmpl.threshold or not tmpl.match(img, client_pos):
-            LOGGER.debug(
-                "not match: tmpl=%s, pos=%s, similarity=%.3f", tmpl, max_loc, max_val
+            app.log.text(
+                "not match: tmpl=%s, pos=%s, similarity=%.3f"
+                % (tmpl, max_loc, max_val),
+                level=app.DEBUG,
             )
             break
-        LOGGER.info("match: tmpl=%s, pos=%s, similarity=%.2f", tmpl, max_loc, max_val)
+        app.log.text(
+            "match: tmpl=%s, pos=%s, similarity=%.2f" % (tmpl, max_loc, max_val)
+        )
         yield (tmpl, client_pos)
 
         # mark position unavailable to avoid overlap
@@ -196,4 +194,28 @@ def match(
             match_count += 1
             yield j
     if match_count == 0:
-        LOGGER.info("no match: tmpl=%s", tmpl)
+        app.log.text(f"no match: tmpl={tmpl}")
+
+
+# DEPRECATED
+# spell-checker: disable
+def _legacy_screenshot(*, max_age: float = 1) -> Image:
+    import warnings
+
+    warnings.warn("use `app.device.screenshot` instead", DeprecationWarning)
+    return app.device.screenshot(max_age=max_age)
+
+
+def _legacy_invalidate_screenshot():
+    import warnings
+
+    warnings.warn(
+        "screenshot invalidation is handled by device service", DeprecationWarning
+    )
+
+
+globals()["LOGGER"] = logging.getLogger(__name__)
+globals()["invalidate_screeshot"] = _legacy_invalidate_screenshot
+globals()["invalidate_screenshot"] = _legacy_invalidate_screenshot
+globals()["screenshot"] = _legacy_screenshot
+g.screenshot_width = g._legacy_screenshot_width  # type: ignore

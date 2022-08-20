@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import os
 import time
 from typing import Any, Dict, Text
 
@@ -11,7 +10,7 @@ import cv2
 import numpy as np
 from auto_derby.single_mode.context import Context
 
-from ... import action, imagetools, ocr, single_mode, template, templates, terminal
+from ... import action, imagetools, ocr, single_mode, template, templates, terminal, app
 from ...scenes import Scene
 from ..scene import Scene, SceneHolder
 
@@ -25,7 +24,7 @@ def _recognize_climax_grade_point(ctx: Context):
         return
     rp = action.resize_proxy()
     bbox = rp.vector4((10, 185, 119, 218), 540)
-    img = template.screenshot().crop(bbox)
+    img = app.device.screenshot().crop(bbox)
     x, _ = next(
         template.match(
             img,
@@ -44,19 +43,21 @@ def _recognize_climax_grade_point(ctx: Context):
         255,
         type=cv2.THRESH_BINARY_INV,
     )
-
-    if os.getenv("DEBUG") == __name__ + "[grade_point]":
-        cv2.imshow("cv_img", cv_img)
-        cv2.imshow("binary_img", binary_img)
-        cv2.waitKey()
-        cv2.destroyAllWindows()
+    app.log.image(
+        "climax grade point",
+        cv_img,
+        level=app.DEBUG,
+        layers={
+            "binary": binary_img,
+        },
+    )
     text = ocr.text(imagetools.pil_image(binary_img))
     ctx.grade_point = int(text.rstrip("pt").replace(",", ""))
 
 
 def _recognize_shop_coin(ctx: Context):
     rp = action.resize_proxy()
-    screenshot = template.screenshot()
+    screenshot = app.device.screenshot()
     _, pos = next(template.match(screenshot, templates.SINGLE_MODE_COMMAND_SHOP))
     x, y = pos
     bbox = (
@@ -69,16 +70,21 @@ def _recognize_shop_coin(ctx: Context):
     img = imagetools.resize(img, height=32)
     cv_img = np.asarray(img.convert("L"))
     _, binary_img = cv2.threshold(cv_img, 100, 255, cv2.THRESH_BINARY_INV)
-    if os.getenv("DEBUG") == __name__ + "[shop_coin]":
-        cv2.imshow("cv_img", cv_img)
-        cv2.imshow("binary_img", binary_img)
-        cv2.waitKey()
-        cv2.destroyAllWindows()
+    app.log.image(
+        "shop coin",
+        cv_img,
+        level=app.DEBUG,
+        layers={
+            "binary": binary_img,
+        },
+    )
     text = ocr.text(imagetools.pil_image(binary_img))
     ctx.shop_coin = int(text.replace(",", ""))
 
 
 class CommandScene(Scene):
+    max_recognition_retry = 10
+
     def __init__(self) -> None:
         super().__init__()
         self.has_health_care = False
@@ -133,14 +139,14 @@ class CommandScene(Scene):
         )
         time.sleep(0.2)  # wait animation
         action.wait_image(templates.SINGLE_MODE_CLASS_DETAIL_TITLE)
-        ctx.update_by_class_detail(template.screenshot())
+        ctx.update_by_class_detail(app.device.screenshot())
         action.wait_tap_image(templates.CLOSE_BUTTON)
 
     def recognize_status(self, ctx: single_mode.Context):
         action.wait_tap_image(templates.SINGLE_MODE_CHARACTER_DETAIL_BUTTON)
         time.sleep(0.2)  # wait animation
         action.wait_image(templates.SINGLE_MODE_CHARACTER_DETAIL_TITLE)
-        ctx.update_by_character_detail(template.screenshot())
+        ctx.update_by_character_detail(app.device.screenshot())
         action.wait_tap_image(templates.CLOSE_BUTTON)
 
     def recognize_commands(self, ctx: single_mode.Context) -> None:
@@ -169,16 +175,16 @@ class CommandScene(Scene):
             ctx.scene = self
 
     def recognize(self, ctx: single_mode.Context, *, static: bool = False):
-        action.reset_client_size()
+        app.device.reset_size()
         # animation may not finished
         # https://github.com/NateScarlet/auto-derby/issues/201
         class local:
             next_retry_count = 0
 
-        max_retry = 0 if static else 10
+        max_retry = 0 if static else self.max_recognition_retry
 
         def _recognize_static():
-            ctx.update_by_command_scene(template.screenshot())
+            ctx.update_by_command_scene(app.device.screenshot())
             self.recognize_commands(ctx)
             if self.has_shop:
                 _recognize_shop_coin(ctx)

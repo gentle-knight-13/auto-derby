@@ -12,18 +12,14 @@ from typing import Text, Tuple
 import cast_unknown as cast
 import win32con
 
-from . import window
+from . import window, app
 from .__version__ import VERSION
 from concurrent import futures
-import logging
-
-_LOGGER = logging.getLogger(__name__)
-
 
 _VERSION_URLS = (
     "https://cdn.jsdelivr.net/gh/NateScarlet/auto-derby@master/version",
     "https://github.com/NateScarlet/auto-derby/raw/master/version",
-    "https://natescarlet.coding.net/p/github/d/auto-derby/git/raw/master/version",
+    "https://ghproxy.com/https://github.com/NateScarlet/auto-derby/raw/master/version",
 )
 _CHANGELOG_URL = "https://github.com/NateScarlet/auto-derby/blob/master/CHANGELOG.md"
 
@@ -51,13 +47,13 @@ def latest() -> Text:
             try:
                 done, jobs = futures.wait(jobs, return_when=futures.FIRST_COMPLETED)
                 url, ret = done.pop().result()
-                _LOGGER.info("lastest: %s from %s", ret, url)
+                app.log.text("latest: %s from %s" % (ret, url))
                 return ret
             except:
                 pass
     finally:
         pool.shutdown(False)
-    _LOGGER.warning("latest: all request failed, use current version")
+    app.log.text("latest: all request failed, use current version", level=app.WARN)
     return VERSION
 
 

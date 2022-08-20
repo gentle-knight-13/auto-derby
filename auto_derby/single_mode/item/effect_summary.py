@@ -3,9 +3,8 @@
 
 from __future__ import annotations
 
-import logging
+import copy
 from collections import defaultdict
-from copy import deepcopy
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -20,7 +19,7 @@ from typing import (
     TypeVar,
 )
 
-from ... import mathtools
+from ... import app, mathtools
 from ...constants import Mood, TrainingType
 from .. import condition
 from ..context import Context
@@ -31,9 +30,6 @@ from .globals import g
 
 if TYPE_CHECKING:
     from .item import Item
-
-
-_LOGGER = logging.getLogger(__name__)
 
 
 _effect_reducers: List[_EffectReducer] = []
@@ -57,6 +53,11 @@ class Buff:
 class BuffList:
     def __init__(self, v: Iterable[Buff] = ()) -> None:
         self._l: List[Buff] = list(v)
+
+    def clone(self) -> BuffList:
+        obj = copy.copy(self)
+        obj._l = self._l.copy()
+        return obj
 
     def __iter__(self):
         yield from self._l
@@ -108,7 +109,7 @@ def _estimate_failure_rate(ctx: Context, trn: Training) -> float:
 class EffectSummary:
     def __init__(self) -> None:
         self.speed = 0
-        self.statmia = 0
+        self.stamina = 0
         self.power = 0
         self.guts = 0
         self.wisdom = 0
@@ -136,6 +137,22 @@ class EffectSummary:
         self.unknown_effects: Sequence[Effect] = ()
         self.known_effects: Sequence[Effect] = ()
 
+    def clone(self) -> EffectSummary:
+        obj = copy.copy(self)
+        obj.condition_add = self.condition_add.copy()
+        obj.condition_remove = self.condition_remove.copy()
+        obj.training_levels = self.training_levels.copy()
+        obj.training_effect_buff = self.training_effect_buff.copy()
+        for k, v in obj.training_effect_buff.items():
+            obj.training_effect_buff[k] = v.clone()
+        obj.training_vitality_debuff = self.training_vitality_debuff.copy()
+        for k, v in obj.training_vitality_debuff.items():
+            obj.training_vitality_debuff[k] = v.clone()
+        obj.race_fan_buff = self.race_fan_buff.clone()
+        obj.race_reward_buff = self.race_reward_buff.clone()
+        obj.character_friendship = self.character_friendship.copy()
+        return obj
+
     def add(self, item: Item, age: int = 0):
         for effect in item.effects:
             if effect.turn_count < age:
@@ -152,9 +169,6 @@ class EffectSummary:
                     *self.unknown_effects,
                     effect,
                 )
-
-    def clone(self) -> EffectSummary:
-        return deepcopy(self)
 
     def apply_to_training(self, ctx: Context, training: Training) -> Training:
         """
@@ -204,7 +218,10 @@ class EffectSummary:
             explain += f"no failure;"
             t_after.failure_rate = 0
         if explain and g.explain_effect_summary:
-            _LOGGER.debug("apply to training: %s->%s: %s", training, t_after, explain)
+            app.log.text(
+                "apply to training: %s->%s: %s" % (training, t_after, explain),
+                level=app.DEBUG,
+            )
         assert 0.0 <= t_after.failure_rate <= 1.0, t_after.failure_rate
         return t_after
 
@@ -239,8 +256,9 @@ class EffectSummary:
             t_before.vitality /= 1 + r
 
         if explain and g.explain_effect_summary:
-            _LOGGER.debug(
-                "revert from training: %s->%s: %s", training, t_before, explain
+            app.log.text(
+                "revert from training: %s->%s: %s" % (training, t_before, explain),
+                level=app.DEBUG,
             )
         return t_before, es_remains
 
@@ -254,9 +272,9 @@ class EffectSummary:
         r = self.race_reward_buff.total_rate()
         if r:
             explain = f"{r*100:+.0f}% reward;"
-            r_after.raward_buff += r
+            r_after.reward_buff += r
         if explain and g.explain_effect_summary:
-            _LOGGER.debug("apply to race: %s: %s", race, explain)
+            app.log.text("apply to race: %s: %s" % (race, explain), level=app.DEBUG)
         return r_after
 
     def apply_to_context(self, ctx: Context) -> Context:
@@ -278,9 +296,9 @@ class EffectSummary:
                 ctx.speed + self.speed, min_property, max_property
             )
             explain += f"{ctx_after.speed - ctx.speed:+d} speed;"
-        if self.statmia:
+        if self.stamina:
             ctx_after.stamina = mathtools.clamp(
-                ctx.stamina + self.statmia, min_property, max_property
+                ctx.stamina + self.stamina, min_property, max_property
             )
             explain += f"{ctx_after.stamina - ctx.stamina:+d} stamina;"
         if self.power:
@@ -328,8 +346,16 @@ class EffectSummary:
             explain += f"remove condition {','.join(condition.get(i).name for i in c)};"
             ctx_after.conditions.difference_update(c)
         if explain and g.explain_effect_summary:
-            _LOGGER.debug("apply to context: %s", explain)
+            app.log.text("apply to context: %s" % explain, level=app.DEBUG)
         return ctx_after
+
+    @property
+    def _stamina_alias(self):
+        return self.stamina
+
+    @_stamina_alias.setter
+    def _stamina_alias(self, v: int):
+        self.stamina = v
 
 
 if TYPE_CHECKING:
@@ -361,7 +387,7 @@ def _(item: Item, effect: Effect, summary: EffectSummary):
         summary.speed += value
         return True
     if prop == Effect.PROPERTY_STAMINA:
-        summary.statmia += value
+        summary.stamina += value
         return True
     if prop == Effect.PROPERTY_POWER:
         summary.power += value
@@ -373,7 +399,7 @@ def _(item: Item, effect: Effect, summary: EffectSummary):
         summary.wisdom += value
         return True
     if prop == Effect.PROPERTY_STAMINA:
-        summary.statmia += value
+        summary.stamina += value
         return True
     if prop == Effect.PROPERTY_MAX_VITALITY:
         summary.max_vitality += value
@@ -550,3 +576,8 @@ def _(item: Item, effect: Effect, summary: EffectSummary):
         summary.character_friendship[c] = summary.character_friendship.get(c, 0) + value
         return True
     return False
+
+
+# deprecated members
+# spell-checker: disable
+EffectSummary.statmia = EffectSummary._stamina_alias  # type: ignore

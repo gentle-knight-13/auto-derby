@@ -2,25 +2,19 @@
 # -*- coding=UTF-8 -*-
 from __future__ import annotations
 
-from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Dict, Iterator, Optional, Set, Text, Tuple
-
-from auto_derby.constants import RuningStyle
-
-
+import copy
 import hashlib
 import json
-import logging
 import math
+from typing import TYPE_CHECKING, Any, Dict, Iterator, Optional, Set, Text, Tuple
 
-from ... import mathtools
-from . import race_score, runing_style_score
+from ... import app, mathtools
+from ...constants import RunningStyle
+from . import race_score, running_style_score
 from .globals import g
 
 if TYPE_CHECKING:
     from ..context import Context
-
-_LOGGER = logging.getLogger(__name__)
 
 
 class _g:
@@ -94,10 +88,11 @@ class Race:
         self.shop_coins: Tuple[int, ...] = ()
         self.with_rival = False
 
-        self.raward_buff = 0.0
+        self.reward_buff = 0.0
 
-    def clone(self):
-        return deepcopy(self)
+    def clone(self) -> Race:
+        obj = copy.copy(self)
+        return obj
 
     def to_dict(self) -> Dict[Text, Any]:
         return {
@@ -207,19 +202,19 @@ class Race:
                 DeprecationWarning,
             )
 
-        last = runing_style_score.compute(ctx, self, ctx.last, 1.1, 0.995, 0.9)
-        middle = runing_style_score.compute(ctx, self, ctx.middle, 1.0, 1, 0.95)
-        head = runing_style_score.compute(ctx, self, ctx.head, 0.8, 0.89, 1.0)
-        lead = runing_style_score.compute(ctx, self, ctx.lead, 0.5, 0.95, 1.1)
+        last = running_style_score.compute(ctx, self, ctx.last, 1.1, 0.995, 0.9)
+        middle = running_style_score.compute(ctx, self, ctx.middle, 1.0, 1, 0.95)
+        head = running_style_score.compute(ctx, self, ctx.head, 0.8, 0.89, 1.0)
+        lead = running_style_score.compute(ctx, self, ctx.lead, 0.5, 0.95, 1.1)
 
         return last, middle, head, lead
 
-    def style_scores_v2(self, ctx: Context) -> Iterator[Tuple[RuningStyle, float]]:
+    def style_scores_v2(self, ctx: Context) -> Iterator[Tuple[RunningStyle, float]]:
         last, middle, head, lead = self.style_scores(ctx, _no_warn=True)
-        yield RuningStyle.LEAD, lead
-        yield RuningStyle.MIDDLE, middle
-        yield RuningStyle.HEAD, head
-        yield RuningStyle.LAST, last
+        yield RunningStyle.LEAD, lead
+        yield RunningStyle.MIDDLE, middle
+        yield RunningStyle.HEAD, head
+        yield RunningStyle.LAST, last
 
     def _raw_estimate_order(self, ctx: Context) -> int:
         style_scores = tuple(i for _, i in self.style_scores_v2(ctx))
@@ -238,11 +233,14 @@ class Race:
             )
         )
         estimate_order = min(self.entry_count, estimate_order)
-        _LOGGER.debug(
-            "estimate order: race=%s, order=%d, style_scores=%s",
-            self,
-            estimate_order,
-            " ".join(f"{i:.2f}" for i in style_scores),
+        app.log.text(
+            "estimate order: race=%s, order=%d, style_scores=%s"
+            % (
+                self,
+                estimate_order,
+                " ".join(f"{i:.2f}" for i in style_scores),
+            ),
+            level=app.DEBUG,
         )
         return estimate_order
 
@@ -265,7 +263,7 @@ class Race:
         if len(self.characters) < 10:
             return True
 
-    def is_avaliable(self, ctx: Context) -> Optional[bool]:
+    def is_available(self, ctx: Context) -> Optional[bool]:
         """return None when result is unknown."""
 
         if ctx.date == (1, 0, 0) and self.grade != self.GRADE_DEBUT:
@@ -281,9 +279,20 @@ class Race:
         if ctx.fan_count < self.min_fan_count:
             return False
 
+    @property
+    def _reward_buff_alias(self):
+        return self.reward_buff
+
+    @_reward_buff_alias.setter
+    def _reward_buff_alias(self, v: float):
+        self.reward_buff = v
+
 
 g.race_class = Race
 
 
 # Deprecated members, removal on v2
+# spell-checker: disable
 Race.TRACE_OUT_TO_IN = Race.TRACK_OUT_TO_IN  # type: ignore
+Race.is_avaliable = Race.is_available  # type: ignore
+Race.raward_buff = Race._reward_buff_alias  # type: ignore

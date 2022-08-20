@@ -2,13 +2,8 @@
 # pyright: strict
 """tools for image processing.  """
 
-import base64
-import csv
-import hashlib
-import io
-import os
-import threading
-from pathlib import Path
+from __future__ import annotations
+
 from typing import (
     Any,
     Callable,
@@ -23,6 +18,14 @@ from typing import (
     TypeVar,
     Union,
 )
+
+import base64
+import csv
+import hashlib
+import io
+import os
+import threading
+from pathlib import Path
 from typing import cast as cast_type
 
 import cast_unknown as cast

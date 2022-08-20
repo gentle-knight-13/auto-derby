@@ -3,12 +3,11 @@
 
 from __future__ import annotations
 
-from PIL.Image import Image
-from auto_derby import constants, template
-
 from typing import Any, Dict, Iterator, Text, Tuple
 
-from ... import action, templates, mathtools
+from PIL.Image import Image
+
+from ... import action, app, constants, mathtools, template, templates
 from ...scenes import Scene
 from ..scene import Scene, SceneHolder
 
@@ -25,7 +24,7 @@ def _recognize_predictions(
         (constants.RaceType.DART, rp.vector4((429, 505, 505, 533), 540)),
     )
 
-    predition_templates = (
+    prediction_templates = (
         (constants.RacePrediction.HONNMEI, templates.PREDICTION_DOUBLE_CIRCLE),
         (constants.RacePrediction.TAIKOU, templates.PREDICTION_CIRCLE_OUTLINE),
         # TODO: add template for this
@@ -35,7 +34,7 @@ def _recognize_predictions(
 
     for t, bbox in bbox_list:
         img = screenshot.crop(bbox)
-        for p, tmpl in predition_templates:
+        for p, tmpl in prediction_templates:
             try:
                 next(
                     template.match(
@@ -70,4 +69,4 @@ class AoharuBattleConfirmScene(Scene):
         return cls()
 
     def recognize_predictions(self) -> None:
-        self.predictions = dict(_recognize_predictions(template.screenshot()))
+        self.predictions = dict(_recognize_predictions(app.device.screenshot()))

@@ -3,8 +3,7 @@
 
 from __future__ import annotations
 
-import logging
-import os
+import traceback
 from concurrent import futures
 from typing import Callable, Iterator, Optional, Tuple
 
@@ -19,8 +18,6 @@ from ...single_mode import Context, Training, training
 from ...single_mode.training import Partner
 from ..scene import Scene, SceneHolder
 from .command import CommandScene
-
-_LOGGER = logging.getLogger(__name__)
 
 _TRAINING_CONFIRM = template.Specification(
     templates.SINGLE_MODE_TRAINING_CONFIRM, threshold=0.8
@@ -224,19 +221,21 @@ def _recognize_red_effect(img: Image) -> int:
     h = cv_img.shape[0]
     imagetools.fill_area(text_img, (0,), size_lt=round(h * 0.2**2))
 
-    if os.getenv("DEBUG") == __name__:
-        cv2.imshow("cv_img", cv_img)
-        cv2.imshow("sharpened_img", sharpened_img)
-        cv2.imshow("white_outline_img", white_outline_img)
-        cv2.imshow("red_outline_img", red_outline_img)
-        cv2.imshow("masked_img", masked_img)
-        cv2.imshow("fill", fill_img)
-        cv2.imshow("text_img_base", text_img_base)
-        cv2.imshow("text_img_extra", text_img_extra)
-        cv2.imshow("text_img", text_img)
-        cv2.waitKey()
-        cv2.destroyAllWindows()
-
+    app.log.image(
+        "red effect",
+        cv_img,
+        level=app.DEBUG,
+        layers={
+            "sharpened": sharpened_img,
+            "white_outline": white_outline_img,
+            "red_outline": red_outline_img,
+            "masked": masked_img,
+            "fill": fill_img,
+            "text_base": text_img_base,
+            "text_extra": text_img_extra,
+            "text": text_img,
+        },
+    )
     text = ocr.text(image_from_array(text_img))
     if not text:
         return 0
@@ -262,9 +261,9 @@ def _recognize_failure_rate(
 ) -> float:
     x, y = trn.confirm_position
     bbox = (
-        x + rp.vector(20, 540),
+        x + rp.vector(15, 540),
         y + rp.vector(-155, 540),
-        x + rp.vector(70, 540),
+        x + rp.vector(75, 540),
         y + rp.vector(-120, 540),
     )
     rate_img = imagetools.cv_image(imagetools.resize(img.crop(bbox), height=48))
@@ -281,13 +280,16 @@ def _recognize_failure_rate(
         (255, 255, 255),
         (18, 218, 255),
     )
-    if __name__ == os.getenv("DEBUG"):
-        cv2.imshow("rate", rate_img)
-        cv2.imshow("outline", outline_img)
-        cv2.imshow("fg", fg_img)
-        cv2.imshow("text", text_img)
-        cv2.waitKey()
-        cv2.destroyAllWindows()
+    app.log.image(
+        "failure rate",
+        rate_img,
+        level=app.DEBUG,
+        layers={
+            "outline": outline_img,
+            "fg": fg_img,
+            "text": text_img,
+        },
+    )
     text = ocr.text(imagetools.pil_image(text_img))
     return int(text.strip("%")) / 100
 
@@ -311,7 +313,7 @@ def _iter_training_images(static: bool):
     rp = action.resize_proxy()
     radius = rp.vector(30, 540)
     _, first_confirm_pos = action.wait_image(_TRAINING_CONFIRM)
-    yield template.screenshot()
+    yield app.device.screenshot()
     if static:
         return
     seen_confirm_pos = {
@@ -326,10 +328,10 @@ def _iter_training_images(static: bool):
     ):
         if mathtools.distance(first_confirm_pos, pos) < radius:
             continue
-        action.tap(pos)
+        app.device.tap((*pos, *rp.vector2((20, 20), 540)))
         _, pos = action.wait_image(_TRAINING_CONFIRM)
         if pos not in seen_confirm_pos:
-            yield template.screenshot()
+            yield app.device.screenshot()
             seen_confirm_pos.add(pos)
 
 
@@ -378,12 +380,17 @@ def _recognize_has_training(
         threshold=0.9,
     )
 
-    if os.getenv("DEBUG") == __name__:
-        cv2.imshow("training_mark_mask", mask)
-        cv2.waitKey()
-        cv2.destroyAllWindows()
-        _LOGGER.debug("training mark mask: avg=%0.2f", np.average(mask))
-    return np.average(mask) > 80
+    mask_avg = np.average(mask)
+    ret = mask_avg > 80
+    app.log.image(
+        "has training: %s mask_avg=%0.2f" % (ret, mask_avg),
+        icon_img,
+        level=app.DEBUG,
+        layers={
+            "mark": mask,
+        },
+    )
+    return ret
 
 
 def _recognize_has_soul_burst(
@@ -399,13 +406,18 @@ def _recognize_has_soul_burst(
         threshold=0.9,
     )
 
-    if os.getenv("DEBUG") == __name__ + "[partner]":
-        cv2.imshow("soul_burst_mark", mark_img)
-        cv2.imshow("soul_burst_mark_mask", mask)
-        cv2.waitKey()
-        cv2.destroyAllWindows()
-        _LOGGER.debug("soul burst mark mask: avg=%0.2f", np.average(mask))
-    return np.average(mask) > 80
+    mask_avg = np.average(mask)
+    ret = mask_avg > 80
+    app.log.image(
+        "has soul burst: %s mask_avg=%s" % (ret, mask_avg),
+        icon_img,
+        level=app.DEBUG,
+        layers={
+            "mark": mark_img,
+            "mark_mask": mask,
+        },
+    )
+    return ret
 
 
 def _recognize_partner_level(rp: mathtools.ResizeProxy, icon_img: Image) -> int:
@@ -518,9 +530,9 @@ def _recognize_soul(
     bg_mask1 = imagetools.border_flood_fill(blue_outline_img)
     fg_mask1 = 255 - bg_mask1
     masked_img = cv2.copyTo(cv_img, fg_mask1)
-    shapened_img = imagetools.mix(imagetools.sharpen(masked_img, 1), masked_img, 0.5)
+    sharpened_img = imagetools.mix(imagetools.sharpen(masked_img, 1), masked_img, 0.5)
     white_outline_img = imagetools.constant_color_key(
-        shapened_img,
+        sharpened_img,
         (255, 255, 255),
         (252, 251, 251),
         (248, 227, 159),
@@ -533,18 +545,20 @@ def _recognize_soul(
     imagetools.fill_area(fg_mask2, (0,), size_lt=100)
     fg_img = cv2.copyTo(masked_img, fg_mask2)
     empty_mask = imagetools.constant_color_key(fg_img, (126, 121, 121))
-    app.log.image("soul", img, level=app.DEBUG)
-    if os.getenv("DEBUG") == __name__ + "[partner]":
-        cv2.imshow("soul", cv_img)
-        cv2.imshow("sharpened", shapened_img)
-        cv2.imshow("right_bottom_icon", imagetools.cv_image(right_bottom_icon_img))
-        cv2.imshow("blue_outline", blue_outline_img)
-        cv2.imshow("white_outline", white_outline_img)
-        cv2.imshow("fg_mask1", fg_mask1)
-        cv2.imshow("fg_mask2", fg_mask2)
-        cv2.imshow("empty_mask", empty_mask)
-        cv2.waitKey()
-        cv2.destroyAllWindows()
+    app.log.image(
+        "soul",
+        img,
+        level=app.DEBUG,
+        layers={
+            "sharpened": sharpened_img,
+            "right_bottom_icon": right_bottom_icon_img,
+            "blue_outline": blue_outline_img,
+            "white_outline": white_outline_img,
+            "fg_mask1": fg_mask1,
+            "fg_mask2": fg_mask2,
+            "empty_mask": empty_mask,
+        },
+    )
 
     fg_avg = np.average(fg_mask2)
     if fg_avg < 100:
@@ -560,10 +574,6 @@ def _recognize_partner_icon(
     rp = mathtools.ResizeProxy(img.width)
     icon_img = img.crop(bbox)
     app.log.image("partner icon", icon_img, level=app.DEBUG)
-    if os.getenv("DEBUG") == __name__ + "[partner]":
-        cv2.imshow("icon_img", imagetools.cv_image(icon_img))
-        cv2.waitKey()
-        cv2.destroyAllWindows()
     level = _recognize_partner_level(rp, icon_img)
 
     soul = -1
@@ -712,9 +722,13 @@ def _recognize_training(ctx: Context, img: Image) -> Training:
         self.failure_rate = _recognize_failure_rate(rp, self, img)
         self.partners = tuple(_recognize_partners(ctx, img))
         app.log.image("%s" % self, img, level=app.DEBUG)
-    except Exception as ex:
-        app.log.image(("training recognition failed: %s" % ex), img, level=app.ERROR)
-        raise ex
+    except:
+        app.log.image(
+            ("training recognition failed: %s" % traceback.format_exc()),
+            img,
+            level=app.ERROR,
+        )
+        raise
     return self
 
 

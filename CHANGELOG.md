@@ -2,6 +2,134 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.27.3](https://github.com/NateScarlet/auto-derby/compare/v1.27.2...v1.27.3) (2022-08-19)
+
+
+### Bug Fixes
+
+* **single-mode:** update game data ([d79182a](https://github.com/NateScarlet/auto-derby/commit/d79182a2b848f9474c85fa2ef03cabe15d64c374)), closes [#345](https://github.com/NateScarlet/auto-derby/issues/345)
+
+## [1.27.2](https://github.com/NateScarlet/auto-derby/compare/v1.27.1...v1.27.2) (2022-08-05)
+
+
+### Bug Fixes
+
+* remove coding.net from vesion check url ([0d665f0](https://github.com/NateScarlet/auto-derby/commit/0d665f06f34ea3475283d85b5be45cfc33ab0980))
+
+## [1.27.1](https://github.com/NateScarlet/auto-derby/compare/v1.27.0...v1.27.1) (2022-07-22)
+
+
+### Bug Fixes
+
+* should update version variable during release ([26e2d0e](https://github.com/NateScarlet/auto-derby/commit/26e2d0e9e27bd570436a0621d2f5d2d04731d537)), closes [#335](https://github.com/NateScarlet/auto-derby/issues/335)
+
+## [1.27.0](https://github.com/NateScarlet/auto-derby/compare/v1.26.5...v1.27.0) (2022-07-20)
+
+
+### Features
+
+* adapt game setting 'auto use item' ([327b13f](https://github.com/NateScarlet/auto-derby/commit/327b13f219e7b341601095b09179c337c4f87783))
+
+
+### Bug Fixes
+
+* **limited-sale:** correct swipe area ([59d450f](https://github.com/NateScarlet/auto-derby/commit/59d450fe62cfdf91cda4f9680e3c1bc3ad0061f4))
+* **limited-sale:** handle inertial scrolling ([7650232](https://github.com/NateScarlet/auto-derby/commit/76502325fdec4816072754f9196ed013f69c9d1f))
+
+## [1.26.5](https://github.com/NateScarlet/auto-derby/compare/v1.26.4...v1.26.5) (2022-07-07)
+
+### Bug Fixes
+
+- **plugin:** race_campaign: update data ([9b46b63](https://github.com/NateScarlet/auto-derby/commit/9b46b636d5838c82a541001b57dabb0f0c1a7a04))
+- should convert screenshot format ([6dfecac](https://github.com/NateScarlet/auto-derby/commit/6dfecacd1bb13301c56862a9f828fa3f15e5ed15)), closes [#328](https://github.com/NateScarlet/auto-derby/issues/328)
+
+## [1.26.4](https://github.com/NateScarlet/auto-derby/compare/v1.26.3...v1.26.4) (2022-07-05)
+
+### Bug Fixes
+
+- should deprecate template.g.screenshot_width ([9dcacbf](https://github.com/NateScarlet/auto-derby/commit/9dcacbf1427ee055b44a38f1d841747620c3a390)), closes [#322](https://github.com/NateScarlet/auto-derby/issues/322)
+
+### Performance
+
+- avoid unnecessary deepcopy ([bf45a5b](https://github.com/NateScarlet/auto-derby/commit/bf45a5b03a67fcb0fe5ddfb715068908d8db7d17))
+
+## [1.26.3](https://github.com/NateScarlet/auto-derby/compare/v1.26.2...v1.26.3) (2022-07-02)
+
+### Bug Fixes
+
+- **plugin:** race_campaign: update data ([f8bb5c7](https://github.com/NateScarlet/auto-derby/commit/f8bb5c75dee414b51d505dfa29396d41d7392c64))
+
+## [1.26.2](https://github.com/NateScarlet/auto-derby/compare/v1.26.1...v1.26.2) (2022-06-23)
+
+### Bug Fixes
+
+- **plugin:** race_campaign: update data ([e6c0b1d](https://github.com/NateScarlet/auto-derby/commit/e6c0b1db2a5518d6f552864a7e0177ebfe9e0089))
+- **single-mode:** update data ([3941db7](https://github.com/NateScarlet/auto-derby/commit/3941db7d65329db2509ed277d477e497386f9164))
+
+## [1.26.1](https://github.com/NateScarlet/auto-derby/compare/v1.26.0...v1.26.1) (2022-06-20)
+
+### Bug Fixes
+
+- missing log level of debug log ([6b73f8a](https://github.com/NateScarlet/auto-derby/commit/6b73f8aa11d3344e6f305f3be7584a4f7b146b15))
+- **plugin:** race_campaign: update data ([3af33f5](https://github.com/NateScarlet/auto-derby/commit/3af33f539e7f1a496a748ed2d80570190b869c47))
+
+## [1.26.0](https://github.com/NateScarlet/auto-derby/compare/v1.25.1...v1.26.0) (2022-06-10)
+
+### Features
+
+- **nurturing:** handle command changing item effect ([7324324](https://github.com/NateScarlet/auto-derby/commit/7324324e6c9e201b94f8935aac28791769e746a3))
+- **plugin:** fast_fail: ignore shop ([fae374f](https://github.com/NateScarlet/auto-derby/commit/fae374f57fab16ff6d08a9a5b9a21ac23e96c9a8))
+
+### Bug Fixes
+
+- **single-mode:** can not recognize disabled item ([14650c8](https://github.com/NateScarlet/auto-derby/commit/14650c8541ea9f349a094bcfc24fe07b55e4e694)), closes [#316](https://github.com/NateScarlet/auto-derby/issues/316)
+- **single-mode:** second item prompt not work ([d49e7a6](https://github.com/NateScarlet/auto-derby/commit/d49e7a6cdffa7b25bc2ada1da9ebbead22343f36)), closes [#315](https://github.com/NateScarlet/auto-derby/issues/315)
+
+## [1.25.1](https://github.com/NateScarlet/auto-derby/compare/v1.25.0...v1.25.1) (2022-05-30)
+
+### Bug Fixes
+
+- **plugin:** race_campaign: update data ([0891867](https://github.com/NateScarlet/auto-derby/commit/08918679cb668c23a9fdd840e81f6e0ed32def2a))
+- **single-mode:** error while recognizing training scene ([fea495f](https://github.com/NateScarlet/auto-derby/commit/fea495f1117804a5ae6fafca1efbc6ffb3dafd21)), closes [#309](https://github.com/NateScarlet/auto-derby/issues/309)
+
+## [1.25.0](https://github.com/NateScarlet/auto-derby/compare/v1.24.0...v1.25.0) (2022-05-16)
+
+### Features
+
+- **plugin:** add `fast_fail` plugin ([486d23a](https://github.com/NateScarlet/auto-derby/commit/486d23a6d28230757cbd95809ec72a9763f3ec93))
+
+### Bug Fixes
+
+- **plugin:** race_campaign: update data ([383fac1](https://github.com/NateScarlet/auto-derby/commit/383fac115958a00efd0feb8ec125fc7768d27392))
+
+### Performance
+
+- **web:** handle large log load ([792f510](https://github.com/NateScarlet/auto-derby/commit/792f510b0f550ef9cc09d31e79e827903d585d6b))
+
+## [1.24.0](https://github.com/NateScarlet/auto-derby/compare/v1.23.2...v1.24.0) (2022-05-14)
+
+### Features
+
+- **launcher:** add web-based plugin select ([1ba50bf](https://github.com/NateScarlet/auto-derby/commit/1ba50bf5904d4a7bd6ad93a9cf316d918e7e099b))
+
+### Bug Fixes
+
+- png image save mode error ([e2c78ff](https://github.com/NateScarlet/auto-derby/commit/e2c78fff42ab2df12117399d417482c8c641a88a))
+- **single-mode:** update game data ([d8e7d80](https://github.com/NateScarlet/auto-derby/commit/d8e7d807ffab041b77e9ad554e5190b3d5d7b669))
+- **web:** error caused by concurrent log write ([d056c78](https://github.com/NateScarlet/auto-derby/commit/d056c786cbf67b878f433d1568faafbdc9ad221d))
+- **web:** log viewer freeze on level disabled ([2398b5d](https://github.com/NateScarlet/auto-derby/commit/2398b5d6daf2e22274b48edafc66a8aed8e8460f))
+- **web:** log: handle inconsistent image layer size ([c3a5781](https://github.com/NateScarlet/auto-derby/commit/c3a578194876d8fa5176104fa66f980c62328e30))
+
+### Performance
+
+- **web:** improve log viewer ([47327da](https://github.com/NateScarlet/auto-derby/commit/47327dab08104887ca9419d906b492dc2cd3d632))
+
+## [1.23.2](https://github.com/NateScarlet/auto-derby/compare/v1.23.1...v1.23.2) (2022-05-09)
+
+### Bug Fixes
+
+- **plugin:** race_campaign: update data ([29031a5](https://github.com/NateScarlet/auto-derby/commit/29031a5f1848dc64f3c1002328b1197875bc91b3))
+
 ## [1.23.1](https://github.com/NateScarlet/auto-derby/compare/v1.23.0...v1.23.1) (2022-05-03)
 
 ### Bug Fixes
@@ -831,7 +959,7 @@ All notable changes to this project will be documented in this file. See [standa
 - **single-mode:** wrong continuous race count ([f8b54df](https://github.com/NateScarlet/auto-derby/commit/f8b54df93e2c5e830cca3d40144a54a730ce5fa8))
 - **single-mode:** wrong date ocr input image ([26bcdba](https://github.com/NateScarlet/auto-derby/commit/26bcdbaaa7b4d57ef0f3fb19924f6f894d1b758b))
 - **single-mode:** wrong date ocr result ([62a5c7b](https://github.com/NateScarlet/auto-derby/commit/62a5c7b546c63789e71415c135bae0d14be6f4b4)), closes [#12](https://github.com/NateScarlet/auto-derby/issues/12)
-- **single-mode:** wrong race block penality ([6bc58b8](https://github.com/NateScarlet/auto-derby/commit/6bc58b8b67d64baf0a586a31445ec2e91b60345b))
+- **single-mode:** wrong race block penalty ([6bc58b8](https://github.com/NateScarlet/auto-derby/commit/6bc58b8b67d64baf0a586a31445ec2e91b60345b))
 - **single-mode:** wrong race years ([21ebf41](https://github.com/NateScarlet/auto-derby/commit/21ebf411cf10bf0cd3bfef04757a13c7298fcb97))
 - **team-race:** handle granted reward ([231a861](https://github.com/NateScarlet/auto-derby/commit/231a86180ca6431814660234da959b93bb35d458))
 - **team-race:** handle high score updated ([7ba095f](https://github.com/NateScarlet/auto-derby/commit/7ba095fb06595da175357a15029d04ae68508556))

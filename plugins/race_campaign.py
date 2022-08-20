@@ -1,21 +1,14 @@
 # -*- coding=UTF-8 -*-
 
-from abc import abstractmethod
-import auto_derby
-from auto_derby import single_mode
-
-
-from typing import List, Text
 import datetime
+from abc import abstractmethod
+from typing import List, Text
 
-import logging
+import auto_derby
+from auto_derby import app, single_mode
 from auto_derby.single_mode.context import Context
-
-from auto_derby.single_mode.race.race import Race
 from auto_derby.single_mode.race import race_result
-
-_LOGGER = logging.getLogger(__name__)
-
+from auto_derby.single_mode.race.race import Race
 
 JST = datetime.timezone(datetime.timedelta(hours=9), name="JST")
 
@@ -105,7 +98,7 @@ class OneTimeCampaign(Campaign):
 _CAMPAIGNS: List[Campaign] = []
 
 
-def _add_compagin(
+def _add_campaign(
     c: Campaign,
 ) -> None:
 
@@ -118,15 +111,15 @@ def _add_compagin(
 
 
 class Plugin(auto_derby.Plugin):
-    """Pick race by compagin."""
+    """Pick race by campaign."""
 
     def install(self) -> None:
         if not _CAMPAIGNS:
-            _LOGGER.info("no race campaign today")
+            app.log.text("no race campaign today")
             return
 
         for i in _CAMPAIGNS:
-            _LOGGER.info("race campaign: %s~%s %s", i.start, i.end, i.race_name)
+            app.log.text("race campaign: %s~%s %s" % (i.start, i.end, i.race_name))
 
         class Race(auto_derby.config.single_mode_race_class):
             def score(self, ctx: single_mode.Context) -> float:
@@ -143,31 +136,20 @@ class Plugin(auto_derby.Plugin):
 auto_derby.plugin.register(__name__, Plugin())
 
 
-# 春のGⅠ記念ミッション　第２弾 NHKマイルC
+# シーク・ソルヴ・サマーウォーク！
 
-_add_compagin(
-    OneTimeCampaign(
-        datetime.datetime(2022, 5, 2, 4, 0, tzinfo=JST),
-        datetime.datetime(2022, 5, 9, 3, 59, tzinfo=JST),
-        "NHKマイルカップ",
-        order_lte=1,
-    ),
-)
+_start = datetime.datetime(2022, 6, 30, 11, 0, tzinfo=JST)
+_end = datetime.datetime(2022, 7, 11, 10, 59, tzinfo=JST)
+_add_campaign(OneTimeCampaign(_start, _end, "大阪杯", order_lte=3))
+_add_campaign(OneTimeCampaign(_start, _end, "オークス", order_lte=3))
+_add_campaign(OneTimeCampaign(_start, _end, "安田記念", order_lte=3))
+_add_campaign(OneTimeCampaign(_start, _end, "スプリンターズステークス", order_lte=3))
+_add_campaign(OneTimeCampaign(_start, _end, "秋華賞", order_lte=3))
+_add_campaign(OneTimeCampaign(_start, _end, "マイルチャンピオンシップ", order_lte=3))
 
-_add_compagin(
-    OneTimeCampaign(
-        datetime.datetime(2022, 5, 2, 4, 0, tzinfo=JST),
-        datetime.datetime(2022, 5, 9, 3, 59, tzinfo=JST),
-        "アーリントンカップ",
-        order_lte=3,
-    ),
-)
 
-_add_compagin(
-    OneTimeCampaign(
-        datetime.datetime(2022, 5, 2, 4, 0, tzinfo=JST),
-        datetime.datetime(2022, 5, 9, 3, 59, tzinfo=JST),
-        "ニュージーランドトロフィー",
-        order_lte=3,
-    ),
-)
+# G1 記念ミッション ジャパンダートダービー#
+_start = datetime.datetime(2022, 7, 7, 4, 0, tzinfo=JST)
+_end = datetime.datetime(2022, 7, 14, 3, 59, tzinfo=JST)
+_add_campaign(OneTimeCampaign(_start, _end, "ジャパンダートダービー", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "ユニコーンステークス", order_lte=1))

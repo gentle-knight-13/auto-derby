@@ -42,15 +42,14 @@
 <script setup lang="ts">
 import type { LogRecord } from '@/log-record';
 import type { PropType } from 'vue';
-import { nextTick, watch, watchEffect, computed, ref, toRef } from 'vue';
+import { watch, nextTick, computed, ref, toRef } from 'vue';
 import ListItem from '@/components/LogViewer/ListItem.vue';
 import computedWith from '@/utils/computedWith';
 import useInfiniteScroll from '@/composables/useInfiniteScroll';
-import usePause from '@/composables/usePause';
 import { throttle } from 'lodash-es';
 import usePropVModel from '@/composables/usePropVModel';
 import usePolling from '@/composables/usePolling';
-import useDebounced from '@/composables/useDebounced';
+import useStabled from '@/composables/useStabled';
 
 const props = defineProps({
   records: {
@@ -68,60 +67,92 @@ const props = defineProps({
     type: Function as PropType<(v: LogRecord, index: number) => boolean>,
     default: () => true,
   },
+  endIndex: {
+    type: Number,
+    default: 0,
+  },
 });
 const emit = defineEmits<{
-  (e: 'update:paused', v: boolean): void;
+  (e: 'update:endIndex', v: number): void;
 }>();
-const paused = usePropVModel({ emit }, props, 'paused');
+const loadingCount = ref(0);
+const paused = toRef(props, 'paused');
 const records = toRef(props, 'records');
-
+const recordByIndex = (index: number): LogRecord | undefined => {
+  return records.value[index];
+};
+const endIndex = useStabled(usePropVModel({ emit }, props, 'endIndex'), 10);
 const el = ref<HTMLOListElement>();
 
 const scrollContainer = el;
-// avoid update too fast when reading from buffer.
-const totalCountRaw = useDebounced(ref(props.records.length), 50);
-watch(
-  () => props.records.length,
-  (v) => {
-    totalCountRaw.value = v;
-  },
-  { deep: true }
-);
-const totalCount = usePause(totalCountRaw, paused);
-const topIndex = ref(0);
+const totalCount = ref(props.records.length);
+usePolling(() => {
+  totalCount.value = props.records.length;
+});
+
 const itemElement = (index: number) => {
-  return scrollContainer.value?.querySelector<HTMLLIElement>(
-    `li[data-index="${index}"]`
+  return (
+    scrollContainer.value?.querySelector<HTMLLIElement>(
+      `li[data-index="${index}"]`
+    ) ?? undefined
   );
 };
 
 const visibleRecords = computedWith(
-  [totalCount, topIndex, () => props.filter],
+  [totalCount, endIndex, () => props.filter],
   () => {
-    const { records, size, filter } = props;
+    const { size, filter } = props;
     const ret: {
       value: LogRecord;
       key: number;
       index: number;
     }[] = [];
 
-    for (let index = topIndex.value; index < records.length; index += 1) {
+    for (let index = endIndex.value; index >= 0; index -= 1) {
       if (ret.length === size) {
         break;
       }
-      const i = records[index];
-      if (!filter(i, index)) {
-        continue;
+      const i = recordByIndex(index);
+      if (i && filter(i, index)) {
+        ret.splice(0, 0, {
+          value: i,
+          key: index,
+          index,
+        });
       }
-      ret.push({
-        value: i,
-        key: index,
-        index,
-      });
     }
     return ret;
   }
 );
+
+const offsetEndIndex = (offset: number): void => {
+  if (offset === 0) {
+    return;
+  }
+  let newEndIndex = endIndex.value;
+  const maxMatchCount = Math.abs(offset);
+  let matchCount = 0;
+  const direction = offset > 0 ? 1 : -1;
+  const { filter } = props;
+  for (
+    let index = endIndex.value + direction;
+    index < totalCount.value && index >= 0;
+    index += direction
+  ) {
+    if (matchCount === maxMatchCount) {
+      break;
+    }
+    const i = recordByIndex(index);
+    if (!i) {
+      continue;
+    }
+    if (filter(i, index)) {
+      matchCount += 1;
+      newEndIndex = index;
+    }
+  }
+  endIndex.value = newEndIndex;
+};
 
 const scrollAnchorElement = () => {
   let ret: HTMLElement | undefined;
@@ -146,7 +177,7 @@ const scrollViewport = throttle((offset: number) => {
   if (offset === 0) {
     return;
   }
-  topIndex.value += offset;
+  offsetEndIndex(offset);
 
   // recover scroll position
   const el = scrollContainer.value;
@@ -164,31 +195,21 @@ const scrollViewport = throttle((offset: number) => {
   });
 }, 100);
 
-watchEffect(() => {
-  if (!props.paused) {
-    topIndex.value = Math.max(0, totalCountRaw.value - props.size);
-  }
-});
-
 const hasPrevious = computed(() => {
-  if (topIndex.value === 0) {
+  if (endIndex.value === 0) {
     return false;
   }
-  for (let index = 0; index < records.value.length; index += 1) {
-    if (index >= topIndex.value) {
-      return false;
+  const topIndex = visibleRecords.value[0]?.index ?? endIndex.value;
+  for (let index = 0; index < topIndex; index += 1) {
+    const i = recordByIndex(index);
+    if (!i) {
+      continue;
     }
-    const i = records.value[index];
     if (props.filter(i, index)) {
       return true;
     }
   }
   return false;
-});
-watchEffect(() => {
-  if (visibleRecords.value.length < props.size && hasPrevious.value) {
-    topIndex.value -= 1;
-  }
 });
 const hasNext = computed(() => {
   if (!paused.value) {
@@ -197,14 +218,11 @@ const hasNext = computed(() => {
   if (visibleRecords.value.length === 0) {
     return false;
   }
-  const endRecord = visibleRecords.value[visibleRecords.value.length - 1];
-
-  for (
-    let index = endRecord.index + 1;
-    index < records.value.length;
-    index += 1
-  ) {
-    const i = records.value[index];
+  for (let index = endIndex.value + 1; index < totalCount.value; index += 1) {
+    const i = recordByIndex(index);
+    if (!i) {
+      continue;
+    }
     if (props.filter(i, index)) {
       return true;
     }
@@ -212,25 +230,39 @@ const hasNext = computed(() => {
   return false;
 });
 
+// infinite scroll
+watch(endIndex, () => {
+  // prevent infinite loop (endIndex -> scroll -> endIndex)
+  loadingCount.value += 1;
+  setTimeout(() => {
+    loadingCount.value -= 1;
+  }, 100);
+});
 const onScrollToTop = () => {
+  if (loadingCount.value > 0) {
+    return;
+  }
   if (!hasPrevious.value) {
     return;
   }
   scrollViewport(-Math.round(props.size / 2));
 };
 const onScrollToBottom = () => {
+  if (loadingCount.value > 0) {
+    return;
+  }
   if (!hasNext.value) {
     return;
   }
   scrollViewport(Math.round(props.size / 2));
 };
-
 useInfiniteScroll(scrollContainer, {
   onScrollToTop,
   onScrollToBottom,
-  margin: (el) => Math.min(el.clientHeight * 3, el.scrollHeight * 0.2),
+  margin: (el) => Math.min(el.clientHeight * 0.5, el.scrollHeight * 0.2),
 });
 
+// auto scroll to end
 usePolling(() => {
   if (paused.value) {
     return;

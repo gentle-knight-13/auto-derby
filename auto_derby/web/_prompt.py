@@ -1,23 +1,23 @@
 # -*- coding=UTF-8 -*-
 
 # pyright: strict
+# spell-checker: word keybd KEYEVENTF KEYUP
 
 from __future__ import annotations
 
 import http
 import http.server
-import logging
 import os
+import threading
 import time
 import webbrowser
 from typing import Any, Dict, Optional, Text
 
+from .. import app
 from . import handler
+from ._create_server import create_server
 from .context import Context
 from .webview import Webview
-from ._create_server import create_server
-
-_LOGGER = logging.getLogger(__name__)
 
 
 class _PromptMiddleware(handler.Middleware):
@@ -80,7 +80,7 @@ class _DefaultWebview(Webview):
             import win32api
             import win32con
         except ImportError:
-            _LOGGER.info(
+            app.log.text(
                 "`win32api`/`win32con` module not found, browser tab need to be closed manually"
             )
             return
@@ -121,12 +121,27 @@ def prompt(
     port = port or g.default_port
     webview = webview or g.default_webview
     pm = _PromptMiddleware(html)
-    with create_server((host, port), *(pm, *middlewares), max_port=max_port) as httpd:
+    with create_server(
+        (host, port),
+        *(pm, *middlewares),
+        max_port=max_port,
+        # XXX: ThreadingHTTPServer.shutdown not work
+        # https://github.com/python/cpython/issues/84485
+        server_class=http.server.HTTPServer,
+    ) as httpd:
         host, port = httpd.server_address
         url = f"http://{host}:{port}"
-        webview.open(url)
-        _LOGGER.info(f"prompt at: {url}")
+
+        def _open_url():
+            # XXX: need threading server to allow pre-opened socket
+            time.sleep(1)
+            webview.open(url)
+
+        threading.Thread(
+            target=_open_url,
+        ).start()
+        app.log.text(f"prompt at: {url}")
         httpd.serve_forever()
     webview.shutdown()
-    _LOGGER.info("form data: %s", pm.data)
+    app.log.text("form data: %s" % pm.data)
     return pm.data
