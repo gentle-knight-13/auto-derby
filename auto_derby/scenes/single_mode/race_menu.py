@@ -80,7 +80,7 @@ class RaceMenuScene(Scene):
         races: list[Race] = []
         prev_races: list[Race] = []
         while self._scroll.next():
-            next_races = [i[0] for i in find_by_race_menu_image(ctx, template.screenshot())]
+            next_races = [i[0] for i in find_by_race_menu_image(ctx, app.device.screenshot())]
             next_races.sort(key=lambda x: x.name)
             for r in next_races:
                 if r.name not in [i.name for i in races]:
