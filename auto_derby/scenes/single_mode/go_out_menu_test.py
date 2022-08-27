@@ -17,7 +17,7 @@ def test_recognize(name: Text):
     _test.use_screenshot(f"single_mode/{name}.png")
     ctx = Context.new()
     scene = GoOutMenuScene()
-    scene.recognize(ctx)
+    scene.recognize(ctx, static=True)
     _test.snapshot_match(
         {"options": ctx.go_out_options},
         name=name,

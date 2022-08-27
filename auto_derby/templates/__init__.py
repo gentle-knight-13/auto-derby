@@ -191,6 +191,7 @@ SINGLE_MODE_GO_OUT_FRIEND_ICON_POS = "single_mode_go_out_friend_icon.pos.png"
 SINGLE_MODE_GO_OUT_MENU_TITLE = "single_mode_go_out_menu_title.png"
 SINGLE_MODE_GO_OUT_MENU_TITLE_POS = "single_mode_go_out_menu_title.pos.png"
 SINGLE_MODE_GO_OUT_OPTION_LEFT_TOP = "single_mode_go_out_option_left_top.png"
+SINGLE_MODE_GO_OUT_OPTION_LEFT_BOTTOM = "single_mode_go_out_option_left_BOTTOM.png"
 SINGLE_MODE_GO_TO_SCHEDULED_RACE_BUTTON = "single_mode_go_to_scheduled_race_button.png"
 SINGLE_MODE_GO_TO_SCHEDULED_RACE_BUTTON_POS = (
     "single_mode_go_to_scheduled_race_button.pos.png"

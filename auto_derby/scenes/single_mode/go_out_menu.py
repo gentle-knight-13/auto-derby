@@ -9,9 +9,10 @@ from typing import Iterator, Text
 import cv2
 from PIL.Image import Image
 
-from ... import action, app, imagetools, mathtools, ocr, template, templates, texttools
+from ... import action, app, imagetools, mathtools, ocr, template, templates, texttools, terminal
 from ...single_mode import Context, go_out
 from ..scene import Scene, SceneHolder
+from ..vertical_scroll import VerticalScroll
 
 
 def _recognize_name(img: Image) -> Text:
@@ -90,17 +91,32 @@ def _recognize_menu(img: Image) -> Iterator[go_out.Option]:
             x,
             y,
             x + rp.vector(500, 540),
-            y + rp.vector(100, 540),
+            y + rp.vector(110, 540),
         )
-        option = _recognize_item(rp, img.crop(bbox))
-        option.position = (x + rp.vector(102, 540), y + rp.vector(46, 540))
-        option.bbox = bbox
-        yield option
+
+        item_img = img.crop(bbox)
+        if len(
+            tuple(
+                template.match(
+                    item_img, templates.SINGLE_MODE_GO_OUT_OPTION_LEFT_BOTTOM
+                )
+            )
+        ):
+            option = _recognize_item(rp, item_img)
+            option.position = (x + rp.vector(102, 540), y + rp.vector(46, 540))
+            option.bbox = bbox
+            yield option
 
 
 class GoOutMenuScene(Scene):
     def __init__(self) -> None:
         super().__init__()
+        rp = action.resize_proxy()
+        self._scroll = VerticalScroll(
+            origin=rp.vector2((16, 540), 540),
+            page_size=100,
+            max_page=3,
+        )
 
     @classmethod
     def name(cls):
@@ -111,5 +127,17 @@ class GoOutMenuScene(Scene):
         action.wait_image(templates.SINGLE_MODE_GO_OUT_MENU_TITLE)
         return cls()
 
-    def recognize(self, ctx: Context) -> None:
-        ctx.go_out_options = tuple(_recognize_menu(app.device.screenshot()))
+    def recognize(self, ctx: Context, static: bool = False) -> None:
+        while self._scroll.next():
+            new_go_out_options = tuple(
+                i
+                for i in _recognize_menu(app.device.screenshot())
+                if i.name not in [i.name for i in ctx.go_out_options]
+            )
+            if not new_go_out_options:
+                self._scroll.on_end()
+                self._scroll.complete()
+                return
+            ctx.go_out_options += new_go_out_options
+            if static:
+                break
