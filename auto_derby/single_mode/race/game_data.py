@@ -18,7 +18,7 @@ from ... import imagetools, mathtools, ocr, template, templates, texttools, app
 from .race import Course, Race
 
 
-def find_by_date(date: Tuple[int, int, int]) -> Iterator[Race]:
+def _find_by_date(date: Tuple[int, int, int]) -> Iterator[Race]:
     year, month, half = date
     for i in Race.repository.find():
         if year not in i.years:
@@ -33,13 +33,16 @@ def find_by_date(date: Tuple[int, int, int]) -> Iterator[Race]:
 def find(ctx: Context) -> Iterator[Race]:
     if ctx.date[1:] == (0, 0):
         return
-    for i in find_by_date(ctx.date):
+    for i in _find_by_date(ctx.date):
         if i.is_available(ctx) == False:
             continue
         # target race should be excluded when finding available race
         if i.is_target_race(ctx):
             continue
         yield i
+
+
+# DEPRECATED
 
 
 def _recognize_fan_count(img: PIL.Image.Image) -> int:
@@ -124,11 +127,6 @@ def _recognize_grade(
     raise ValueError("_recognize_grade: unknown grade color: %s" % (img.getpixel(pos),))
 
 
-def _recognize_rival(img: PIL.Image.Image) -> bool:
-    res = tuple(template.match(img, templates.SINGLE_MODE_CLIMAX_VS_RIVAL_ICON))
-    return len(res) == 1
-
-
 def _match_scenario(ctx: Context, race: Race) -> bool:
 
     if ctx.scenario != ctx.SCENARIO_CLIMAX and race.name.startswith("トゥインクルスタークライマックス"):
@@ -142,11 +140,10 @@ def _find_by_spec(
     ctx: Context,
     course: Course,
     no1_fan_count: int,
-    grades: Tuple[int, ...],
-    with_rival: bool,
+    grades: Tuple[int, ...]
 ):
 
-    for i in find_by_date(ctx.date):
+    for i in _find_by_date(ctx.date):
         if i.grade not in grades:
             continue
         if not _match_scenario(ctx, i):
@@ -155,11 +152,12 @@ def _find_by_spec(
             continue
         if i.fan_counts[0] != no1_fan_count:
             continue
-        i.with_rival = with_rival
         yield i
 
 
-def find_by_race_detail_image(ctx: Context, screenshot: PIL.Image.Image) -> Race:
+def _deprecated_find_by_race_detail_image(
+    ctx: Context, screenshot: PIL.Image.Image
+) -> Race:
     rp = mathtools.ResizeProxy(screenshot.width)
 
     grade_color_pos = rp.vector2((45, 92), 466)
@@ -181,12 +179,10 @@ def find_by_race_detail_image(ctx: Context, screenshot: PIL.Image.Image) -> Race
     spec_img = screenshot.crop(spec_bbox)
     course = _recognize_course(spec_img)
     no1_fan_count = _recognize_fan_count(screenshot.crop(no1_fan_count_bbox))
-    with_rival = False
     full_spec = (
         course,
         no1_fan_count,
         grades,
-        with_rival,
     )
     for i in _find_by_spec(ctx, *full_spec):
         app.log.image("%s: %s" % (full_spec, i), spec_img)
@@ -213,31 +209,21 @@ def _grade_color_pos(ctx: Context, rp: mathtools.ResizeProxy):
     return rp.vector2((198, 29), 540)
 
 
-def _vs_rival_icon_bbox(rp: mathtools.ResizeProxy):
-    return rp.vector4((354, 3, 369, 15), 492)
-
-
 def _find_by_race_menu_item(ctx: Context, img: PIL.Image.Image) -> Iterator[Race]:
     rp = mathtools.ResizeProxy(img.width)
     spec_bbox = _spec_bbox(ctx, rp)
     no1_fan_count_bbox = _no1_fan_count_bbox(ctx, rp)
     grade_color_pos = _grade_color_pos(ctx, rp)
-    vs_rival_icon_bbox = _vs_rival_icon_bbox(rp)
 
     spec_img = img.crop(spec_bbox)
     course = _recognize_course(spec_img)
     no1_fan_count = _recognize_fan_count(img.crop(no1_fan_count_bbox))
     grades = _recognize_grade(img, grade_color_pos)
 
-    with_rival = False
-    if ctx.scenario == ctx.SCENARIO_CLIMAX:
-        with_rival = _recognize_rival(img.crop(vs_rival_icon_bbox))
-
     full_spec = (
         course,
         no1_fan_count,
         grades,
-        with_rival,
     )
     match_count = 0
     for i in _find_by_spec(ctx, *full_spec):
@@ -270,7 +256,7 @@ def _menu_item_bbox(
     )
 
 
-def find_by_race_menu_image(
+def _deprecated_find_by_race_menu_image(
     ctx: Context, screenshot: PIL.Image.Image
 ) -> Iterator[Tuple[Race, Tuple[int, int]]]:
     rp = mathtools.ResizeProxy(screenshot.width)
@@ -278,9 +264,6 @@ def find_by_race_menu_image(
         bbox = _menu_item_bbox(ctx, pos, rp)
         for i in _find_by_race_menu_item(ctx, screenshot.crop(bbox)):
             yield i, pos
-
-
-# DEPRECATED
 
 
 def _deprecated_reload() -> None:
@@ -294,3 +277,6 @@ def _deprecated_reload_on_demand() -> None:
 globals()["LOGGER"] = logging.getLogger(__name__)
 globals()["reload"] = _deprecated_reload
 globals()["reload_on_demand"] = _deprecated_reload_on_demand
+globals()["find_by_race_menu_image"] = _deprecated_find_by_race_menu_image
+globals()["find_by_race_detail_image"] = _deprecated_find_by_race_detail_image
+globals()["find_by_date"] = _find_by_date
