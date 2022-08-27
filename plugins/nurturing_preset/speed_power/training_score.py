@@ -4,11 +4,17 @@ from auto_derby.single_mode.commands.globals import g
 
 import logging
 
+from auto_derby.single_mode.training.partner import Partner
+
 _LOGGER = logging.getLogger(__name__)
+
 
 class Training(single_mode.Training):
     def score(self, ctx: single_mode.Context) -> float:
         ret = super().score(ctx)
+
+        if ctx.is_summer_camp:
+            return ret
 
         climax_status_limit = 1130
         if self.type == self.TYPE_SPEED:
@@ -66,6 +72,19 @@ class Training(single_mode.Training):
             # else:
             #     ret += self.speed * 0.4
 
+        # classic 06 month second half
+        if ctx.turn_count_v2() < 36:
+            support_card_partners = list(
+                filter(
+                    lambda x: x.type != Partner.TYPE_OTHER
+                    and x.type != Partner.TYPE_TEAMMATE,
+                    self.partners,
+                )
+            )
+            # print(f"support_card_partners: {len(support_card_partners)}")
+            if 2 < len(support_card_partners):
+                ret += ret * 0.3
+
         return ret
 
 
@@ -105,5 +124,6 @@ def ignore_training_commands(ctx: single_mode.Context) -> bool:
         return True
 
     return False
+
 
 g.ignore_training_commands = ignore_training_commands

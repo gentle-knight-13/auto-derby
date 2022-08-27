@@ -18,10 +18,14 @@ class Plugin(auto_derby.Plugin):
         item_score_list = ExpansionItemScoreFactory.create()
 
         class Item(auto_derby.config.single_mode_item_class):
-            def print_effect(self, summary: EffectSummary):
+            def print_effect(
+                self,
+                command: Command,
+                summary: EffectSummary,
+            ):
                 explain = f"print effect:\n"
                 explain += f"- speed:        {summary.speed}\n"
-                explain += f"- statmia:      {summary.statmia}\n"
+                explain += f"- stamina:      {summary.stamina}\n"
                 explain += f"- power:        {summary.power}\n"
                 explain += f"- guts:         {summary.guts}\n"
                 explain += f"- wisdom:       {summary.wisdom}\n"
@@ -32,22 +36,29 @@ class Plugin(auto_derby.Plugin):
                 explain += f"- use whistle:  {summary.training_partner_reassign}\n"
                 explain += f"- use amulet:   {summary.training_no_failure}\n"
                 for key, value in summary.training_effect_buff.items():
-                    explain += f"- training buff {key.name}: {value.total_rate()}\n"
+                    explain += f"- training buff {key.name:<7}: {value.total_rate():.2f}\n"
                     for buff in value:
                         explain += (
-                            f"  - buff: rate {buff.rate}, turn {buff.turn_count}\n"
+                            f"  - buff: rate {buff.rate:.2f}, turn {buff.turn_count}\n"
                         )
                 for key, value in summary.training_vitality_debuff.items():
-                    explain += f"- training debuff {key.name}: {value.total_rate()}\n"
+                    explain += f"- training debuff {key.name:<7}: {value.total_rate():.2f}\n"
                     for buff in value:
                         explain += (
-                            f"  - buff: rate {buff.rate}, turn {buff.turn_count}\n"
+                            f"  - buff: rate {buff.rate:.2f}, turn {buff.turn_count}\n"
                         )
                     explain += f"- race buff: {summary.race_reward_buff.total_rate()}\n"
                     for buff in summary.race_reward_buff:
                         explain += (
-                            f"  - buff: rate {buff.rate}, turn {buff.turn_count}\n"
+                            f"  - buff: rate {buff.rate:.2f}, turn {buff.turn_count}\n"
                         )
+                if isinstance(command, TrainingCommand):
+                    explain += f"- training speed  : {command.training.speed}\n"
+                    explain += f"- training stamina: {command.training.stamina}\n"
+                    explain += f"- training power  : {command.training.power}\n"
+                    explain += f"- training guts   : {command.training.guts}\n"
+                    explain += f"- training wisdom : {command.training.wisdom}\n"
+
                 _LOGGER.info(explain)
 
             # high exchange score means high exchange priority
@@ -70,7 +81,7 @@ class Plugin(auto_derby.Plugin):
                 ret = super().effect_score(ctx, command, summary)
 
                 # _LOGGER.info(f"print context:\n{ctx}")
-                # self.print_effect(summary)
+                # self.print_effect(command, summary)
                 for i in item_score_list:
                     ret = i.effect_score(ret, self, ctx, command, summary)
                 # _LOGGER.info(f"effect item score:\n item: {self.name}, score: {ret}")
@@ -79,9 +90,8 @@ class Plugin(auto_derby.Plugin):
 
             def should_use_directly(self, ctx: Context) -> bool:
                 for i in item_score_list:
-                    if self.name in i.item_names and i.use_directly:
-                        # _LOGGER.info(f"use directly item:\n item: {self.name}")
-                        return True
+                    if self.name in i.item_names:
+                        return i.should_use_directly(ctx)
 
                 return super().should_use_directly(ctx)
 
@@ -93,7 +103,8 @@ auto_derby.plugin.register(__name__, Plugin())
 
 _MAX_SCENARIO_TURN = 78
 _MAX_QUANTITY = 5
-_DEFAULT_SCORE = 20
+_DEFAULT_EXCHANGE_SCORE = 20
+_DEFAULT_EFFECT_SCORE = 10
 _STATUS_THRESHOLD = 1130
 _TRAINING_THRESHOLD = 25
 _TRAINING_FAILURE_THRESHOLD = 0.20
@@ -110,13 +121,15 @@ class ExpansionItemScore:
         item_names: Set[str],
         quantity: int = _MAX_QUANTITY,
         turn: int = _MAX_SCENARIO_TURN,
-        score: int = _DEFAULT_SCORE,
+        exchange_score_: int = _DEFAULT_EXCHANGE_SCORE,
+        effect_score_: int = _DEFAULT_EFFECT_SCORE,
         use_directly: bool = False,
     ) -> None:
         self.item_names = item_names
         self.quantity = quantity
         self.turn = turn
-        self.score = score
+        self.exchange_score_ = exchange_score_
+        self.effect_score_ = effect_score_
         self.use_directly = use_directly
 
     def exchange_score(self, base_score: int, item: Item, ctx: Context) -> int:
@@ -131,6 +144,9 @@ class ExpansionItemScore:
         summary: EffectSummary,
     ) -> int:
         return base_score
+
+    def should_use_directly(self, ctx: Context) -> bool:
+        return self.use_directly
 
 
 class ExpansionItemScoreFactory:
@@ -156,6 +172,7 @@ class ExpansionItemScoreFactory:
             GutsAnkleItemScore(),
             SpartaMegaphoneItemScore(),
             BootCampMegaphoneItemScore(),
+            ResetWhistleItemScore(),
             AmuletItemScore(),
             VitalItemScore(),
             MoodItemScore(),
@@ -173,7 +190,7 @@ class FriendshipUpItemScore(ExpansionItemScore):
                 "にんじんBBQセット",
             },
             turn=49,  # senior 01 month first half
-            score=30,
+            exchange_score_=30,
             use_directly=True,
         )
 
@@ -181,7 +198,7 @@ class FriendshipUpItemScore(ExpansionItemScore):
         if item.name not in self.item_names:
             return base_score
         if ctx.turn_count_v2() <= self.turn:
-            return base_score + self.score
+            return base_score + self.exchange_score_
         return 0
 
 
@@ -193,7 +210,7 @@ class CharmItemScore(ExpansionItemScore):
             },
             quantity=1,
             turn=49,  # senior 01 month first half
-            score=10,
+            exchange_score_=10,
             use_directly=True,
         )
         self.condition = "愛嬌○"
@@ -208,7 +225,7 @@ class CharmItemScore(ExpansionItemScore):
             and self.condition not in conditions
             and ctx.items.get(item.id).quantity < self.quantity
         ):
-            return base_score + self.score
+            return base_score + self.exchange_score_
         return 0
 
 
@@ -219,7 +236,7 @@ class SharpItemScore(ExpansionItemScore):
                 "博学帽子",
             },
             quantity=1,
-            score=10,
+            exchange_score_=10,
             use_directly=True,
         )
         self.condition = "切れ者"
@@ -234,7 +251,7 @@ class SharpItemScore(ExpansionItemScore):
             and self.condition not in conditions
             and ctx.items.get(item.id).quantity < self.quantity
         ):
-            return base_score + self.score
+            return base_score + self.exchange_score_
         return 0
 
 
@@ -245,7 +262,7 @@ class SpeedUpItemScore(ExpansionItemScore):
                 "スピード戦術書",
                 "スピード秘伝書",
             },
-            score=10,
+            exchange_score_=10,
             use_directly=True,
         )
 
@@ -253,7 +270,7 @@ class SpeedUpItemScore(ExpansionItemScore):
         if item.name not in self.item_names:
             return base_score
         if ctx.speed < _STATUS_THRESHOLD:
-            return base_score + self.score
+            return base_score + self.exchange_score_
         return 0
 
 
@@ -264,7 +281,7 @@ class StaminaUpItemScore(ExpansionItemScore):
                 "スタミナ戦術書",
                 "スタミナ秘伝書",
             },
-            score=10,
+            exchange_score_=10,
             use_directly=True,
         )
 
@@ -272,7 +289,7 @@ class StaminaUpItemScore(ExpansionItemScore):
         if item.name not in self.item_names:
             return base_score
         if ctx.stamina < _STATUS_THRESHOLD:
-            return base_score + self.score
+            return base_score + self.exchange_score_
         return 0
 
 
@@ -283,7 +300,7 @@ class PowerUpItemScore(ExpansionItemScore):
                 "パワー戦術書",
                 "パワー秘伝書",
             },
-            score=10,
+            exchange_score_=10,
             use_directly=True,
         )
 
@@ -291,7 +308,7 @@ class PowerUpItemScore(ExpansionItemScore):
         if item.name not in self.item_names:
             return base_score
         if ctx.power < _STATUS_THRESHOLD:
-            return base_score + self.score
+            return base_score + self.exchange_score_
         return 0
 
 
@@ -302,7 +319,7 @@ class GutsUpItemScore(ExpansionItemScore):
                 "根性戦術書",
                 "根性秘伝書",
             },
-            score=10,
+            exchange_score_=10,
             use_directly=True,
         )
 
@@ -310,7 +327,7 @@ class GutsUpItemScore(ExpansionItemScore):
         if item.name not in self.item_names:
             return base_score
         if ctx.guts < _STATUS_THRESHOLD:
-            return base_score + self.score
+            return base_score + self.exchange_score_
         return 0
 
 
@@ -321,7 +338,7 @@ class WisdomUpItemScore(ExpansionItemScore):
                 "賢さ戦術書",
                 "賢さ秘伝書",
             },
-            score=10,
+            exchange_score_=10,
             use_directly=True,
         )
 
@@ -329,7 +346,7 @@ class WisdomUpItemScore(ExpansionItemScore):
         if item.name not in self.item_names:
             return base_score
         if ctx.wisdom < _STATUS_THRESHOLD:
-            return base_score + self.score
+            return base_score + self.exchange_score_
         return 0
 
 
@@ -339,18 +356,18 @@ class SpeedTrainingLevelUpItemScore(ExpansionItemScore):
             item_names={
                 "スピードトレーニング嘆願書",
             },
-            score=20,
+            exchange_score_=20,
             use_directly=True,
         )
 
     def exchange_score(self, base_score: int, item: Item, ctx: Context) -> int:
-        if item.name not in self.item_names:
+        if item.name not in self.item_names or not ctx.training_levels:
             return base_score
         if (
             ctx.speed < _STATUS_THRESHOLD
             and ctx.training_levels[TrainingType.SPEED] < _MAX_TRAINING_LEVEL
         ):
-            return base_score + self.score
+            return base_score + self.exchange_score_
         return 0
 
 
@@ -360,18 +377,18 @@ class StaminaTrainingLevelUpItemScore(ExpansionItemScore):
             item_names={
                 "スタミナトレーニング嘆願書",
             },
-            score=20,
+            exchange_score_=20,
             use_directly=True,
         )
 
     def exchange_score(self, base_score: int, item: Item, ctx: Context) -> int:
-        if item.name not in self.item_names:
+        if item.name not in self.item_names or not ctx.training_levels:
             return base_score
         if (
             ctx.stamina < _STATUS_THRESHOLD
             and ctx.training_levels[TrainingType.STAMINA] < _MAX_TRAINING_LEVEL
         ):
-            return base_score + self.score
+            return base_score + self.exchange_score_
         return 0
 
 
@@ -381,18 +398,18 @@ class PowerTrainingLevelUpItemScore(ExpansionItemScore):
             item_names={
                 "パワートレーニング嘆願書",
             },
-            score=20,
+            exchange_score_=20,
             use_directly=True,
         )
 
     def exchange_score(self, base_score: int, item: Item, ctx: Context) -> int:
-        if item.name not in self.item_names:
+        if item.name not in self.item_names or not ctx.training_levels:
             return base_score
         if (
             ctx.power < _STATUS_THRESHOLD
             and ctx.training_levels[TrainingType.POWER] < _MAX_TRAINING_LEVEL
         ):
-            return base_score + self.score
+            return base_score + self.exchange_score_
         return 0
 
 
@@ -402,18 +419,18 @@ class GutsTrainingLevelUpItemScore(ExpansionItemScore):
             item_names={
                 "根性トレーニング嘆願書",
             },
-            score=20,
+            exchange_score_=20,
             use_directly=True,
         )
 
     def exchange_score(self, base_score: int, item: Item, ctx: Context) -> int:
-        if item.name not in self.item_names:
+        if item.name not in self.item_names or not ctx.training_levels:
             return base_score
         if (
             ctx.guts < _STATUS_THRESHOLD
             and ctx.training_levels[TrainingType.GUTS] < _MAX_TRAINING_LEVEL
         ):
-            return base_score + self.score
+            return base_score + self.exchange_score_
         return 0
 
 
@@ -423,18 +440,18 @@ class WisdomTrainingLevelUpItemScore(ExpansionItemScore):
             item_names={
                 "賢さトレーニング嘆願書",
             },
-            score=20,
+            exchange_score_=20,
             use_directly=True,
         )
 
     def exchange_score(self, base_score: int, item: Item, ctx: Context) -> int:
-        if item.name not in self.item_names:
+        if item.name not in self.item_names or not ctx.training_levels:
             return base_score
         if (
             ctx.wisdom < _STATUS_THRESHOLD
             and ctx.training_levels[TrainingType.WISDOM] < _MAX_TRAINING_LEVEL
         ):
-            return base_score + self.score
+            return base_score + self.exchange_score_
         return 0
 
 
@@ -445,14 +462,14 @@ class SpeedAnkleItemScore(ExpansionItemScore):
                 "スピードアンクルウェイト",
             },
             quantity=5,
-            score=20,
+            exchange_score_=20,
         )
 
     def exchange_score(self, base_score: int, item: Item, ctx: Context) -> int:
         if item.name not in self.item_names:
             return base_score
         if ctx.items.get(item.id).quantity < self.quantity:
-            return base_score + self.score
+            return base_score + self.exchange_score_
         return 0
 
     def effect_score(
@@ -479,7 +496,7 @@ class SpeedAnkleItemScore(ExpansionItemScore):
                 BuffList(),
             )
             if all([i.rate != 0.5 for i in buff_list]):
-                return base_score + self.score
+                return base_score + self.effect_score_
         return 0
 
 
@@ -489,15 +506,15 @@ class StaminaAnkleItemScore(ExpansionItemScore):
             item_names={
                 "スタミナアンクルウェイト",
             },
-            quantity=3,
-            score=20,
+            quantity=1,
+            exchange_score_=20,
         )
 
     def exchange_score(self, base_score: int, item: Item, ctx: Context) -> int:
         if item.name not in self.item_names:
             return base_score
         if ctx.items.get(item.id).quantity < self.quantity:
-            return base_score + self.score
+            return base_score + self.exchange_score_
         return 0
 
     def effect_score(
@@ -523,7 +540,7 @@ class StaminaAnkleItemScore(ExpansionItemScore):
                 BuffList(),
             )
             if all([i.rate != 0.5 for i in buff_list]):
-                return base_score + self.score
+                return base_score + self.effect_score_
         return 0
 
 
@@ -534,14 +551,14 @@ class PowerAnkleItemScore(ExpansionItemScore):
                 "パワーアンクルウェイト",
             },
             quantity=3,
-            score=20,
+            exchange_score_=20,
         )
 
     def exchange_score(self, base_score: int, item: Item, ctx: Context) -> int:
         if item.name not in self.item_names:
             return base_score
         if ctx.items.get(item.id).quantity < self.quantity:
-            return base_score + self.score
+            return base_score + self.exchange_score_
         return 0
 
     def effect_score(
@@ -567,7 +584,7 @@ class PowerAnkleItemScore(ExpansionItemScore):
                 BuffList(),
             )
             if all([i.rate != 0.5 for i in buff_list]):
-                return base_score + self.score
+                return base_score + self.effect_score_
         return 0
 
 
@@ -578,14 +595,14 @@ class GutsAnkleItemScore(ExpansionItemScore):
                 "根性アンクルウェイト",
             },
             quantity=3,
-            score=20,
+            exchange_score_=20,
         )
 
     def exchange_score(self, base_score: int, item: Item, ctx: Context) -> int:
         if item.name not in self.item_names:
             return base_score
         if ctx.items.get(item.id).quantity < self.quantity:
-            return base_score + self.score
+            return base_score + self.exchange_score_
         return 0
 
     def effect_score(
@@ -611,7 +628,7 @@ class GutsAnkleItemScore(ExpansionItemScore):
                 BuffList(),
             )
             if all([i.rate != 0.5 for i in buff_list]):
-                return base_score + self.score
+                return base_score + self.effect_score_
         return 0
 
 
@@ -621,15 +638,19 @@ class SpartaMegaphoneItemScore(ExpansionItemScore):
             item_names={
                 "スパルタメガホン",
             },
-            score=30,
+            exchange_score_=30,
             turn=61,  # senior 07 month first half
         )
+        self.quantity = 3
 
     def exchange_score(self, base_score: int, item: Item, ctx: Context) -> int:
         if item.name not in self.item_names:
             return base_score
-        if ctx.turn_count_v2() <= self.turn:
-            return base_score + self.score
+        if (
+            ctx.turn_count_v2() <= self.turn
+            and ctx.items.get(item.id).quantity < self.quantity
+        ):
+            return base_score + self.exchange_score_
         return base_score
 
     def effect_score(
@@ -653,7 +674,7 @@ class BootCampMegaphoneItemScore(ExpansionItemScore):
             item_names={
                 "ブートキャンプメガホン",
             },
-            score=30,
+            exchange_score_=30,
             turn=64,  # senior 08 month second half
         )
         self.min_quantity = 2
@@ -662,7 +683,7 @@ class BootCampMegaphoneItemScore(ExpansionItemScore):
         if item.name not in self.item_names:
             return base_score
         if ctx.turn_count_v2() <= self.turn:
-            return base_score + self.score
+            return base_score + self.exchange_score_
         return base_score
 
     def effect_score(
@@ -676,7 +697,7 @@ class BootCampMegaphoneItemScore(ExpansionItemScore):
         if item.name not in self.item_names or not isinstance(command, TrainingCommand):
             return base_score
         if ctx.is_summer_camp and len(summary.training_effect_buff) < 5:
-            return base_score + self.score
+            return base_score + self.effect_score_
         elif (
             self.min_quantity < ctx.items.get(item.id).quantity
             or self.turn < ctx.turn_count_v2()
@@ -685,19 +706,64 @@ class BootCampMegaphoneItemScore(ExpansionItemScore):
         return 0
 
 
+class ResetWhistleItemScore(ExpansionItemScore):
+    def __init__(self) -> None:
+        super().__init__(
+            item_names={
+                "リセットホイッスル",
+            },
+            quantity=5,
+            exchange_score_=20,
+            effect_score_=20,
+            turn=72,  # ura qualifying first half
+        )
+        self.year = 3
+
+    def exchange_score(self, base_score: int, item: Item, ctx: Context) -> int:
+        if item.name not in self.item_names:
+            return base_score
+        if ctx.items.get(item.id).quantity < self.quantity:
+            return base_score + self.exchange_score_
+        return 0
+
+    def should_use_directly(self, ctx: Context) -> bool:
+        if not ctx.is_summer_camp and ctx.turn_count_v2() < self.turn:
+            return False
+        if ctx.is_summer_camp and self.year > ctx.date[0]:
+            return False
+
+        ctx_ = ctx.clone()
+        amulet_exists = any("健康祈願のお守り" == item.name for item in ctx_.items)
+
+        explain = f"ResetWhistleItemScore\n"
+        explain += f"- amulet exists: {amulet_exists}\n"
+        for i in ctx_.trainings:
+            if amulet_exists:
+                i.failure_rate = 0
+            explain += f"- {i.type.name:<7} score: {i.score(ctx_):.2f}, {i}\n"
+        _LOGGER.info(explain)
+
+        max_training_score = max(i.score(ctx_) for i in ctx_.trainings)
+        training_threshold = 30.0 * 1.5 if ctx_.is_summer_camp else 30.0
+        if training_threshold > max_training_score:
+            return True
+        return False
+
+
 class AmuletItemScore(ExpansionItemScore):
     def __init__(self) -> None:
         super().__init__(
             item_names={
                 "健康祈願のお守り",
             },
-            score=30,
+            exchange_score_=30,
+            effect_score_=30,
         )
 
     def exchange_score(self, base_score: int, item: Item, ctx: Context) -> int:
         if item.name not in self.item_names:
             return base_score
-        return base_score + self.score
+        return base_score + self.exchange_score_
 
     def effect_score(
         self,
@@ -721,7 +787,7 @@ class AmuletItemScore(ExpansionItemScore):
                 or _TRAINING_THRESHOLD < command.training.wisdom
             )
         ):
-            return base_score + self.score
+            return base_score + self.effect_score_
         return 0
 
 
@@ -735,13 +801,13 @@ class VitalItemScore(ExpansionItemScore):
                 "ロイヤルビタージュース",
                 "エネドリンクMAX",
             },
-            score=0,
+            exchange_score_=0,
         )
 
     def exchange_score(self, base_score: int, item: Item, ctx: Context) -> int:
         if item.name not in self.item_names:
             return base_score
-        return base_score + self.score
+        return base_score + self.exchange_score_
 
     def effect_score(
         self,
@@ -767,7 +833,7 @@ class MoodItemScore(ExpansionItemScore):
                 "プレーンカップケーキ",
                 "スイートカップケーキ",
             },
-            score=20,
+            exchange_score_=20,
         )
         self.extra_quantity = 2
         self.bitter_juice_vitality = 100
@@ -784,7 +850,7 @@ class MoodItemScore(ExpansionItemScore):
         total_cake_quantity = plane_cake_quantity + sweet_cake_quantity
 
         if total_cake_quantity < max_quantity and total_cake_quantity < self.quantity:
-            return base_score + self.score
+            return base_score + self.exchange_score_
 
         return base_score
 
@@ -796,18 +862,20 @@ class MoodItemScore(ExpansionItemScore):
         command: Command,
         summary: EffectSummary,
     ) -> int:
-        if item.name not in self.item_names or not isinstance(command, TrainingCommand):
+        if item.name not in self.item_names:
             return base_score
-
-        bitter_juice_quantity = _get_owned_item_quantity_by_name(ctx, "ロイヤルビタージュース")
-        is_mood_down = summary.mood < 0
-        if is_mood_down and summary.vitality == self.bitter_juice_vitality:
-            return base_score + self.score
-        elif (
-            ctx.mood != ctx.MOOD_VERY_GOOD
-            and bitter_juice_quantity < ctx.items.get(item.id).quantity
-        ):
-            return base_score + self.score
+        if isinstance(command, RaceCommand):
+            return 0
+        if isinstance(command, TrainingCommand):
+            bitter_juice_quantity = _get_owned_item_quantity_by_name(ctx, "ロイヤルビタージュース")
+            is_mood_down = summary.mood < 0
+            if is_mood_down and summary.vitality == self.bitter_juice_vitality:
+                return base_score + self.effect_score_
+            elif (
+                ctx.mood != ctx.MOOD_VERY_GOOD
+                and bitter_juice_quantity < ctx.items.get(item.id).quantity
+            ):
+                return base_score + self.effect_score_
         return 0
 
 
@@ -823,7 +891,7 @@ class DebuffRecoveryItemScore(ExpansionItemScore):
                 # "ナンデモナオール",
             },
             quantity=2,
-            score=10,
+            exchange_score_=10,
             turn=49,  # senior 01 month second half
         )
 
@@ -834,7 +902,7 @@ class DebuffRecoveryItemScore(ExpansionItemScore):
             ctx.turn_count_v2() <= self.turn
             and ctx.items.get(item.id).quantity < self.quantity
         ):
-            return base_score + self.score
+            return base_score + self.exchange_score_
         return 0
 
 
@@ -845,7 +913,8 @@ class KiwamiHummerItemScore(ExpansionItemScore):
                 "蹄鉄ハンマー・極",
             },
             quantity=5,
-            score=20,
+            exchange_score_=20,
+            effect_score_=20,
             turn=72,  # ura qualifying first half
         )
         self.year = 4
@@ -858,7 +927,7 @@ class KiwamiHummerItemScore(ExpansionItemScore):
             ctx.turn_count_v2() < self.turn
             and ctx.items.get(item.id).quantity < self.quantity
         ):
-            return base_score + self.score
+            return base_score + self.exchange_score_
         return 0
 
     def effect_score(
@@ -874,13 +943,13 @@ class KiwamiHummerItemScore(ExpansionItemScore):
 
         year = ctx.date[0]
         if year == self.year and summary.race_reward_buff.total_rate() == 0.0:
-            return base_score + self.score
+            return base_score + self.effect_score_
         elif (
             command.race.grade == command.race.GRADE_G1
             and self.min_quantity < ctx.items.get(item.id).quantity
             and summary.race_reward_buff.total_rate() == 0.0
         ):
-            return base_score + self.score
+            return base_score + self.effect_score_
         return 0
 
 
@@ -891,7 +960,8 @@ class TakumiHummerItemScore(ExpansionItemScore):
                 "蹄鉄ハンマー・匠",
             },
             quantity=5,
-            score=10,
+            exchange_score_=10,
+            effect_score_=10,
             turn=72,  # ura qualifying first half
         )
         self.year = 4
@@ -903,7 +973,7 @@ class TakumiHummerItemScore(ExpansionItemScore):
             ctx.turn_count_v2() < self.turn
             and ctx.items.get(item.id).quantity < self.quantity
         ):
-            return base_score + self.score
+            return base_score + self.exchange_score_
         return 0
 
     def effect_score(
@@ -919,12 +989,12 @@ class TakumiHummerItemScore(ExpansionItemScore):
 
         year = ctx.date[0]
         if year == self.year and summary.race_reward_buff.total_rate() == 0.0:
-            return base_score + self.score
+            return base_score + self.effect_score_
         elif (
             command.race.grade == command.race.GRADE_G1
             and summary.race_reward_buff.total_rate() == 0.0
         ):
-            return base_score + self.score
+            return base_score + self.effect_score_
         return 0
 
 
@@ -937,12 +1007,12 @@ class IgnoreItemScore(ExpansionItemScore):
                 "パワーのメモ帳",
                 "根性のメモ帳",
                 "賢さのメモ帳",
-                "スピード戦術書",
+                # "スピード戦術書",
                 # "スタミナ戦術書",
                 # "パワー戦術書",
                 # "根性戦術書",
                 # "賢さ戦術書",
-                "スピード秘伝書",
+                # "スピード秘伝書",
                 # "スタミナ秘伝書",
                 # "パワー秘伝書",
                 # "根性秘伝書",
@@ -961,19 +1031,19 @@ class IgnoreItemScore(ExpansionItemScore):
                 "名物記者の双眼鏡",
                 "効率練習のススメ",
                 # "博学帽子",
-                # "すやすや安眠枕",
-                # "ポケットスケジュール帳",
+                "すやすや安眠枕",
+                "ポケットスケジュール帳",
                 # "うるおいハンドクリーム",
-                # "スリムスキャナー",
-                # "アロマディフューザー",
-                # "練習改善DVD",
-                # "ナンデモナオール",
+                "スリムスキャナー",
+                "アロマディフューザー",
+                "練習改善DVD",
+                "ナンデモナオール",
                 # "スピードトレーニング嘆願書",
                 "スタミナトレーニング嘆願書",
                 # "パワートレーニング嘆願書",
                 "根性トレーニング嘆願書",
                 "賢さトレーニング嘆願書",
-                "リセットホイッスル",
+                # "リセットホイッスル",
                 "チアメガホン",
                 # "スパルタメガホン",
                 # "ブートキャンプメガホン",
