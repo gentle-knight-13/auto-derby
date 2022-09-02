@@ -461,7 +461,7 @@ def bbox_from_rect(rect: Tuple[int, int, int, int]) -> Tuple[int, int, int, int]
 
 def rect_from_bbox(bbox: Tuple[int, int, int, int]) -> Tuple[int, int, int, int]:
     l, t, r, b = bbox
-    x, y, w, h = l, b, r - l, b - t
+    x, y, w, h = l, t, r - l, b - t
     return x, y, w, h
 
 
@@ -472,6 +472,12 @@ def auto_crop(cv_img: np.ndarray) -> np.ndarray:
         )
     )
     return cv_img[t:b, l:r]
+
+
+def auto_crop_pil(pil_img: Image) -> Image:
+    # spell-checker: word getbbox
+    bbox = pil_img.getbbox()
+    return pil_img.crop(bbox)
 
 
 def data_url(img: Image) -> Text:
