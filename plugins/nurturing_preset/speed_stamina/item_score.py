@@ -482,6 +482,11 @@ class SpeedAnkleItemScore(ExpansionItemScore):
     ) -> int:
         if item.name not in self.item_names or not isinstance(command, TrainingCommand):
             return base_score
+        if (
+            _TRAINING_FAILURE_THRESHOLD <= command.training.failure_rate
+            and not summary.training_no_failure
+        ):
+            return 0
 
         if (
             command.training.type == TrainingType.SPEED
@@ -528,6 +533,12 @@ class StaminaAnkleItemScore(ExpansionItemScore):
         if item.name not in self.item_names or not isinstance(command, TrainingCommand):
             return base_score
         if (
+            _TRAINING_FAILURE_THRESHOLD <= command.training.failure_rate
+            and not summary.training_no_failure
+        ):
+            return 0
+
+        if (
             command.training.type == TrainingType.STAMINA
             and _TRAINING_THRESHOLD < command.training.stamina
         ):
@@ -572,6 +583,12 @@ class PowerAnkleItemScore(ExpansionItemScore):
         if item.name not in self.item_names or not isinstance(command, TrainingCommand):
             return base_score
         if (
+            _TRAINING_FAILURE_THRESHOLD <= command.training.failure_rate
+            and not summary.training_no_failure
+        ):
+            return 0
+
+        if (
             command.training.type == TrainingType.POWER
             and _TRAINING_THRESHOLD < command.training.power
         ):
@@ -615,6 +632,12 @@ class GutsAnkleItemScore(ExpansionItemScore):
     ) -> int:
         if item.name not in self.item_names or not isinstance(command, TrainingCommand):
             return base_score
+        if (
+            _TRAINING_FAILURE_THRESHOLD <= command.training.failure_rate
+            and not summary.training_no_failure
+        ):
+            return 0
+
         if (
             command.training.type == TrainingType.GUTS
             and _TRAINING_THRESHOLD < command.training.guts
@@ -663,6 +686,11 @@ class SpartaMegaphoneItemScore(ExpansionItemScore):
     ) -> int:
         if item.name not in self.item_names or not isinstance(command, TrainingCommand):
             return base_score
+        if (
+            _TRAINING_FAILURE_THRESHOLD <= command.training.failure_rate
+            and not summary.training_no_failure
+        ):
+            return 0
         if len(summary.training_effect_buff) < 5:
             return base_score
         return 0
@@ -696,6 +724,11 @@ class BootCampMegaphoneItemScore(ExpansionItemScore):
     ) -> int:
         if item.name not in self.item_names or not isinstance(command, TrainingCommand):
             return base_score
+        if (
+            _TRAINING_FAILURE_THRESHOLD <= command.training.failure_rate
+            and not summary.training_no_failure
+        ):
+            return 0
         if ctx.is_summer_camp and len(summary.training_effect_buff) < 5:
             return base_score + self.effect_score_
         elif (

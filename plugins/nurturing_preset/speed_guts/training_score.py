@@ -16,7 +16,7 @@ class Training(single_mode.Training):
         if ctx.is_summer_camp:
             return ret
 
-        climax_status_limit = 1150
+        climax_status_limit = 1500
         if self.type == self.TYPE_SPEED:
             if ctx.speed >= climax_status_limit:
                 ret -= self.speed
