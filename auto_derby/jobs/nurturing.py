@@ -327,6 +327,10 @@ def _template_actions(ctx: Context) -> Iterator[Tuple[_Template, _Handler]]:
         yield templates.SINGLE_MODE_TARGET_GRADE_POINT_NOT_ENOUGH, _set_scenario(
             ctx.SCENARIO_CLIMAX, _cancel
         )
+    if ctx.scenario in (ctx.SCENARIO_GRAND_LIVE, ctx.SCENARIO_UNKNOWN):
+        yield templates.SINGLE_MODE_GO_TO_SHOP_BUTTON, _set_scenario(
+            ctx.SCENARIO_GRAND_LIVE, _close
+        )
 
 
 def _spec_key(tmpl: _Template) -> Text:
