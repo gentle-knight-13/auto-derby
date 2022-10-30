@@ -31,6 +31,7 @@
     "hasHealthCare": false,
     "hasScheduledRace": false,
     "canGoOutWithFriend": false,
-    "hasShop": false
+    "hasShop": false,
+    "hasLesson": false
   }
 }

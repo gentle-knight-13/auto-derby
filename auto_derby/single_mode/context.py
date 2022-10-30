@@ -38,7 +38,7 @@ class g:
 
 
 def _year4_date_text(ctx: Context) -> Iterator[Text]:
-    if ctx.scenario in (ctx.SCENARIO_URA, ctx.SCENARIO_AOHARU, ctx.SCENARIO_UNKNOWN):
+    if ctx.scenario in (ctx.SCENARIO_URA, ctx.SCENARIO_AOHARU, ctx.SCENARIO_GRAND_LIVE, ctx.SCENARIO_UNKNOWN):
         yield "ファイナルズ開催中"
     if ctx.scenario in (ctx.SCENARIO_CLIMAX, ctx.SCENARIO_UNKNOWN):
         yield "クライマックス開催中"
@@ -207,6 +207,8 @@ def _recognize_scenario(rp: mathtools.ResizeProxy, img: Image) -> Text:
             ),
             Context.SCENARIO_CLIMAX,
         ),
+        (templates.SINGLE_MODE_GRAND_LIVE_DATE_REMAIN, Context.SCENARIO_GRAND_LIVE),
+        (templates.SINGLE_MODE_GRAND_LIVE_PERFORMANCE, Context.SCENARIO_GRAND_LIVE),
         (templates.SINGLE_MODE_AOHARU_CLASS_DETAIL_BUTTON, Context.SCENARIO_AOHARU),
         (templates.SINGLE_MODE_CLASS_DETAIL_BUTTON, Context.SCENARIO_URA),
     )
@@ -223,7 +225,7 @@ def _recognize_scenario(rp: mathtools.ResizeProxy, img: Image) -> Text:
 
 
 def _date_bbox(ctx: Context, rp: mathtools.ResizeProxy):
-    if ctx.scenario == ctx.SCENARIO_AOHARU:
+    if ctx.scenario in (ctx.SCENARIO_AOHARU, ctx.SCENARIO_GRAND_LIVE):
         return rp.vector4((125, 32, 278, 48), 540)
     if ctx.scenario == ctx.SCENARIO_CLIMAX:
         return rp.vector4((11, 32, 163, 48), 540)
@@ -269,6 +271,7 @@ class Context:
     SCENARIO_URA = "新設！　URAファイナルズ！！"
     SCENARIO_AOHARU = "アオハル杯～輝け、チームの絆～"
     SCENARIO_CLIMAX = "Make a new track!!  ～クライマックス開幕～"
+    SCENARIO_GRAND_LIVE = "つなげ、照らせ、ひかれ。 私たちのグランドライブ"
 
     @staticmethod
     def new() -> Context:
@@ -327,6 +330,12 @@ class Context:
 
         self.grade_point = 0
         self.shop_coin = 0
+
+        self.dance = 0
+        self.passion =0
+        self.vocal = 0
+        self.visual = 0
+        self.mental = 0
 
         from . import training
 
@@ -470,6 +479,8 @@ class Context:
         msg = ""
         if self.scenario == Context.SCENARIO_CLIMAX:
             msg += f",pt={self.grade_point},coin={self.shop_coin},items={self.items.quantity()}"
+        if self.scenario == Context.SCENARIO_GRAND_LIVE:
+            msg += f",da={self.dance}pa,={self.passion},vo={self.vocal},vi={self.visual},me={self.mental}"
         if self.go_out_options:
             msg += ",go_out="
             msg += " ".join(
@@ -646,6 +657,12 @@ class Context:
         if self.scenario == self.SCENARIO_CLIMAX:
             d["gradePoint"] = self.grade_point
             d["shopCoin"] = self.shop_coin
+        if self.scenario == self.SCENARIO_GRAND_LIVE:
+            d["dance"] = self.dance
+            d["passion"] = self.passion
+            d["vocal"] = self.vocal
+            d["visual"] = self.visual
+            d["mental"] = self.mental
         return d
 
     @classmethod
@@ -692,6 +709,11 @@ class Context:
         ret.scenario = data["scenario"]
         ret.grade_point = data.get("gradePoint", 0)
         ret.shop_coin = data.get("shopCoin", 0)
+        ret.dance = data.get("dance", 0)
+        ret.passion = data.get("passion", 0)
+        ret.vocal = data.get("vocal", 0)
+        ret.visual = data.get("visual", 0)
+        ret.mental = data.get("mental", 0)
 
         return ret
 
