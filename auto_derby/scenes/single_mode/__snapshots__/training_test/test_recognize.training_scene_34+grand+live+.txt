@@ -1,0 +1,1 @@
+Training<spd=50 da=25 vi=25 pow=23 ski=21 vit=-27.0% fail=33% lv=5 ptn=frd@5,spd@5,spd@4>

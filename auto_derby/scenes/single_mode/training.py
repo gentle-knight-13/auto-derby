@@ -623,6 +623,10 @@ def _recognize_partners(ctx: Context, img: Image) -> Iterator[training.Partner]:
             rp.vector4((448, 147, 516, 220), 540),
             rp.vector(90, 540),
         ),
+        ctx.SCENARIO_GRAND_LIVE: (  # Todo: check correctness
+            rp.vector4((448, 147, 516, 220), 540),
+            rp.vector(86, 540),
+        ),
     }[ctx.scenario]
     icons_bottom = rp.vector(578, 540)
     while icon_bbox[2] < icons_bottom:
@@ -667,6 +671,34 @@ def _effect_recognitions(
     elif ctx.scenario == ctx.SCENARIO_CLIMAX:
         yield _bbox_groups(595, 623), _recognize_base_effect
         yield _bbox_groups(568, 593), _recognize_red_effect
+    elif ctx.scenario == ctx.SCENARIO_GRAND_LIVE:
+        yield _bbox_groups(597, 625), _recognize_base_effect
+        yield _bbox_groups(568, 593), _recognize_red_effect
+    else:
+        raise NotImplementedError(ctx.scenario)
+
+
+def _performance_recognitions(
+    ctx: Context, rp: mathtools.ResizeProxy
+) -> Iterator[
+    Tuple[
+        Tuple[_Vector4, _Vector4, _Vector4, _Vector4, _Vector4],
+        Callable[[Image], int],
+    ]
+]:
+    def _bbox_groups(l: int, r: int):
+        return (
+            (l, rp.vector(265, 540), r, rp.vector(292, 540)),
+            (l, rp.vector(314, 540), r, rp.vector(341, 540)),
+            (l, rp.vector(363, 540), r, rp.vector(390, 540)),
+            (l, rp.vector(412, 540), r, rp.vector(439, 540)),
+            (l, rp.vector(461, 540), r, rp.vector(488, 540)),
+        )
+
+    if ctx.scenario == ctx.SCENARIO_GRAND_LIVE:
+        base_x = rp.vector(88, 540)
+        l, r = base_x, base_x + rp.vector(58, 540)
+        yield _bbox_groups(l, r), _recognize_base_effect
     else:
         raise NotImplementedError(ctx.scenario)
 
@@ -714,6 +746,14 @@ def _recognize_training(ctx: Context, img: Image) -> Training:
             self.guts += recognize(img.crop(bbox_group[3]))
             self.wisdom += recognize(img.crop(bbox_group[4]))
             self.skill += recognize(img.crop(bbox_group[5]))
+
+        if ctx.scenario == ctx.SCENARIO_GRAND_LIVE:
+            for bbox_group, recognize in _performance_recognitions(ctx, rp):
+                self.dance += recognize(img.crop(bbox_group[0]))
+                self.passion += recognize(img.crop(bbox_group[1]))
+                self.vocal += recognize(img.crop(bbox_group[2]))
+                self.visual += recognize(img.crop(bbox_group[3]))
+                self.mental += recognize(img.crop(bbox_group[4]))
 
         # TODO: recognize vitality
         # plugin hook

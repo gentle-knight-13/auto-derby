@@ -38,7 +38,12 @@ class g:
 
 
 def _year4_date_text(ctx: Context) -> Iterator[Text]:
-    if ctx.scenario in (ctx.SCENARIO_URA, ctx.SCENARIO_AOHARU, ctx.SCENARIO_GRAND_LIVE, ctx.SCENARIO_UNKNOWN):
+    if ctx.scenario in (
+        ctx.SCENARIO_URA,
+        ctx.SCENARIO_AOHARU,
+        ctx.SCENARIO_GRAND_LIVE,
+        ctx.SCENARIO_UNKNOWN,
+    ):
         yield "ファイナルズ開催中"
     if ctx.scenario in (ctx.SCENARIO_CLIMAX, ctx.SCENARIO_UNKNOWN):
         yield "クライマックス開催中"
@@ -332,7 +337,7 @@ class Context:
         self.shop_coin = 0
 
         self.dance = 0
-        self.passion =0
+        self.passion = 0
         self.vocal = 0
         self.visual = 0
         self.mental = 0
