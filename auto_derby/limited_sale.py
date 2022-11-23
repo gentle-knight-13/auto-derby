@@ -36,9 +36,7 @@ def buy_first_n(n: int) -> None:
 
     action.wait_tap_image(templates.CLOSE_NOW_BUTTON)
     action.wait_tap_image(templates.GREEN_OK_BUTTON)
-    action.wait_image(templates.RETURN_BUTTON)
-    for tmpl, pos in action.match_image_until_disappear(templates.RETURN_BUTTON):
-        app.device.tap(action.template_rect(tmpl, pos))
+    action.wait_tap_image(templates.RETURN_BUTTON)
 
 
 def ignore() -> None:
