@@ -130,9 +130,9 @@ def wait_tap_image(
 
 def get_random_pos() -> Tuple[int, int]:
     random.seed()
-    x = random.randint(-5, 5)
+    x = random.randint(-2, 2)
     random.seed()
-    y = random.randint(-5, 5)
+    y = random.randint(-2, 2)
     return (x, y)
 
 
