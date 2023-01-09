@@ -18,8 +18,7 @@ _ACTION_PICK = 4
 _DEFAULT_ACTION = _ACTION_BAN
 
 _RULES: Dict[Tuple[int, Text], int] = {
-    (12, "ジュニア級未勝利戦"): _ACTION_PICK,
-    (13, "ジュニア級未勝利戦"): _ACTION_PICK,
+    (15, "ジュニア級未勝利戦"): _ACTION_PICK,
     (15, "新潟ジュニアステークス"): _ACTION_PICK,
     (16, "札幌ジュニアステークス"): _ACTION_PICK,
     (18, "サウジアラビアロイヤルカップ"): _ACTION_PICK,
@@ -65,6 +64,7 @@ _RULES: Dict[Tuple[int, Text], int] = {
     (56, "ヴィクトリアマイル"): _ACTION_PICK,
     (58, "安田記念"): _ACTION_PICK,
     (59, "宝塚記念"): _ACTION_PICK,
+    # (66, "府中ウマ娘ステークス"): _ACTION_PICK,
     (67, "天皇賞（秋）"): _ACTION_PICK,
     (68, "エリザベス女王杯"): _ACTION_PICK,
 }
