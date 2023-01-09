@@ -18,6 +18,7 @@ def legend_race():
             templates.LIMITED_SALE_OPEN,
             templates.LEGEND_RACE_REWARD,
             templates.LEGEND_RACE_COLLECT_ALL_REWARD,
+            templates.GREEN_RETURN_BUTTON,
         )
         name = tmpl.name
         if name == templates.CONNECTING:
@@ -26,6 +27,8 @@ def legend_race():
             config.on_limited_sale()
         elif name == templates.LEGEND_RACE_COLLECT_ALL_REWARD:
             app.device.tap(action.template_rect(tmpl, pos))
+            return
+        elif name == templates.GREEN_RETURN_BUTTON:
             return
         else:
             app.device.tap(action.template_rect(tmpl, pos))
