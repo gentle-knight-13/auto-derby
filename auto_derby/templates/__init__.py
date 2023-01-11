@@ -30,6 +30,9 @@ GREEN_BATTLE_BUTTON = "green_battle_button.png"
 GREEN_NEXT_BUTTON = "green_next_button.png"
 GREEN_OK_BUTTON = "green_ok_button.png"
 GREEN_RETURN_BUTTON = "green_return_button.png"
+GREEN_SKIP_1_BUTTON = "green_skip_1_button.png"
+GREEN_SKIP_2_BUTTON = "green_skip_2_button.png"
+GREEN_START_NURTURING_BUTTON = "green_start_nurturing_button.png"
 GREEN_TIGHT_OK_BUTTON = "green_tight_ok_button.png"
 HOME_BUTTON = "home_button.png"
 JUPITER_CUP = "jupiter_cup.png"
@@ -83,6 +86,9 @@ ROULETTE_DERBY_TAP_BUTTON_DISABLED_POS = "roulette_derby_tap_button_disabled.pos
 RP_NOT_ENOUGH = "rp_not_enough.png"
 SCROLL_TO_END = "scroll_to_end.png"
 SCROLL_TO_END_POS = "scroll_to_end.pos.png"
+SINGLE_MODE_ALL_EVENT_SHORTENED_SETTINGS = (
+    "single_mode_all_event_shortened_settings.png"
+)
 SINGLE_MODE_AOHARU_AUTO_FORMATION_TITLE = "single_mode_aoharu_auto_formation_title.png"
 SINGLE_MODE_AOHARU_AUTO_FORMATION_TITLE_POS = (
     "single_mode_aoharu_auto_formation_title.pos.png"
@@ -179,6 +185,9 @@ SINGLE_MODE_CRANE_GAME_PLAY_GUIDE_BUTTON_POS = (
 )
 SINGLE_MODE_END_BUTTON = "single_mode_end_button.png"
 SINGLE_MODE_END_BUTTON_POS = "single_mode_end_button.pos.png"
+SINGLE_MODE_EVENT_SHORTENED_SETTINGS_DECIDE_BUTTON = (
+    "single_mode_event_shortened_settings_decide_button.png"
+)
 SINGLE_MODE_FANS_NOT_ENOUGH = "single_mode_fans_not_enough.png"
 SINGLE_MODE_FANS_NOT_ENOUGH_POS = "single_mode_fans_not_enough.pos.png"
 SINGLE_MODE_FINISH = "single_mode_finish.png"
@@ -243,6 +252,7 @@ SINGLE_MODE_SCHEDULED_RACE_OPENING_BANNER_POS = (
 SINGLE_MODE_SHOP_DECIDE_BUTTON = "single_mode_shop_decide_button.png"
 SINGLE_MODE_SHOP_ITEM_PRICE = "single_mode_shop_item_price.png"
 SINGLE_MODE_SHOP_USE_CONFIRM_BUTTON = "single_mode_shop_use_confirm_button.png"
+SINGLE_MODE_SKIP_BUTTON = "single_mode_skip_button.png"
 SINGLE_MODE_TARGET_GRADE_POINT_NOT_ENOUGH = (
     "single_mode_target_grade_point_not_enough.png"
 )
@@ -261,6 +271,7 @@ SINGLE_MODE_URA_FINALS = "single_mode_ura_finals.png"
 SINGLE_MODE_URA_FINALS_POS = "single_mode_ura_finals.pos.png"
 SKIP_BUTTON = "skip_button.png"
 SKIP_BUTTON_POS = "skip_button.pos.png"
+SKIP_OFF_BUTTON = "skip_off_button.png"
 TEAM_RACE_ALL_RACE_RESULT_BUTTON = "team_race_all_race_result_button.png"
 TEAM_RACE_ALL_RACE_RESULT_BUTTON_POS = "team_race_all_race_result_button.pos.png"
 TEAM_RACE_BUTTON = "team_race_button.png"

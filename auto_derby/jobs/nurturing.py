@@ -197,6 +197,24 @@ def _ac_handle_turn(ac: _ActionContext):
     _handle_turn(ac.ctx)
 
 
+def _ac_handle_nurturing_settings(ac: _ActionContext):
+    while True:
+        tmpl, pos = action.wait_image(
+            templates.GREEN_START_NURTURING_BUTTON, templates.SINGLE_MODE_SKIP_BUTTON
+        )
+        name = tmpl.name
+        if name == templates.GREEN_START_NURTURING_BUTTON:
+            app.device.tap(action.template_rect(tmpl, pos))
+        elif name == templates.SINGLE_MODE_SKIP_BUTTON:
+            app.device.tap(action.template_rect(tmpl, pos))
+            break
+
+    action.wait_tap_image(templates.SINGLE_MODE_ALL_EVENT_SHORTENED_SETTINGS)
+    action.wait_tap_image(templates.SKIP_OFF_BUTTON)
+    action.wait_tap_image(templates.GREEN_SKIP_1_BUTTON)
+    action.wait_tap_image(templates.SINGLE_MODE_EVENT_SHORTENED_SETTINGS_DECIDE_BUTTON)
+
+
 class _SingleModeEnd(StopIteration):
     pass
 
@@ -310,6 +328,7 @@ def _template_actions(ctx: Context) -> Iterator[Tuple[_Template, _Handler]]:
     yield templates.SINGLE_MODE_RACE_NEXT_BUTTON, _tap
     yield templates.SINGLE_MODE_OPTION1, _ac_handle_option
     yield templates.GREEN_NEXT_BUTTON, _tap
+    yield templates.GREEN_START_NURTURING_BUTTON, _ac_handle_nurturing_settings
     yield templates.SINGLE_MODE_URA_FINALS, _handle_target_race
     yield templates.SINGLE_MODE_GENE_INHERIT, _tap
     yield templates.SINGLE_MODE_CRANE_GAME_BUTTON, _handle_crane_game
