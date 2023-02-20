@@ -10,6 +10,7 @@ def champions_meeting():
     while True:
         tmpl, pos = action.wait_image(
             templates.CONNECTING,
+            templates.GREEN_OK_BUTTON,
             templates.RETRY_BUTTON,
             templates.GREEN_NEXT_BUTTON,
             templates.SKIP_BUTTON,
@@ -19,6 +20,7 @@ def champions_meeting():
             templates.CHAMPIONS_MEETING_ENTRY_BUTTON,
             templates.CHAMPIONS_MEETING_CONFIRM_TITLE,
             templates.CHAMPIONS_MEETING_REGISTER_BUTTON,
+            templates.CHAMPIONS_MEETING_MATCHING_BUTTON,
             templates.CHAMPIONS_MEETING_RACE_BUTTON,
             templates.CHAMPIONS_MEETING_REWARD_BUTTON,
             templates.LEGEND_RACE_START_BUTTON,
