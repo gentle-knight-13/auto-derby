@@ -926,6 +926,7 @@ class DebuffRecoveryItemScore(ExpansionItemScore):
             quantity=2,
             exchange_score_=10,
             turn=49,  # senior 01 month second half
+            use_directly=True,
         )
 
     def exchange_score(self, base_score: int, item: Item, ctx: Context) -> int:
