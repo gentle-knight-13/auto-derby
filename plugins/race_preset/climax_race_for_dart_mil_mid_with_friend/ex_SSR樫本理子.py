@@ -103,7 +103,7 @@ class Plugin(auto_derby.Plugin):
             26, # classic 01 month second half
             32, # classic 04 month second half
             35, # classic 06 month first half
-            42, # classic 09 month second half
+            48, # classic 12 month second half
         ]
 
         class Option(auto_derby.config.single_mode_go_out_option_class):
