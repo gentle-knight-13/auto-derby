@@ -29,6 +29,8 @@ class Option:
     TYPE_MAIN = 1
     # support card
     TYPE_SUPPORT = 2
+    # group card
+    TYPE_GROUP = 3
 
     @classmethod
     def new(cls) -> Option:
@@ -38,6 +40,7 @@ class Option:
         self.type: int = Option.TYPE_UNDEFINED
         self.current_event_count = 0
         self.total_event_count = 0
+        self.current_group_event_count = 0
         self.position: Tuple[int, int] = (0, 0)
         self.bbox: Tuple[int, int, int, int] = (0, 0, 0, 0)
         self.name = ""
@@ -46,6 +49,7 @@ class Option:
         type_text = {
             Option.TYPE_MAIN: "MAIN",
             Option.TYPE_SUPPORT: "SUPPORT",
+            Option.TYPE_GROUP: "GROUP",
             Option.TYPE_UNDEFINED: "UNDEFINED",
         }.get(self.type, "UNKNOWN")
         return f"Option<name={self.name},type={type_text},event={self.current_event_count}/{self.total_event_count},pos={self.position}>"
@@ -63,20 +67,20 @@ class Option:
             if ctx.CONDITION_HEADACHE in ctx.conditions:
                 return 0
             return 0.5
-        if self.type == self.TYPE_SUPPORT:
+        if self.type == self.TYPE_SUPPORT or self.type == self.TYPE_GROUP:
             return 0.4
         return 0
 
     def mood_rate(self, ctx: Context) -> float:
         if self.type == self.TYPE_MAIN:
             return 1.2
-        if self.type == self.TYPE_SUPPORT:
+        if self.type == self.TYPE_SUPPORT or self.type == self.TYPE_GROUP:
             return 0.5
         return 0
 
     def vitality(self, ctx: Context) -> float:
         ret = 5
-        if self.type == self.TYPE_SUPPORT:
+        if self.type == self.TYPE_SUPPORT or self.type == self.TYPE_GROUP:
             ret = 15
         return ret / ctx.max_vitality
 
@@ -119,7 +123,7 @@ class Option:
         ret += t.score(ctx)
 
         # try finish all events
-        if self.type == self.TYPE_SUPPORT:
+        if self.type == self.TYPE_SUPPORT or self.type == self.TYPE_GROUP:
             ret += mathtools.interpolate(
                 ctx.turn_count(),
                 (

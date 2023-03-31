@@ -20,6 +20,7 @@ class Partner:
     TYPE_FRIEND: int = 6
     TYPE_OTHER: int = 7
     TYPE_TEAMMATE: int = 8
+    TYPE_GROUP: int = 9
 
     def __init__(self):
         self.level = 0
@@ -78,6 +79,7 @@ class Partner:
             Partner.TYPE_FRIEND: "frd",
             Partner.TYPE_OTHER: "oth",
             Partner.TYPE_TEAMMATE: "tm",
+            Partner.TYPE_GROUP: "grp"
         }.get(v, f"unknown({v})")
 
     def to_short_text(self):

@@ -336,7 +336,7 @@ def _iter_training_images(static: bool):
 
 
 def _recognize_type_color(rp: mathtools.ResizeProxy, icon_img: Image) -> int:
-    type_pos = rp.vector2((7, 18), 540)
+    type_pos = rp.vector2((2, 2), 540)
     type_colors = (
         ((36, 170, 255), Partner.TYPE_SPEED),
         ((255, 106, 86), Partner.TYPE_STAMINA),
@@ -344,6 +344,7 @@ def _recognize_type_color(rp: mathtools.ResizeProxy, icon_img: Image) -> int:
         ((255, 96, 156), Partner.TYPE_GUTS),
         ((3, 191, 126), Partner.TYPE_WISDOM),
         ((255, 179, 22), Partner.TYPE_FRIEND),
+        ((249, 255, 240), Partner.TYPE_GROUP),
     )
     for color, v in type_colors:
         if (

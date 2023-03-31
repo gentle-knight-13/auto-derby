@@ -38,7 +38,14 @@ def _recognize_type(rp: mathtools.ResizeProxy, img: Image) -> int:
         imagetools.compare_color(img.getpixel(friendship_gauge_pos), (236, 231, 228))
         > 0.9
     )
-    if has_friendship_gauge:
+    has_page_icon_pos = rp.vector2((470, 75), 500)
+    has_page_icon = (
+        imagetools.compare_color(img.getpixel(has_page_icon_pos), (99, 93, 126))
+        > 0.9
+    )
+    if has_page_icon:
+        return go_out.Option.TYPE_GROUP
+    elif has_friendship_gauge:
         return go_out.Option.TYPE_SUPPORT
     return go_out.Option.TYPE_MAIN
 
@@ -73,6 +80,28 @@ def _recognize_item(rp: mathtools.ResizeProxy, img: Image) -> go_out.Option:
 
             name_bbox = rp.vector4((95, 16, 316, 40), 540)
             v.name = _recognize_name(img.crop(name_bbox))
+        elif v.type == go_out.Option.TYPE_GROUP:
+            event_count_pos = rp.vector4((295, 63, 295 + 55, 63 + 20), 500)
+            event_count_img = img.crop(event_count_pos)
+            cv_img = imagetools.cv_image(event_count_img.convert("L"))
+            _, binary_img = cv2.threshold(cv_img, 120, 255, cv2.THRESH_BINARY_INV)
+            text = ocr.text(imagetools.pil_image(binary_img))
+            app.log.image(
+                "event_text",
+                cv_img,
+                layers={
+                    "binary": binary_img,
+                },
+                level=app.DEBUG,
+            )
+            current_event_count_text, total_event_count_text = filter(
+                None, text.split("/")
+            )
+            v.current_event_count = int(current_event_count_text)
+            v.total_event_count = int(total_event_count_text)
+            name_bbox = rp.vector4((95, 16, 316, 40), 540)
+            v.name = _recognize_name(img.crop(name_bbox))
+
         app.log.image("recognize: %s" % v, img, level=app.DEBUG)
         return v
     except:
