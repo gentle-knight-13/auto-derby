@@ -16,9 +16,11 @@ from ..scenes.single_mode import (
     RaceMenuScene,
     RaceTurnsIncorrect,
     ShopScene,
+    KnowledgeTableMenuScene,
+    GrandMastersRaceMenuScene,
 )
 from ..scenes.single_mode.item_menu import ItemMenuScene
-from ..single_mode import Context, commands, event, item
+from ..single_mode import Context, commands, event, item, Race
 
 ALL_OPTIONS = [
     templates.SINGLE_MODE_OPTION1,
@@ -89,6 +91,17 @@ def _handle_item_list(ctx: Context, cs: CommandScene):
     return
 
 
+def _handle_knowledge_table(
+    ctx: Context, cs: CommandScene, command: commands.Command
+) -> bool:
+    if not cs.has_learn_wisdom:
+        return False
+    scene = KnowledgeTableMenuScene.enter(ctx)
+    is_learn = scene.learn_goddess_wisdom(ctx, command)
+    cs.enter(ctx)
+    return is_learn
+
+
 class _CommandPlan:
     def __init__(
         self,
@@ -127,6 +140,16 @@ def _has_command_changing_effect(es: item.EffectSummary) -> bool:
     return False
 
 
+def _sort_command_plans(
+    ctx: Context, turn_commands: tuple[commands.Command, ...]
+) -> List[_CommandPlan]:
+    return sorted(
+        (_CommandPlan(ctx, i) for i in turn_commands),
+        key=lambda x: x.score,
+        reverse=True,
+    )
+
+
 def _handle_turn(ctx: Context):
     scene = CommandScene.enter(ctx)
     scene.recognize(ctx)
@@ -139,15 +162,18 @@ def _handle_turn(ctx: Context):
         turn_commands = tuple(commands.from_context(ctx))
         es_delta = ctx.item_history.effect_summary_delta()
         _handle_item_list(ctx, scene)
+
+    plan = _sort_command_plans(ctx, turn_commands)[0]
+    if _handle_knowledge_table(ctx, scene, plan.command):
+        scene = CommandScene.enter(ctx)
+        scene.recognize(ctx)
+        turn_commands = tuple(commands.from_context(ctx))
+
     ctx.next_turn()
     app.log.text("context: %s" % ctx)
     for i in ctx.items:
         app.log.text("item:\t#%s\tx%s\t%s" % (i.id, i.quantity, i.name))
-    command_plans = sorted(
-        (_CommandPlan(ctx, i) for i in turn_commands),
-        key=lambda x: x.score,
-        reverse=True,
-    )
+    command_plans = _sort_command_plans(ctx, turn_commands)
     for cp in command_plans:
         app.log.text(
             "score:\t%2.2f\t%s;%s" % (cp.score, cp.command.name(), cp.explain())
@@ -224,6 +250,7 @@ def _handle_target_race(ac: _ActionContext):
     scene.recognize(ctx)
     _handle_item_list(ctx, scene)
     _handle_shop(ctx, scene)
+    _handle_knowledge_table(ctx, scene, commands.RaceCommand(Race()))
     ctx.next_turn()
     try:
         scene = RaceMenuScene().enter(ctx)
@@ -298,9 +325,25 @@ def _handle_aoharu_team_race(ac: _ActionContext):
             break
 
 
+def _handle_grand_masters_race(ac: _ActionContext):
+    ctx = ac.ctx
+    scene = CommandScene.enter(ctx)
+    scene.recognize(ctx)
+    scene = GrandMastersRaceMenuScene().enter(ctx)
+    race = scene.recognize(ctx)
+    action.wait_tap_image(templates.SINGLE_MODE_GRAND_MASTERS_RACE_START_BUTTON)
+    _CommandPlan(
+        ctx, commands.RaceCommand(race, selected=True, skip_menu=True)
+    ).execute(ctx)
+
+
 def _template_actions(ctx: Context) -> Iterator[Tuple[_Template, _Handler]]:
     yield templates.CONNECTING, _pass
+    yield templates.CLOSE_BUTTON, _tap
     yield templates.RETRY_BUTTON, _tap
+    yield templates.SINGLE_MODE_GRAND_MASTERS_GUR_BUTTON, _handle_grand_masters_race
+    yield templates.SINGLE_MODE_GRAND_MASTERS_WBC_BUTTON, _handle_grand_masters_race
+    yield templates.SINGLE_MODE_GRAND_MASTERS, _handle_target_race
     yield templates.SINGLE_MODE_COMMAND_TRAINING, _ac_handle_turn
     yield templates.SINGLE_MODE_FANS_NOT_ENOUGH, _handle_fan_not_enough
     yield templates.SINGLE_MODE_TARGET_RACE_NO_PERMISSION, _handle_fan_not_enough
@@ -327,6 +370,10 @@ def _template_actions(ctx: Context) -> Iterator[Tuple[_Template, _Handler]]:
         yield templates.SINGLE_MODE_TARGET_GRADE_POINT_NOT_ENOUGH, _set_scenario(
             ctx.SCENARIO_CLIMAX, _cancel
         )
+    # if ctx.scenario in (ctx.SCENARIO_GRAND_MASTERS, ctx.SCENARIO_UNKNOWN):
+    #     yield templates.SINGLE_MODE_GRAND_MASTERS_KNOWLEDGE_TABLE_BUTTON, _set_scenario(
+    #         ctx.SCENARIO_GRAND_MASTERS, _close
+    #     )
 
 
 def _spec_key(tmpl: _Template) -> Text:

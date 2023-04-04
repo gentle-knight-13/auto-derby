@@ -42,6 +42,8 @@ def _year4_date_text(ctx: Context) -> Iterator[Text]:
         yield "ファイナルズ開催中"
     if ctx.scenario in (ctx.SCENARIO_CLIMAX, ctx.SCENARIO_UNKNOWN):
         yield "クライマックス開催中"
+    if ctx.scenario in (ctx.SCENARIO_GRAND_MASTERS, ctx.SCENARIO_UNKNOWN):
+        yield "GM 開催中"
 
 
 def _ocr_date(ctx: Context, img: Image) -> Tuple[int, int, int]:
@@ -193,6 +195,17 @@ def _recognize_property(img: Image) -> int:
     return int(ocr.text(imagetools.pil_image(binary_img)))
 
 
+def _recognize_max_property(img: Image) -> int:
+    img = imagetools.resize(img, height=32)
+    cv_img = np.asarray(img.convert("L"))
+    _, binary_img = cv2.threshold(cv_img, 160, 255, cv2.THRESH_BINARY_INV)
+    imagetools.fill_area(binary_img, (0,), size_lt=2)
+    app.log.image(
+        "property limit", cv_img, layers={"binary": binary_img}, level=app.DEBUG
+    )
+    return int(ocr.text(imagetools.pil_image(binary_img)))
+
+
 def _recognize_scenario(rp: mathtools.ResizeProxy, img: Image) -> Text:
     spec = (
         (
@@ -206,6 +219,37 @@ def _recognize_scenario(rp: mathtools.ResizeProxy, img: Image) -> Text:
                 templates.SINGLE_MODE_CLIMAX_RANK_POINT_ICON, threshold=0.8
             ),
             Context.SCENARIO_CLIMAX,
+        ),
+        (
+            template.Specification(
+                templates.SINGLE_MODE_GRAND_MASTERS_KNOWLEDGE_TABLE_BUTTON,
+                threshold=0.8,
+            ),
+            Context.SCENARIO_GRAND_MASTERS,
+        ),
+        (
+            template.Specification(
+                templates.SINGLE_MODE_GRAND_MASTERS_WISDOM_PIECE, threshold=0.8
+            ),
+            Context.SCENARIO_GRAND_MASTERS,
+        ),
+        (
+            template.Specification(
+                templates.SINGLE_MODE_GRAND_MASTERS_READY, threshold=0.8
+            ),
+            Context.SCENARIO_GRAND_MASTERS,
+        ),
+        (
+            template.Specification(
+                templates.SINGLE_MODE_GRAND_MASTERS_GUR_BUTTON, threshold=0.8
+            ),
+            Context.SCENARIO_GRAND_MASTERS,
+        ),
+        (
+            template.Specification(
+                templates.SINGLE_MODE_GRAND_MASTERS_WBC_BUTTON, threshold=0.8
+            ),
+            Context.SCENARIO_GRAND_MASTERS,
         ),
         (templates.SINGLE_MODE_AOHARU_CLASS_DETAIL_BUTTON, Context.SCENARIO_AOHARU),
         (templates.SINGLE_MODE_CLASS_DETAIL_BUTTON, Context.SCENARIO_URA),
@@ -227,6 +271,8 @@ def _date_bbox(ctx: Context, rp: mathtools.ResizeProxy):
         return rp.vector4((125, 32, 278, 48), 540)
     if ctx.scenario == ctx.SCENARIO_CLIMAX:
         return rp.vector4((11, 32, 163, 48), 540)
+    if ctx.scenario == ctx.SCENARIO_GRAND_MASTERS:
+        return rp.vector4((125, 32, 278, 48), 540)
     return rp.vector4((23, 66, 328, 98), 1080)
 
 
@@ -269,6 +315,7 @@ class Context:
     SCENARIO_URA = "新設！　URAファイナルズ！！"
     SCENARIO_AOHARU = "アオハル杯～輝け、チームの絆～"
     SCENARIO_CLIMAX = "Make a new track!!  ～クライマックス開幕～"
+    SCENARIO_GRAND_MASTERS = "グランドマスターズ ―継ぐ者達へ―"
 
     @staticmethod
     def new() -> Context:
@@ -281,6 +328,12 @@ class Context:
         self.power = 0
         self.guts = 0
         self.wisdom = 0
+        self.max_speed = 0
+        self.max_stamina = 0
+        self.max_power = 0
+        self.max_guts = 0
+        self.max_wisdom = 0
+
         # (year, month, half-month), 1-base
         self.date = (0, 0, 0)
         self.vitality = 0.0
@@ -391,33 +444,61 @@ class Context:
         guts_bbox = (rp.vector(264, 466), t, rp.vector(308, 466), b)
         wisdom_bbox = (rp.vector(337, 466), t, rp.vector(381, 466), b)
 
-        self.date = _ocr_date(self, screenshot.crop(date_bbox))
+        base2_y = detail_button_pos[1] + rp.vector(89, 466)
+        t2, b2 = base2_y, base2_y + rp.vector(13, 466)
+        max_speed_bbox = (rp.vector(53, 466), t2, rp.vector(87, 466), b2)
+        max_stamina_bbox = (rp.vector(126, 466), t2, rp.vector(161, 466), b2)
+        max_power_bbox = (rp.vector(199, 466), t2, rp.vector(234, 466), b2)
+        max_guts_bbox = (rp.vector(272, 466), t2, rp.vector(308, 466), b2)
+        max_wisdom_bbox = (rp.vector(344, 466), t2, rp.vector(380, 466), b2)
 
-        self.vitality = _recognize_vitality(screenshot.crop(vitality_bbox))
-
-        # mood_pos change when vitality increase
-        for index, mood_pos in enumerate(
-            (
-                rp.vector2((395, 113), 466),
-                rp.vector2((473, 133), 540),
-            )
+        if not any(
+            [
+                tuple(
+                    template.match(
+                        screenshot, templates.SINGLE_MODE_GRAND_MASTERS_WBC_BUTTON
+                    )
+                ),
+                tuple(
+                    template.match(
+                        screenshot, templates.SINGLE_MODE_GRAND_MASTERS_GUR_BUTTON
+                    )
+                ),
+            ]
         ):
-            mood_color = screenshot.getpixel(mood_pos)
-            assert isinstance(mood_color, tuple), mood_color
-            try:
-                self.mood = _recognize_mood(
-                    (mood_color[0], mood_color[1], mood_color[2])
+            self.date = _ocr_date(self, screenshot.crop(date_bbox))
+
+            self.vitality = _recognize_vitality(screenshot.crop(vitality_bbox))
+
+            # mood_pos change when vitality increase
+            for index, mood_pos in enumerate(
+                (
+                    rp.vector2((395, 113), 466),
+                    rp.vector2((473, 133), 540),
                 )
-                break
-            except ValueError:
-                if index == 1:
-                    raise
+            ):
+                mood_color = screenshot.getpixel(mood_pos)
+                assert isinstance(mood_color, tuple), mood_color
+                try:
+                    self.mood = _recognize_mood(
+                        (mood_color[0], mood_color[1], mood_color[2])
+                    )
+                    break
+                except ValueError:
+                    if index == 1:
+                        raise
 
         self.speed = _recognize_property(screenshot.crop(speed_bbox))
         self.stamina = _recognize_property(screenshot.crop(stamina_bbox))
         self.power = _recognize_property(screenshot.crop(power_bbox))
         self.guts = _recognize_property(screenshot.crop(guts_bbox))
         self.wisdom = _recognize_property(screenshot.crop(wisdom_bbox))
+
+        self.max_speed = _recognize_max_property(screenshot.crop(max_speed_bbox))
+        self.max_stamina = _recognize_max_property(screenshot.crop(max_stamina_bbox))
+        self.max_power = _recognize_max_property(screenshot.crop(max_power_bbox))
+        self.max_guts = _recognize_max_property(screenshot.crop(max_guts_bbox))
+        self.max_wisdom = _recognize_max_property(screenshot.crop(max_wisdom_bbox))
 
     def update_by_class_detail(self, screenshot: Image) -> None:
         rp = mathtools.ResizeProxy(screenshot.width)

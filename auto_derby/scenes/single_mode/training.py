@@ -624,6 +624,10 @@ def _recognize_partners(ctx: Context, img: Image) -> Iterator[training.Partner]:
             rp.vector4((448, 147, 516, 220), 540),
             rp.vector(90, 540),
         ),
+        ctx.SCENARIO_GRAND_MASTERS: (
+            rp.vector4((448, 147, 516, 220), 540),
+            rp.vector(90, 540),
+        ),
     }[ctx.scenario]
     icons_bottom = rp.vector(578, 540)
     while icon_bbox[2] < icons_bottom:
@@ -666,6 +670,9 @@ def _effect_recognitions(
         yield _bbox_groups(597, 625), _recognize_base_effect
         yield _bbox_groups(570, 595), _recognize_red_effect
     elif ctx.scenario == ctx.SCENARIO_CLIMAX:
+        yield _bbox_groups(595, 623), _recognize_base_effect
+        yield _bbox_groups(568, 593), _recognize_red_effect
+    elif ctx.scenario == ctx.SCENARIO_GRAND_MASTERS:
         yield _bbox_groups(595, 623), _recognize_base_effect
         yield _bbox_groups(568, 593), _recognize_red_effect
     else:

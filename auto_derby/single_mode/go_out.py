@@ -20,6 +20,8 @@ class g:
 def command_template(ctx: Context) -> Union[Text, template.Specification]:
     if ctx.scenario == ctx.SCENARIO_CLIMAX:
         return templates.SINGLE_MODE_CLIMAX_COMMAND_GO_OUT
+    if ctx.scenario == ctx.SCENARIO_GRAND_MASTERS:
+        return templates.SINGLE_MODE_GRAND_MASTERS_COMMAND_GO_OUT
     return templates.SINGLE_MODE_COMMAND_GO_OUT
 
 

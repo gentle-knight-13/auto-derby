@@ -40,7 +40,14 @@ def _retry_method(ctx: Context) -> Optional[Callable[[], None]]:
 
         def _retry():
             action.tap_image(templates.SINGLE_MODE_CLIMAX_WHITE_CONTINUE_BUTTON)
-            action.wait_tap_image(templates.SINGLE_MODE_CLIMAX_GREEN_CONTINUE_BUTTON)
+            if ctx.scenario == ctx.SCENARIO_GRAND_MASTERS:
+                action.wait_tap_image(
+                    templates.SINGLE_MODE_GRAND_MASTERS_GREEN_CONTINUE_BUTTON
+                )
+            else:
+                action.wait_tap_image(
+                    templates.SINGLE_MODE_CLIMAX_GREEN_CONTINUE_BUTTON
+                )
 
         return _retry
 
@@ -100,19 +107,21 @@ def _handle_race_result(ctx: Context, race: Race):
 
 
 class RaceCommand(Command):
-    def __init__(self, race: Race, *, selected: bool = False):
+    def __init__(self, race: Race, *, selected: bool = False, skip_menu: bool = False):
         self.race = race
         self.selected = selected
+        self.skip_menu = skip_menu
 
     def name(self) -> Text:
         return str(self.race)
 
     def execute(self, ctx: Context) -> None:
         g.on_command(ctx, self)
-        scene = RaceMenuScene.enter(ctx)
-        if not self.selected:
-            scene.choose_race(ctx, self.race)
-            self.selected = True
+        if not self.skip_menu:
+            scene = RaceMenuScene.enter(ctx)
+            if not self.selected:
+                scene.choose_race(ctx, self.race)
+                self.selected = True
         race1 = self.race
         estimate_order = race1.estimate_order(ctx)
         if g.pause_if_race_order_gt >= 0 and estimate_order > g.pause_if_race_order_gt:

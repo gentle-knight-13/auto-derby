@@ -190,6 +190,7 @@ class RaceMenuScene(Scene):
             templates.SINGLE_MODE_FORMAL_RACE_BANNER,
             templates.SINGLE_MODE_URA_FINALS,
             templates.SINGLE_MODE_SCHEDULED_RACE_OPENING_BANNER,
+            templates.SINGLE_MODE_GRAND_MASTERS,
         )
         x, y = pos
         rp = action.resize_proxy()

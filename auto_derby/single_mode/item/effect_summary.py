@@ -290,30 +290,29 @@ class EffectSummary:
             explain += f"mood {ctx.mood} -> {ctx_after.mood};"
 
         min_property = 1
-        max_property = 1200
         if self.speed:
             ctx_after.speed = mathtools.clamp(
-                ctx.speed + self.speed, min_property, max_property
+                ctx.speed + self.speed, min_property, ctx.max_speed
             )
             explain += f"{ctx_after.speed - ctx.speed:+d} speed;"
         if self.stamina:
             ctx_after.stamina = mathtools.clamp(
-                ctx.stamina + self.stamina, min_property, max_property
+                ctx.stamina + self.stamina, min_property, ctx.max_stamina
             )
             explain += f"{ctx_after.stamina - ctx.stamina:+d} stamina;"
         if self.power:
             ctx_after.power = mathtools.clamp(
-                ctx.power + self.power, min_property, max_property
+                ctx.power + self.power, min_property, ctx.max_power
             )
             explain += f"{ctx_after.power - ctx.power:+d} power;"
         if self.guts:
             ctx_after.guts = mathtools.clamp(
-                ctx.guts + self.guts, min_property, max_property
+                ctx.guts + self.guts, min_property, ctx.max_guts
             )
             explain += f"{ctx_after.guts - ctx.guts:+d} guts;"
         if self.wisdom:
             ctx_after.wisdom = mathtools.clamp(
-                ctx.wisdom + self.wisdom, min_property, max_property
+                ctx.wisdom + self.wisdom, min_property, ctx.max_wisdom
             )
             explain += f"{ctx_after.wisdom - ctx.wisdom:+d} wisdom;"
         if self.max_vitality:

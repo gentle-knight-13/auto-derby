@@ -91,6 +91,8 @@ class CommandScene(Scene):
         self.has_scheduled_race = False
         self.can_go_out_with_friend = False
         self.has_shop = False
+        self.has_knowledge_table = False
+        self.has_learn_wisdom = False
 
     @classmethod
     def name(cls):
@@ -125,18 +127,28 @@ class CommandScene(Scene):
             "hasScheduledRace": self.has_scheduled_race,
             "canGoOutWithFriend": self.can_go_out_with_friend,
             "hasShop": self.has_shop,
+            "hasKnowledgeTable": self.has_knowledge_table,
+            "hasLearnWisdom": self.has_learn_wisdom,
         }
 
     def recognize_class(self, ctx: single_mode.Context):
-        action.wait_tap_image(
-            {
-                ctx.SCENARIO_AOHARU: templates.SINGLE_MODE_AOHARU_CLASS_DETAIL_BUTTON,
-                ctx.SCENARIO_CLIMAX: templates.SINGLE_MODE_CLIMAX_CLASS_DETAIL_BUTTON,
-            }.get(
-                ctx.scenario,
-                templates.SINGLE_MODE_CLASS_DETAIL_BUTTON,
+        if action.count_image(
+            templates.SINGLE_MODE_GRAND_MASTERS_RACE_CLASS_DETAIL_BUTTON
+        ):
+            action.wait_tap_image(
+                templates.SINGLE_MODE_GRAND_MASTERS_RACE_CLASS_DETAIL_BUTTON
             )
-        )
+        else:
+            action.wait_tap_image(
+                {
+                    ctx.SCENARIO_AOHARU: templates.SINGLE_MODE_AOHARU_CLASS_DETAIL_BUTTON,
+                    ctx.SCENARIO_CLIMAX: templates.SINGLE_MODE_CLIMAX_CLASS_DETAIL_BUTTON,
+                    ctx.SCENARIO_GRAND_MASTERS: templates.SINGLE_MODE_GRAND_MASTERS_CLASS_DETAIL_BUTTON,
+                }.get(
+                    ctx.scenario,
+                    templates.SINGLE_MODE_CLASS_DETAIL_BUTTON,
+                )
+            )
         time.sleep(0.2)  # wait animation
         action.wait_image(templates.SINGLE_MODE_CLASS_DETAIL_TITLE)
         ctx.update_by_class_detail(app.device.screenshot())
@@ -161,6 +173,25 @@ class CommandScene(Scene):
         )
         if ctx.scenario == ctx.SCENARIO_CLIMAX:
             self.has_shop = action.count_image(templates.SINGLE_MODE_COMMAND_SHOP) > 0
+        if ctx.scenario == ctx.SCENARIO_GRAND_MASTERS:
+            self.has_knowledge_table = (
+                action.count_image(
+                    templates.SINGLE_MODE_GRAND_MASTERS_KNOWLEDGE_TABLE_BUTTON
+                )
+                > 0
+            )
+            self.has_learn_wisdom = any(
+                [
+                    action.count_image(
+                        templates.SINGLE_MODE_GRAND_MASTERS_LEARN_WISDOM_BANNER
+                    )
+                    > 0,
+                    action.count_image(
+                        templates.SINGLE_MODE_GRAND_MASTERS_RACE_LEARN_WISDOM_BANNER
+                    )
+                    > 0,
+                ]
+            )
 
     def recognize_go_out_options(self, ctx: single_mode.Context) -> None:
         if not self.can_go_out_with_friend:
