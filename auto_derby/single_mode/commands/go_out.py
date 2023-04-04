@@ -62,6 +62,13 @@ class GoOutCommand(Command):
 
         if self.option.total_event_count > 0:
             self.option.current_event_count += 1
+
+        if (
+            self.option.type == self.option.TYPE_GROUP
+            and self.option.current_event_count >= self.option.total_event_count
+        ):
+            app.log.text("reset go_out_options", level=app.LogLevel.DEBUG)
+            ctx.go_out_options = ()
         return
 
     def score(self, ctx: Context) -> float:
