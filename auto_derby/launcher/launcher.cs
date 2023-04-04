@@ -155,8 +155,14 @@ namespace NateScarlet.AutoDerby
 
             this.JobOptions1 = new JobOptions();
             this.YearOptions1 = Enum.GetValues(typeof(Year)).Cast<Year>();
+            this.YearOptions2 = Enum.GetValues(typeof(Year)).Cast<Year>();
+            this.YearOptions3 = Enum.GetValues(typeof(Year)).Cast<Year>();
             this.MonthOptions1 = Enum.GetValues(typeof(Month)).Cast<Month>();
-            this.PauseOnSpecifiedTurn = CalculateTurn(this.Year, this.Month);
+            this.MonthOptions2 = Enum.GetValues(typeof(Month)).Cast<Month>();
+            this.MonthOptions3 = Enum.GetValues(typeof(Month)).Cast<Month>();
+            this.PauseOnSpecifiedTurn1 = CalculateTurn(this.Year1, this.Month1);
+            this.PauseOnSpecifiedTurn2 = CalculateTurn(this.Year2, this.Month2);
+            this.PauseOnSpecifiedTurn3 = CalculateTurn(this.Year3, this.Month3);
             this.ForceRunningStyleOptions1 = Enum.GetValues(typeof(ForceRunningStyle)).Cast<ForceRunningStyle>();
             this.NurturingPresetInfoList1 = LoadPresetFiles(@"plugins\nurturing_preset");
             this.RacePresetInfoList1 = LoadPresetFiles(@"plugins\race_preset");
@@ -291,47 +297,133 @@ namespace NateScarlet.AutoDerby
         { get; set; }
 
 
-        public short PauseOnSpecifiedTurn
+        public short PauseOnSpecifiedTurn1
         { get; set; }
 
-        public Year Year
+        public short PauseOnSpecifiedTurn2
+        { get; set; }
+
+        public short PauseOnSpecifiedTurn3
+        { get; set; }
+
+        public Year Year1
         {
             get
             {
-                var _value = (string)key.GetValue("Year", "None");
+                var _value = (string)key.GetValue("Year1", "None");
                 Year year;
                 Enum.TryParse(_value, out year);
                 return year;
             }
             set
             {
-                key.SetValue("Year", value.ToString());
-                this.PauseOnSpecifiedTurn = CalculateTurn(this.Year, this.Month);
-                OnPropertyChanged("Year");
+                key.SetValue("Year1", value.ToString());
+                this.PauseOnSpecifiedTurn1 = CalculateTurn(this.Year1, this.Month1);
+                OnPropertyChanged("Year1");
             }
         }
 
-        public Month Month
+        public Year Year2
         {
             get
             {
-                var _value = (string)key.GetValue("Month", "None");
+                var _value = (string)key.GetValue("Year2", "None");
+                Year year;
+                Enum.TryParse(_value, out year);
+                return year;
+            }
+            set
+            {
+                key.SetValue("Year2", value.ToString());
+                this.PauseOnSpecifiedTurn2 = CalculateTurn(this.Year2, this.Month2);
+                OnPropertyChanged("Year2");
+            }
+        }
+
+        public Year Year3
+        {
+            get
+            {
+                var _value = (string)key.GetValue("Year3", "None");
+                Year year;
+                Enum.TryParse(_value, out year);
+                return year;
+            }
+            set
+            {
+                key.SetValue("Year3", value.ToString());
+                this.PauseOnSpecifiedTurn3 = CalculateTurn(this.Year3, this.Month3);
+                OnPropertyChanged("Year3");
+            }
+        }
+
+        public Month Month1
+        {
+            get
+            {
+                var _value = (string)key.GetValue("Month1", "None");
                 Month month;
                 Enum.TryParse(_value, out month);
                 return month;
             }
             set
             {
-                key.SetValue("Month", value.ToString());
-                this.PauseOnSpecifiedTurn = CalculateTurn(this.Year, this.Month);
-                OnPropertyChanged("Month");
+                key.SetValue("Month1", value.ToString());
+                this.PauseOnSpecifiedTurn1 = CalculateTurn(this.Year1, this.Month1);
+                OnPropertyChanged("Month1");
+            }
+        }
+
+        public Month Month2
+        {
+            get
+            {
+                var _value = (string)key.GetValue("Month2", "None");
+                Month month;
+                Enum.TryParse(_value, out month);
+                return month;
+            }
+            set
+            {
+                key.SetValue("Month2", value.ToString());
+                this.PauseOnSpecifiedTurn2 = CalculateTurn(this.Year2, this.Month2);
+                OnPropertyChanged("Month2");
+            }
+        }
+
+        public Month Month3
+        {
+            get
+            {
+                var _value = (string)key.GetValue("Month3", "None");
+                Month month;
+                Enum.TryParse(_value, out month);
+                return month;
+            }
+            set
+            {
+                key.SetValue("Month3", value.ToString());
+                this.PauseOnSpecifiedTurn3 = CalculateTurn(this.Year3, this.Month3);
+                OnPropertyChanged("Month3");
             }
         }
 
         public IEnumerable<Year> YearOptions1
         { get; set; }
 
+        public IEnumerable<Year> YearOptions2
+        { get; set; }
+
+        public IEnumerable<Year> YearOptions3
+        { get; set; }
+
         public IEnumerable<Month> MonthOptions1
+        { get; set; }
+
+        public IEnumerable<Month> MonthOptions2
+        { get; set; }
+
+        public IEnumerable<Month> MonthOptions3
         { get; set; }
 
         private short CalculateTurn(Year year, Month month)

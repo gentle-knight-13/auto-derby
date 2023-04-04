@@ -35,7 +35,9 @@ from . import condition
 
 class g:
     context_class: Type[Context]
-    pause_on_specified_turn: int = 0
+    pause_on_specified_turn_1: int = 0
+    pause_on_specified_turn_2: int = 0
+    pause_on_specified_turn_3: int = 0
 
 
 def _year4_date_text(ctx: Context) -> Iterator[Text]:
@@ -368,9 +370,15 @@ class Context:
             self._next_turn_cb.pop()()
         app.log.text("next turn: %s" % self)
 
-        if g.pause_on_specified_turn > 0 and self.turn_count_v2() == g.pause_on_specified_turn:
-            app.log.text("Pause on turn count:\t%i" % g.pause_on_specified_turn)
-            terminal.pause(f"Pause on specified turn")
+        if g.pause_on_specified_turn_1 > 0 and self.turn_count_v2() == g.pause_on_specified_turn_1:
+            app.log.text("Pause on specified turn 1, count:\t%i" % g.pause_on_specified_turn_1)
+            terminal.pause(f"Pause on specified turn 1")
+        if g.pause_on_specified_turn_2 > 0 and self.turn_count_v2() == g.pause_on_specified_turn_2:
+            app.log.text("Pause on specified turn 2, count:\t%i" % g.pause_on_specified_turn_2)
+            terminal.pause(f"Pause on specified turn 2")
+        if g.pause_on_specified_turn_3 > 0 and self.turn_count_v2() == g.pause_on_specified_turn_2:
+            app.log.text("Pause on specified turn 3, count:\t%i" % g.pause_on_specified_turn_2)
+            terminal.pause(f"Pause on specified turn 3")
 
     def defer_next_turn(self, cb: Callable[[], None]) -> None:
         self._next_turn_cb.append(cb)
