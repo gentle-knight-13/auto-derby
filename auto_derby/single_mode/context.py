@@ -376,8 +376,8 @@ class Context:
         if g.pause_on_specified_turn_2 > 0 and self.turn_count_v2() == g.pause_on_specified_turn_2:
             app.log.text("Pause on specified turn 2, count:\t%i" % g.pause_on_specified_turn_2)
             terminal.pause(f"Pause on specified turn 2")
-        if g.pause_on_specified_turn_3 > 0 and self.turn_count_v2() == g.pause_on_specified_turn_2:
-            app.log.text("Pause on specified turn 3, count:\t%i" % g.pause_on_specified_turn_2)
+        if g.pause_on_specified_turn_3 > 0 and self.turn_count_v2() == g.pause_on_specified_turn_3:
+            app.log.text("Pause on specified turn 3, count:\t%i" % g.pause_on_specified_turn_3)
             terminal.pause(f"Pause on specified turn 3")
 
     def defer_next_turn(self, cb: Callable[[], None]) -> None:
