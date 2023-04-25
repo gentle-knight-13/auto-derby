@@ -126,14 +126,13 @@ def _recognize_base_effect(img: Image) -> int:
         return 0
 
     # +100 has different color
-    hash100 = "000000000000006600ee00ff00ff00ff004e0000000000000000000000000000"
-    if (
-        imagetools.compare_hash(
-            imagetools.image_hash(imagetools.pil_image(text_img)),
-            hash100,
-        )
-        > 0.9
-    ):
+    hash100 = ["000000000000006600ee00ff00ff00ff004e0000000000000000000000000000",
+               "00000000000000000066007e007e007e007e005e005a00420000000000000000" # mumu 12 1080p
+               ]
+    text_img_hash = imagetools.image_hash(imagetools.pil_image(text_img))
+    hash_sim = max(map(lambda lst: imagetools.compare_hash(text_img_hash, lst), hash100))
+    app.log.image(f"hash100<{hash_sim}>{text_img_hash}", text_img, level=app.DEBUG)
+    if hash_sim > 0.9:
         return 100
     text = ocr.text(image_from_array(text_img))
     if not text:
