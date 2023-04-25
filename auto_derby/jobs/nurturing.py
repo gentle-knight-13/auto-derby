@@ -244,6 +244,21 @@ def _close(ac: _ActionContext):
         return
 
 
+def _handle_go_to_shop(ac: _ActionContext):
+    try:
+        tmpl, pos = action.wait_image_stable(
+            *[templates.CLOSE_BUTTON, templates.CANCEL_BUTTON], duration=0.2, timeout=1
+        )
+    except TimeoutError:
+        app.log.text("go to shop timeout, return to main loop", level=app.WARN)
+        return
+    if tmpl.name == templates.CANCEL_BUTTON:
+        ac.ctx.scenario = Context.SCENARIO_CLIMAX
+    if tmpl.name == templates.CLOSE_BUTTON:
+        ac.ctx.scenario = Context.SCENARIO_GRAND_LIVE
+    app.device.tap(action.template_rect(tmpl, pos))
+
+
 def _ac_handle_turn(ac: _ActionContext):
     try:
         action.wait_image_stable(ac.tmpl, timeout=3)
@@ -408,6 +423,8 @@ def _template_actions(ctx: Context) -> Iterator[Tuple[_Template, _Handler]]:
         yield templates.SINGLE_MODE_GO_TO_SHOP_BUTTON, _cancel
     if ctx.scenario is ctx.SCENARIO_GRAND_LIVE:
         yield templates.SINGLE_MODE_GO_TO_SHOP_BUTTON, _close
+    if ctx.scenario is ctx.SCENARIO_UNKNOWN:
+        yield templates.SINGLE_MODE_GO_TO_SHOP_BUTTON, _handle_go_to_shop
 
 
 def _spec_key(tmpl: _Template) -> Text:
