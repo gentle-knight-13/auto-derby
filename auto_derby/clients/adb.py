@@ -21,7 +21,7 @@ from .. import app
 
 class ADBClient(Client):
     key_path: Text = "adb.local.key"
-    action_wait = 1
+    action_wait = 0.25
 
     def __init__(self, address: Text):
         hostname, port = address.split(":", 2)
