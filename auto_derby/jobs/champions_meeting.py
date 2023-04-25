@@ -13,6 +13,7 @@ def champions_meeting():
             templates.RETRY_BUTTON,
             templates.GREEN_NEXT_BUTTON,
             templates.SKIP_BUTTON,
+            templates.RACE_RESULT_BUTTON,
             templates.RACE_START_BUTTON,
             templates.RACE_CONFIRM_BUTTON,
             templates.CHAMPIONS_MEETING_ENTRY_BUTTON_DISABLED,
@@ -22,6 +23,8 @@ def champions_meeting():
             templates.CHAMPIONS_MEETING_RACE_BUTTON,
             templates.CHAMPIONS_MEETING_REWARD_BUTTON,
             templates.LEGEND_RACE_START_BUTTON,
+            templates.TEAM_RACE_WIN,
+            templates.TEAM_RACE_LOSE,
         )
         name = tmpl.name
         if name == templates.CONNECTING:
