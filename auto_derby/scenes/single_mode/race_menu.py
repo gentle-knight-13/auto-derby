@@ -41,7 +41,7 @@ def _race_by_course(ctx: Context, course: Course) -> Iterator[Race]:
             continue
         if (month, half) not in ((i.month, i.half), (0, 0)):
             continue
-        if i.is_available(ctx) == False:
+        if i.is_available(ctx) is False:
             continue
         if course not in i.courses:
             continue
@@ -174,8 +174,8 @@ class RaceMenuScene(Scene):
         rp = action.resize_proxy()
         self._scroll = VerticalScroll(
             origin=rp.vector2((15, 600), 540),
-            page_size=50,
-            max_page=10,
+            page_size=100,
+            max_page=15,
         )
 
     @classmethod
