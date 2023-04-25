@@ -71,6 +71,7 @@ def to_http_handler_class(h: Handler, methods: Sequence[Text] = ()):
             app.log.text(format % args, level=app.ERROR)
 
         def log_message(self, format: str, *args: Any) -> None:
-            app.log.text(format % args)
+            pass
+            # app.log.text(format % args)
 
     return _Handler
