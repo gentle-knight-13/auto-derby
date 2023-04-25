@@ -1,0 +1,1 @@
+Training<sta=15 vo=12 gut=8 ski=5 vit=-20.0% fail=0% lv=2 ptn=oth,pow@3>

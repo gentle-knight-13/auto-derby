@@ -49,6 +49,12 @@ class Training:
         self.confirm_position: Tuple[int, int] = (0, 0)
         self.partners: Tuple[Partner, ...] = ()
 
+        self.dance: int = 0
+        self.passion: int = 0
+        self.vocal: int = 0
+        self.visual: int = 0
+        self.mental: int = 0
+
     def clone(self) -> Training:
         obj = copy.copy(self)
         return obj
@@ -62,6 +68,11 @@ class Training:
             ("gut", self.guts),
             ("wis", self.wisdom),
             ("ski", self.skill),
+            ("da", self.dance),
+            ("pa", self.passion),
+            ("vo", self.vocal),
+            ("vi", self.visual),
+            ("me", self.mental),
         )
         partner_text = ",".join(i.to_short_text() for i in self.partners)
         return (

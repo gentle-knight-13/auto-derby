@@ -8,6 +8,7 @@ from typing import Any, Dict, Text
 
 import cv2
 import numpy as np
+from PIL.Image import Image
 from auto_derby.single_mode.context import Context
 
 from ... import action, imagetools, ocr, single_mode, template, templates, terminal, app
@@ -82,6 +83,34 @@ def _recognize_shop_coin(ctx: Context):
     ctx.shop_coin = int(text.replace(",", ""))
 
 
+def _recognize_grand_live_performance(ctx: Context):
+    def _recognize_property(img: Image) -> int:
+        img = imagetools.resize(img, height=32)
+        cv_img = np.asarray(img.convert("L"))
+        _, binary_img = cv2.threshold(cv_img, 160, 255, cv2.THRESH_BINARY_INV)
+        app.log.image(
+            "performance", cv_img, layers={"binary": binary_img}, level=app.DEBUG
+        )
+        return int(ocr.text(imagetools.pil_image(binary_img)))
+
+    rp = action.resize_proxy()
+    screenshot = app.device.screenshot()
+
+    base_x = rp.vector(37, 540)
+    l, r = base_x, base_x + rp.vector(58, 540)
+    dance_bbox = (l, rp.vector(267, 540), r, rp.vector(289, 540))
+    passion_bbox = (l, rp.vector(316, 540), r, rp.vector(338, 540))
+    vocal_bbox = (l, rp.vector(365, 540), r, rp.vector(387, 540))
+    visual_bbox = (l, rp.vector(414, 540), r, rp.vector(436, 540))
+    mental_bbox = (l, rp.vector(463, 540), r, rp.vector(485, 540))
+
+    ctx.dance = _recognize_property(screenshot.crop(dance_bbox))
+    ctx.passion = _recognize_property(screenshot.crop(passion_bbox))
+    ctx.vocal = _recognize_property(screenshot.crop(vocal_bbox))
+    ctx.visual = _recognize_property(screenshot.crop(visual_bbox))
+    ctx.mental = _recognize_property(screenshot.crop(mental_bbox))
+
+
 class CommandScene(Scene):
     max_recognition_retry = 10
 
@@ -93,6 +122,7 @@ class CommandScene(Scene):
         self.has_shop = False
         self.has_knowledge_table = False
         self.has_learn_wisdom = False
+        self.has_lesson = False
 
     @classmethod
     def name(cls):
@@ -129,6 +159,7 @@ class CommandScene(Scene):
             "hasShop": self.has_shop,
             "hasKnowledgeTable": self.has_knowledge_table,
             "hasLearnWisdom": self.has_learn_wisdom,
+            "hasLesson": self.has_lesson,
         }
 
     def recognize_class(self, ctx: single_mode.Context):
@@ -141,6 +172,7 @@ class CommandScene(Scene):
         else:
             action.wait_tap_image(
                 {
+                    ctx.SCENARIO_GRAND_LIVE: templates.SINGLE_MODE_AOHARU_CLASS_DETAIL_BUTTON,
                     ctx.SCENARIO_AOHARU: templates.SINGLE_MODE_AOHARU_CLASS_DETAIL_BUTTON,
                     ctx.SCENARIO_CLIMAX: templates.SINGLE_MODE_CLIMAX_CLASS_DETAIL_BUTTON,
                     ctx.SCENARIO_GRAND_MASTERS: templates.SINGLE_MODE_GRAND_MASTERS_CLASS_DETAIL_BUTTON,
@@ -191,6 +223,9 @@ class CommandScene(Scene):
                     )
                     > 0,
                 ]
+        if ctx.scenario == ctx.SCENARIO_GRAND_LIVE:
+            self.has_lesson = (
+                action.count_image(templates.SINGLE_MODE_COMMAND_LESSON) > 0
             )
 
     def recognize_go_out_options(self, ctx: single_mode.Context) -> None:
@@ -221,6 +256,8 @@ class CommandScene(Scene):
                 _recognize_shop_coin(ctx)
             if ctx.scenario == ctx.SCENARIO_CLIMAX:
                 _recognize_climax_grade_point(ctx)
+            if self.has_lesson:
+                _recognize_grand_live_performance(ctx)
 
         def _recognize_static_with_retry():
             local.next_retry_count += 1

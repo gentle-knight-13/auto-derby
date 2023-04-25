@@ -364,9 +364,6 @@ def _template_actions(ctx: Context) -> Iterator[Tuple[_Template, _Handler]]:
             ctx.SCENARIO_AOHARU, _handle_aoharu_team_race
         )
     if ctx.scenario in (ctx.SCENARIO_CLIMAX, ctx.SCENARIO_UNKNOWN):
-        yield templates.SINGLE_MODE_GO_TO_SHOP_BUTTON, _set_scenario(
-            ctx.SCENARIO_CLIMAX, _cancel
-        )
         yield templates.SINGLE_MODE_TARGET_GRADE_POINT_NOT_ENOUGH, _set_scenario(
             ctx.SCENARIO_CLIMAX, _cancel
         )
@@ -374,6 +371,10 @@ def _template_actions(ctx: Context) -> Iterator[Tuple[_Template, _Handler]]:
     #     yield templates.SINGLE_MODE_GRAND_MASTERS_KNOWLEDGE_TABLE_BUTTON, _set_scenario(
     #         ctx.SCENARIO_GRAND_MASTERS, _close
     #     )
+    if ctx.scenario is ctx.SCENARIO_CLIMAX:
+        yield templates.SINGLE_MODE_GO_TO_SHOP_BUTTON, _cancel
+    if ctx.scenario is ctx.SCENARIO_GRAND_LIVE:
+        yield templates.SINGLE_MODE_GO_TO_SHOP_BUTTON, _close
 
 
 def _spec_key(tmpl: _Template) -> Text:
