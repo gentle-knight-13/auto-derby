@@ -31,8 +31,22 @@ ALL_OPTIONS = [
 ]
 
 
-def _handle_option():
+def _handle_option(ctx: Context):
     time.sleep(0.2)  # wait animation
+    if ctx.scenario in (ctx.SCENARIO_URA, ctx.SCENARIO_UNKNOWN):
+        predict_tmpl = [
+            templates.PREDICTION_TRIANGLE_OUTLINE,
+            templates.PREDICTION_CIRCLE_OUTLINE,
+            templates.PREDICTION_DOUBLE_CIRCLE,
+        ]
+        screenshot = app.device.screenshot(max_age=0)
+        predicts = list(template.match(screenshot, *predict_tmpl))
+        if len(predicts) > 0:
+            tmpl, pos = max(predicts, key=lambda i: predict_tmpl.index(i[0].name))
+            app.log.image(f"URA勝負予想: {tmpl.name}", screenshot, level=app.DEBUG)
+            app.device.tap(action.template_rect(tmpl, pos))
+            ctx.scenario = ctx.SCENARIO_URA
+            return
     ans = event.get_choice(app.device.screenshot(max_age=0))
     action.tap_image(ALL_OPTIONS[ans - 1])
 
@@ -281,7 +295,7 @@ def _handle_target_race(ac: _ActionContext):
 
 
 def _ac_handle_option(ac: _ActionContext):
-    _handle_option()
+    _handle_option(ac.ctx)
 
 
 def _handle_crane_game(ac: _ActionContext):
