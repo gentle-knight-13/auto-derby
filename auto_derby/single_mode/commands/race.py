@@ -22,6 +22,17 @@ def _choose_running_style(ctx: Context, race1: Race) -> None:
 
     scene.choose_running_style(style_scores[0][0])
 
+    while True:
+        tmpl, pos = action.wait_image(
+            templates.RETRY_BUTTON,
+            templates.RACE_RUNNING_STYLE_CHANGE_BUTTON,
+        )
+        name = tmpl.name
+        if name == templates.RETRY_BUTTON:
+            app.device.tap(action.template_rect(tmpl, pos))
+        else:
+            break
+
 
 _RACE_ORDER_TEMPLATES = {
     templates.RACE_RESULT_NO1: 1,
@@ -53,25 +64,66 @@ def _retry_method(ctx: Context) -> Optional[Callable[[], None]]:
 
 
 def _handle_race_result(ctx: Context, race: Race):
-    action.wait_tap_image(templates.RACE_RESULT_BUTTON)
+    tmpl, pos = action.wait_image(templates.RACE_RESULT_BUTTON, templates.GO_TO_RACE_BUTTON)
+    app.device.tap(action.template_rect(tmpl, pos))
 
     res = RaceResult()
     res.ctx = ctx.clone()
     res.race = race
 
-    tmpl, pos = action.wait_image(*_RACE_ORDER_TEMPLATES.keys())
-    order_img = app.device.screenshot()
 
-    res.order = _RACE_ORDER_TEMPLATES[tmpl.name]
-    app.device.tap(action.template_rect(tmpl, pos))
+    if tmpl.name == templates.GO_TO_RACE_BUTTON:
+        while True:
+            tmpl, pos = action.wait_image(
+                templates.RETRY_BUTTON,
+                templates.RACE_START_BUTTON,
+                templates.SKIP_BUTTON,
+                templates.CLOSE_BUTTON,
+                templates.GREEN_NEXT_BUTTON,
+                templates.SINGLE_MODE_CONTINUE,
+            )
+            name = tmpl.name
+            if name in (templates.GREEN_NEXT_BUTTON, templates.SINGLE_MODE_CONTINUE):
+                break
+            else:
+                app.device.tap(action.template_rect(tmpl, pos))
+
+        # TODO: handle res order
+        order_img = app.device.screenshot()
+
+        res.order = 1
+    else:
+        while True:
+            tmpl, pos = action.wait_image(
+                templates.RETRY_BUTTON,
+                *_RACE_ORDER_TEMPLATES.keys(),
+            )
+            name = tmpl.name
+            if name == templates.RETRY_BUTTON:
+                app.device.tap(action.template_rect(tmpl, pos))
+            else:
+                break
+
+        order_img = app.device.screenshot()
+
+        res.order = _RACE_ORDER_TEMPLATES[tmpl.name]
+        app.device.tap(action.template_rect(tmpl, pos))
 
     if ctx.scenario == ctx.SCENARIO_CLIMAX and ctx.date[0] < 4:
-        tmpl, pos = action.wait_image_stable(
-            templates.CLOSE_BUTTON,
-            templates.SINGLE_MODE_CLIMAX_RIVAL_RACE_WIN,
-            templates.SINGLE_MODE_CLIMAX_RIVAL_RACE_DRAW,
-            templates.SINGLE_MODE_CLIMAX_RIVAL_RACE_LOSE,
-        )
+        while True:
+            tmpl, pos = action.wait_image_stable(
+                templates.RETRY_BUTTON,
+                templates.CLOSE_BUTTON,
+                templates.SINGLE_MODE_CLIMAX_RIVAL_RACE_WIN,
+                templates.SINGLE_MODE_CLIMAX_RIVAL_RACE_DRAW,
+                templates.SINGLE_MODE_CLIMAX_RIVAL_RACE_LOSE,
+            )
+            name = tmpl.name
+            if name == templates.RETRY_BUTTON:
+                app.device.tap(action.template_rect(tmpl, pos))
+            else:
+                break
+
         app.device.tap(action.template_rect(tmpl, pos))
         if tmpl.name != templates.CLOSE_BUTTON:
             _, pos = action.wait_image_stable(templates.CLOSE_BUTTON)
