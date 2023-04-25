@@ -17,6 +17,7 @@ import PIL.Image
 from auto_derby import single_mode, config, app
 from auto_derby.single_mode import Context
 from auto_derby.infrastructure.image_device_service import ImageDeviceService
+from auto_derby.infrastructure.web_log_service import WebLogService
 
 
 def main():
@@ -28,6 +29,11 @@ def main():
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--debug-partner", action="store_true")
     args = parser.parse_args()
+    if args.debug:
+        app.log = WebLogService(
+            app.cleanup,
+            buffer_path=":memory:",
+        )
     if args.debug:
         os.environ["DEBUG"] = "auto_derby.single_mode.training.training"
     if args.debug_partner:
