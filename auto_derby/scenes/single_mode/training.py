@@ -626,6 +626,7 @@ def _recognize_partners(ctx: Context, img: Image) -> Iterator[training.Partner]:
         ctx.SCENARIO_GRAND_MASTERS: (
             rp.vector4((448, 147, 516, 220), 540),
             rp.vector(90, 540),
+        ),
         ctx.SCENARIO_GRAND_LIVE: (  # Todo: check correctness
             rp.vector4((448, 147, 516, 220), 540),
             rp.vector(86, 540),

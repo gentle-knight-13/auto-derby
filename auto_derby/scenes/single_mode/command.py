@@ -181,7 +181,6 @@ class CommandScene(Scene):
                     templates.SINGLE_MODE_CLASS_DETAIL_BUTTON,
                 )
             )
-        )
         # time.sleep(0.2)  # wait animation
         action.wait_image_stable(templates.SINGLE_MODE_CLASS_DETAIL_TITLE, duration=0.2)
         ctx.update_by_class_detail(app.device.screenshot())
@@ -225,6 +224,7 @@ class CommandScene(Scene):
                     )
                     > 0,
                 ]
+            )
         if ctx.scenario == ctx.SCENARIO_GRAND_LIVE:
             self.has_lesson = (
                 action.count_image(templates.SINGLE_MODE_COMMAND_LESSON) > 0
