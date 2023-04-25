@@ -207,11 +207,27 @@ def _tap(ac: _ActionContext):
 
 
 def _cancel(ac: _ActionContext):
-    action.wait_tap_image(templates.CANCEL_BUTTON)
+    try:
+        # avoid fast tap cause original template is still matched and wait for cancel again
+        tmpl, pos = action.wait_image_stable(
+            templates.CANCEL_BUTTON, duration=0.2, timeout=1
+        )
+        app.device.tap(action.template_rect(tmpl, pos))
+    except TimeoutError:
+        # a warned fallback when the situation is still happening
+        app.log.text("cancel timeout, return to main loop", level=app.WARN)
+        return
 
 
 def _close(ac: _ActionContext):
-    action.wait_tap_image(templates.CLOSE_BUTTON)
+    try:
+        tmpl, pos = action.wait_image_stable(
+            templates.CLOSE_BUTTON, duration=0.2, timeout=1
+        )
+        app.device.tap(action.template_rect(tmpl, pos))
+    except TimeoutError:
+        app.log.text("close timeout, return to main loop", level=app.WARN)
+        return
 
 
 def _ac_handle_turn(ac: _ActionContext):
@@ -241,7 +257,10 @@ def _handle_fan_not_enough(ac: _ActionContext):
         ctx.target_fan_count = max(ctx.fan_count + 1, ctx.target_fan_count)
 
     ctx.defer_next_turn(_set_target_fan_count)
-    action.wait_tap_image(templates.CANCEL_BUTTON)
+    try:
+        action.wait_tap_image(templates.CANCEL_BUTTON, timeout=5)
+    except TimeoutError:
+        pass
 
 
 def _handle_target_race(ac: _ActionContext):

@@ -1,5 +1,6 @@
 # -*- coding=UTF-8 -*-
 # pyright: strict
+import time
 
 from .. import action, app, config, templates
 from ..scenes.scene import Scene
@@ -49,6 +50,7 @@ def team_race():
                 action.wait_tap_image(templates.RACE_ITEM_PARFAIT)
             else:
                 scene.choose(ctx, 1)
+                time.sleep(1)
         elif name == templates.RP_NOT_ENOUGH:
             break
         elif name == templates.CONNECTING:

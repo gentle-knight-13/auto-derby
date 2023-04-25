@@ -181,17 +181,19 @@ class CommandScene(Scene):
                     templates.SINGLE_MODE_CLASS_DETAIL_BUTTON,
                 )
             )
-        time.sleep(0.2)  # wait animation
-        action.wait_image(templates.SINGLE_MODE_CLASS_DETAIL_TITLE)
+        )
+        # time.sleep(0.2)  # wait animation
+        action.wait_image_stable(templates.SINGLE_MODE_CLASS_DETAIL_TITLE, duration=0.2)
         ctx.update_by_class_detail(app.device.screenshot())
         action.wait_tap_image(templates.CLOSE_BUTTON)
 
     def recognize_status(self, ctx: single_mode.Context):
         action.wait_tap_image(templates.SINGLE_MODE_CHARACTER_DETAIL_BUTTON)
-        time.sleep(0.2)  # wait animation
-        action.wait_image(templates.SINGLE_MODE_CHARACTER_DETAIL_TITLE)
+        # time.sleep(0.2)  # wait animation
+        action.wait_image_stable(templates.SINGLE_MODE_CHARACTER_DETAIL_TITLE, duration=0.2)
         ctx.update_by_character_detail(app.device.screenshot())
         action.wait_tap_image(templates.CLOSE_BUTTON)
+        time.sleep(0.2)  # wait animation
 
     def recognize_commands(self, ctx: single_mode.Context) -> None:
         self.has_health_care = (

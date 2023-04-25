@@ -114,11 +114,11 @@ def tap_image(
 
 
 def wait_tap_image(
-    name: Union[Text, template.Specification], *, x: int = 0, y: int = 0
+    name: Union[Text, template.Specification], *, x: int = 0, y: int = 0, timeout: float = float("inf"),
 ) -> None:
-    tmpl, last_pos = wait_image(name)
+    tmpl, last_pos = wait_image(name, timeout=timeout)
     while True:
-        tmpl, pos = wait_image(name)
+        tmpl, pos = wait_image(name, timeout=timeout)
         if pos == last_pos:
             break
         last_pos = pos
