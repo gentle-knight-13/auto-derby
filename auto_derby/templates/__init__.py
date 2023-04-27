@@ -211,6 +211,9 @@ SINGLE_MODE_GRAND_MASTERS_LEARN_BUTTON = "single_mode_grand_masters_learn_button
 SINGLE_MODE_GRAND_MASTERS_LEARN_WISDOM_BUTTON = "single_mode_grand_masters_learn_wisdom_button.png"
 SINGLE_MODE_GRAND_MASTERS_LEARN_WISDOM_BANNER = "single_mode_grand_masters_learn_wisdom_banner.png"
 SINGLE_MODE_GRAND_MASTERS_RACE_CLASS_DETAIL_BUTTON = "single_mode_grand_masters_race_class_detail_button.png"
+SINGLE_MODE_GRAND_MASTERS_RACE_CLASS_DETAIL_BUTTON_POS = (
+    "single_mode_grand_masters_race_class_detail_button.pos.png"
+)
 SINGLE_MODE_GRAND_MASTERS_RACE_LEARN_WISDOM_BANNER = "single_mode_grand_masters_race_learn_wisdom_banner.png"
 SINGLE_MODE_GRAND_MASTERS_RACE_START_BUTTON = "single_mode_grand_masters_race_start_button.png"
 SINGLE_MODE_GRAND_MASTERS_READY = "single_mode_grand_masters_ready.png"
