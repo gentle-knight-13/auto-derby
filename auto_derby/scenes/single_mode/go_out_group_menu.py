@@ -49,6 +49,21 @@ def _recognize_item(rp: mathtools.ResizeProxy, img: Image) -> go_out.Option:
 
 def _recognize_menu(img: Image) -> Iterator[go_out.Option]:
     rp = mathtools.ResizeProxy(img.width)
+    for _, pos in template.match(img, templates.SINGLE_MODE_GO_OUT_OPTION_EVENT_PROCESS):
+        x, y = pos
+        x -= rp.vector(138, 540)
+        y -= rp.vector(71, 540)
+        bbox = (
+            x,
+            y,
+            x + rp.vector(500, 540),
+            y + rp.vector(100, 540),
+
+        )
+        option = _recognize_item(rp, img.crop(bbox))
+        option.position = (x + rp.vector(102, 540), y + rp.vector(46, 540))
+        option.bbox = bbox
+        yield option
     for _, pos in template.match(img, templates.SINGLE_MODE_GO_OUT_OPTION_LEFT_TOP):
         x, y = pos
         bbox = (
@@ -80,6 +95,7 @@ class GoOutGroupMenuScene(Scene):
 
     @classmethod
     def _enter(cls, ctx: SceneHolder) -> Scene:
+        action.wait_image_stable(templates.SINGLE_MODE_GO_OUT_OPTION_EVENT_PROCESS, duration=0.2)
         return cls()
 
     def recognize(self, ctx: Context, static: bool = False) -> None:
