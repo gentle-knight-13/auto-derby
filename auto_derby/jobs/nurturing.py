@@ -294,6 +294,16 @@ def _handle_fan_not_enough(ac: _ActionContext):
 
 def _handle_target_race(ac: _ActionContext):
     ctx = ac.ctx
+    if ctx.scenario in (ctx.SCENARIO_GRAND_MASTERS, ctx.SCENARIO_UNKNOWN):
+        try:
+            tmpl, pos = action.wait_image_stable(
+                templates.SINGLE_MODE_GRAND_MASTERS_GUR_BUTTON,
+                templates.SINGLE_MODE_GRAND_MASTERS_WBC_BUTTON,
+                duration = 0.2, timeout = 1
+            )
+            return _handle_grand_masters_race(ac)
+        except TimeoutError:
+            pass
     scene = CommandScene.enter(ctx)
     scene.recognize(ctx)
     _handle_item_list(ctx, scene)
