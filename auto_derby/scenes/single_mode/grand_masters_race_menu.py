@@ -4,7 +4,6 @@
 from __future__ import annotations
 from typing import Iterator
 
-
 from ...single_mode import Context, Race, Course
 from ... import (
     action,
@@ -20,7 +19,6 @@ from .command import CommandScene
 from PIL.Image import Image
 import numpy as np
 import cv2
-
 
 _TURN_TRACK_SPEC = {
     "左·内": (Course.TURN_LEFT, Course.TRACK_IN),
@@ -112,5 +110,6 @@ class GrandMastersRaceMenuScene(Scene):
         return cls()
 
     def recognize(self, ctx: Context) -> Race:
+        action.wait_image_stable(templates.SINGLE_MODE_RACE_START_BUTTON, duration=0.3)
         course = _recognize_menu(ctx, app.device.screenshot())
         return next(_race_by_course(ctx, course))

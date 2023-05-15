@@ -137,7 +137,7 @@ class GoOutMenuScene(Scene):
 
     @classmethod
     def _enter(cls, ctx: SceneHolder) -> Scene:
-        action.wait_image(templates.SINGLE_MODE_GO_OUT_MENU_TITLE)
+        action.wait_image_stable(templates.SINGLE_MODE_GO_OUT_MENU_TITLE, duration=0.2)
         return cls()
 
     def recognize(self, ctx: Context) -> None:
