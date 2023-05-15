@@ -389,9 +389,10 @@ def _template_actions(ctx: Context) -> Iterator[Tuple[_Template, _Handler]]:
     yield templates.CONNECTING, _pass
     yield templates.CLOSE_BUTTON, _tap
     yield templates.RETRY_BUTTON, _tap
-    yield templates.SINGLE_MODE_GRAND_MASTERS_GUR_BUTTON, _handle_grand_masters_race
-    yield templates.SINGLE_MODE_GRAND_MASTERS_WBC_BUTTON, _handle_grand_masters_race
-    yield templates.SINGLE_MODE_GRAND_MASTERS, _handle_target_race
+    if ctx.scenario in (ctx.SCENARIO_GRAND_MASTERS, ctx.SCENARIO_UNKNOWN):
+        yield templates.SINGLE_MODE_GRAND_MASTERS_GUR_BUTTON, _handle_grand_masters_race
+        yield templates.SINGLE_MODE_GRAND_MASTERS_WBC_BUTTON, _handle_grand_masters_race
+        yield templates.SINGLE_MODE_GRAND_MASTERS, _handle_target_race
     yield templates.SINGLE_MODE_COMMAND_TRAINING, _ac_handle_turn
     yield templates.SINGLE_MODE_FANS_NOT_ENOUGH, _handle_fan_not_enough
     yield templates.SINGLE_MODE_TARGET_RACE_NO_PERMISSION, _handle_fan_not_enough
