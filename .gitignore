@@ -21,3 +21,4 @@ single_mode_choices.csv
 .env
 
 /data
+.pdm-python
