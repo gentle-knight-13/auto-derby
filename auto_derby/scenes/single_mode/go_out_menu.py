@@ -40,8 +40,7 @@ def _recognize_type(rp: mathtools.ResizeProxy, img: Image) -> int:
     )
     has_page_icon_pos = rp.vector2((470, 75), 500)
     has_page_icon = (
-        imagetools.compare_color(img.getpixel(has_page_icon_pos), (99, 93, 126))
-        > 0.9
+        imagetools.compare_color(img.getpixel(has_page_icon_pos), (99, 93, 126)) > 0.9
     )
     if has_page_icon:
         return go_out.Option.TYPE_GROUP
@@ -52,7 +51,6 @@ def _recognize_type(rp: mathtools.ResizeProxy, img: Image) -> int:
 
 def _recognize_item(rp: mathtools.ResizeProxy, img: Image) -> go_out.Option:
     try:
-
         v = go_out.Option.new()
         rp = mathtools.ResizeProxy(img.width)
         v.type = _recognize_type(rp, img)
@@ -137,7 +135,12 @@ class GoOutMenuScene(Scene):
 
     @classmethod
     def _enter(cls, ctx: SceneHolder) -> Scene:
-        action.wait_image_stable(templates.SINGLE_MODE_GO_OUT_MENU_TITLE, duration=0.2)
+        action.wait_image_stable(
+            template.Specification(
+                templates.SINGLE_MODE_GO_OUT_MENU_TITLE, threshold=0.8
+            ),
+            duration=0.2,
+        )
         return cls()
 
     def recognize(self, ctx: Context) -> None:

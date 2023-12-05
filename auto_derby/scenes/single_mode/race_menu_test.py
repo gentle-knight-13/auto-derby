@@ -16,6 +16,8 @@ def test_visible_courses(name: Text):
     ctx = Context.new()
     if "+climax+" in name:
         ctx.scenario = ctx.SCENARIO_CLIMAX
+    if "+lark+" in name:
+        ctx.scenario = ctx.SCENARIO_PROJECT_LARK
     res = tuple(scene.visible_courses(ctx))
     _test.snapshot_match(
         res,

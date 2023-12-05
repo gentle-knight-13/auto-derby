@@ -7,6 +7,9 @@ import io
 import logging
 import re
 import time
+import sys
+import os
+import traceback
 from pathlib import Path
 from typing import Callable, List, Text, Tuple
 
@@ -14,6 +17,7 @@ import PIL.Image
 from adb_shell.adb_device import AdbDeviceTcp
 from adb_shell.auth.keygen import keygen
 from adb_shell.auth.sign_pythonrsa import PythonRSASigner
+from adb_shell.exceptions import TcpTimeoutException, AdbConnectionError
 
 from .client import Client
 from .. import app
@@ -47,6 +51,15 @@ class ADBClient(Client):
             keygen(self.key_path)
         signer = PythonRSASigner.FromRSAKeyPath(self.key_path)
         self.device.connect(rsa_keys=[signer])
+
+    def _shell(self, *args, **kwargs):
+        for i in range(10):
+            try:
+                return self.device.shell(*args, **kwargs)
+            except (AdbConnectionError, TcpTimeoutException) as e:
+                app.log.text(traceback.format_exc(), level=app.WARN)
+                self.connect()
+        return self.device.shell(*args, **kwargs)
 
     def tap(self, point: Tuple[int, int]) -> None:
         x, y = point
@@ -113,8 +126,8 @@ class ADBClient(Client):
         return self._screenshot()
 
     def _screenshot_png(self) -> PIL.Image.Image:
-        img_data = self.device.shell(
-            f"screencap -p",
+        img_data = self._shell(
+            "screencap -p",
             decode=False,
             transport_timeout_s=None,
         )
@@ -123,8 +136,8 @@ class ADBClient(Client):
 
     def _screenshot_raw(self) -> PIL.Image.Image:
         # https://stackoverflow.com/a/59470924
-        img_data = self.device.shell(
-            f"screencap",
+        img_data = self._shell(
+            "screencap",
             decode=False,
             transport_timeout_s=None,
         )

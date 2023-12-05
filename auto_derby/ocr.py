@@ -6,6 +6,8 @@ import contextlib
 import json
 import logging
 import os
+import sys
+import time
 import warnings
 from pathlib import Path
 from typing import List, Optional, Text, Tuple
@@ -81,18 +83,21 @@ def _pad_img(img: np.ndarray, padding: int = _PREVIEW_PADDING) -> np.ndarray:
 
 def _prompt(img: np.ndarray, h: Text, value: Text, similarity: float) -> Text:
     # TODO: use web prompt
-    if g.prompt_disabled:
+    if g.prompt_disabled or "pytest" in sys.modules:
         app.log.image(
             "using low similarity label: hash=%s, value=%s, similarity=%s"
             % (h, value, similarity),
             img,
             level=app.WARN,
         )
+        if "pytest" in sys.modules:
+            raise terminal.PromptDisabled
         return value
 
     if terminal.g.prompt_disabled:
         # avoid show image during loop
         raise terminal.PromptDisabled
+
     ret = ""
     app.log.image("ocr prompt", img)
     close_img = imagetools.show(fromarray(_pad_img(img)), h)
@@ -187,6 +192,12 @@ def text(img: Image, *, threshold: float = 0.8) -> Text:
     """
     reload_on_demand()
     ret = ""
+
+    # ret = TextSystem("ja").ocr_single_line(
+    #     cv2.cvtColor(imagetools.cv_image(img), cv2.COLOR_RGB2BGR)
+    # )
+    # app.log.image("ocr result: %s" % str(ret), img, level=app.DEBUG)
+    # return ret[0]
 
     img = imagetools.auto_crop_pil(img)
     w, h = img.width, img.height

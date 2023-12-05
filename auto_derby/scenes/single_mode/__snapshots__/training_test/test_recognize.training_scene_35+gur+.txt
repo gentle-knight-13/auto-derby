@@ -1,0 +1,1 @@
+Training<vit=5.0% fail=0% lv=1 ptn=spd@2,oth@2>

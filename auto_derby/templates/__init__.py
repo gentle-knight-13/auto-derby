@@ -154,6 +154,14 @@ SINGLE_MODE_COMMAND_HEALTH_CARE = "single_mode_command_health_care.png"
 SINGLE_MODE_COMMAND_HEALTH_CARE_POS = "single_mode_command_health_care.pos.png"
 SINGLE_MODE_COMMAND_LESSON = "single_mode_command_lesson.png"
 SINGLE_MODE_COMMAND_LESSON_POS = "single_mode_command_lesson.pos.png"
+SINGLE_MODE_COMMAND_OVERSEA_SHOP = "single_mode_command_oversea_shop.png"
+SINGLE_MODE_COMMAND_OVERSEA_SHOP_POS = "single_mode_command_oversea_shop.pos.png"
+SINGLE_MODE_COMMAND_OVERSEA_SHOP_FORMAL_RACE = (
+    "single_mode_command_oversea_shop_formal_race.png"
+)
+SINGLE_MODE_COMMAND_OVERSEA_SHOP_FORMAL_RACE_POS = (
+    "single_mode_command_oversea_shop_formal_race.pos.png"
+)
 SINGLE_MODE_COMMAND_RACE = "single_mode_command_race.png"
 SINGLE_MODE_COMMAND_RACE_POS = "single_mode_command_race.pos.png"
 SINGLE_MODE_COMMAND_SHOP = "single_mode_command_shop.png"
@@ -162,6 +170,8 @@ SINGLE_MODE_COMMAND_SUMMER_REST = "single_mode_command_summer_rest.png"
 SINGLE_MODE_COMMAND_SUMMER_REST_POS = "single_mode_command_summer_rest.pos.png"
 SINGLE_MODE_COMMAND_TRAINING = "single_mode_command_training.png"
 SINGLE_MODE_COMMAND_TRAINING_POS = "single_mode_command_training.pos.png"
+SINGLE_MODE_COMMAND_TRAINING_LARK = "single_mode_command_training_lark.png"
+SINGLE_MODE_COMMAND_TRAINING_LARK_POS = "single_mode_command_training_lark.pos.png"
 SINGLE_MODE_CONDITION_CHARM = "single_mode_condition_charm.png"
 SINGLE_MODE_CONDITION_HEADACHE = "single_mode_condition_headache.png"
 SINGLE_MODE_CONDITION_OVERWEIGHT = "single_mode_condition_overweight.png"
@@ -192,8 +202,8 @@ SINGLE_MODE_GO_OUT_FRIEND_ICON = "single_mode_go_out_friend_icon.png"
 SINGLE_MODE_GO_OUT_FRIEND_ICON_POS = "single_mode_go_out_friend_icon.pos.png"
 SINGLE_MODE_GO_OUT_MENU_TITLE = "single_mode_go_out_menu_title.png"
 SINGLE_MODE_GO_OUT_MENU_TITLE_POS = "single_mode_go_out_menu_title.pos.png"
-SINGLE_MODE_GO_OUT_OPTION_LEFT_TOP = "single_mode_go_out_option_left_top.png"
 SINGLE_MODE_GO_OUT_OPTION_EVENT_PROCESS = "single_mode_go_out_option_event_process.png"
+SINGLE_MODE_GO_OUT_OPTION_LEFT_TOP = "single_mode_go_out_option_left_top.png"
 SINGLE_MODE_GO_TO_SCHEDULED_RACE_BUTTON = "single_mode_go_to_scheduled_race_button.png"
 SINGLE_MODE_GO_TO_SCHEDULED_RACE_BUTTON_POS = (
     "single_mode_go_to_scheduled_race_button.pos.png"
@@ -201,30 +211,58 @@ SINGLE_MODE_GO_TO_SCHEDULED_RACE_BUTTON_POS = (
 SINGLE_MODE_GO_TO_SHOP_BUTTON = "single_mode_go_to_shop_button.png"
 SINGLE_MODE_GO_TO_SHOP_BUTTON_POS = "single_mode_go_to_shop_button.pos.png"
 SINGLE_MODE_GOOD_RACE_ADAPTABILITY_STAR = "single_mode_good_race_adaptability_star.png"
+SINGLE_MODE_GRAND_LIVE_DATE_REMAIN = "single_mode_grand_live_date_remain.png"
+SINGLE_MODE_GRAND_LIVE_DATE_REMAIN_POS = "single_mode_grand_live_date_remain.pos.png"
+SINGLE_MODE_GRAND_LIVE_LIVE_BONUS_UPDATE = (
+    "single_mode_grand_live_live_bonus_update.png"
+)
+SINGLE_MODE_GRAND_LIVE_LIVE_BONUS_UPDATE_POS = (
+    "single_mode_grand_live_live_bonus_update.pos.png"
+)
+SINGLE_MODE_GRAND_LIVE_PERFORMANCE = "single_mode_grand_live_performance.png"
+SINGLE_MODE_GRAND_LIVE_PERFORMANCE_POS = "single_mode_grand_live_performance.pos.png"
+SINGLE_MODE_GRAND_MASTERS = "single_mode_grand_masters.png"
 SINGLE_MODE_GRAND_MASTERS_BLUE_WISDOM = "single_mode_grand_masters_blue_wisdom.png"
-SINGLE_MODE_GRAND_MASTERS_CLASS_DETAIL_BUTTON = "single_mode_grand_masters_class_detail_button.png"
+SINGLE_MODE_GRAND_MASTERS_CLASS_DETAIL_BUTTON = (
+    "single_mode_grand_masters_class_detail_button.png"
+)
 SINGLE_MODE_GRAND_MASTERS_CLASS_DETAIL_BUTTON_POS = (
     "single_mode_grand_masters_class_detail_button.pos.png"
 )
-SINGLE_MODE_GRAND_MASTERS_COMMAND_GO_OUT = "single_mode_grand_masters_command_go_out.png"
-SINGLE_MODE_GRAND_MASTERS_GREEN_CONTINUE_BUTTON = "single_mode_grand_masters_green_continue_button.png"
+SINGLE_MODE_GRAND_MASTERS_COMMAND_GO_OUT = (
+    "single_mode_grand_masters_command_go_out.png"
+)
+SINGLE_MODE_GRAND_MASTERS_GREEN_CONTINUE_BUTTON = (
+    "single_mode_grand_masters_green_continue_button.png"
+)
 SINGLE_MODE_GRAND_MASTERS_GUR_BUTTON = "single_mode_grand_masters_gur_button.png"
-SINGLE_MODE_GRAND_MASTERS_KNOWLEDGE_TABLE_BUTTON = "single_mode_grand_masters_knowledge_table_button.png"
+SINGLE_MODE_GRAND_MASTERS_KNOWLEDGE_TABLE_BUTTON = (
+    "single_mode_grand_masters_knowledge_table_button.png"
+)
 SINGLE_MODE_GRAND_MASTERS_LEARN_BUTTON = "single_mode_grand_masters_learn_button.png"
-SINGLE_MODE_GRAND_MASTERS_LEARN_WISDOM_BUTTON = "single_mode_grand_masters_learn_wisdom_button.png"
-SINGLE_MODE_GRAND_MASTERS_LEARN_WISDOM_BANNER = "single_mode_grand_masters_learn_wisdom_banner.png"
-SINGLE_MODE_GRAND_MASTERS_RACE_CLASS_DETAIL_BUTTON = "single_mode_grand_masters_race_class_detail_button.png"
-SINGLE_MODE_GRAND_MASTERS_RACE_LEARN_WISDOM_BANNER = "single_mode_grand_masters_race_learn_wisdom_banner.png"
-SINGLE_MODE_GRAND_MASTERS_RACE_START_BUTTON = "single_mode_grand_masters_race_start_button.png"
+SINGLE_MODE_GRAND_MASTERS_LEARN_WISDOM_BANNER = (
+    "single_mode_grand_masters_learn_wisdom_banner.png"
+)
+SINGLE_MODE_GRAND_MASTERS_LEARN_WISDOM_BUTTON = (
+    "single_mode_grand_masters_learn_wisdom_button.png"
+)
+SINGLE_MODE_GRAND_MASTERS_RACE_CLASS_DETAIL_BUTTON = (
+    "single_mode_grand_masters_race_class_detail_button.png"
+)
+SINGLE_MODE_GRAND_MASTERS_RACE_CLASS_DETAIL_BUTTON_POS = (
+    "single_mode_grand_masters_race_class_detail_button.pos.png"
+)
+SINGLE_MODE_GRAND_MASTERS_RACE_LEARN_WISDOM_BANNER = (
+    "single_mode_grand_masters_race_learn_wisdom_banner.png"
+)
+SINGLE_MODE_GRAND_MASTERS_RACE_START_BUTTON = (
+    "single_mode_grand_masters_race_start_button.png"
+)
 SINGLE_MODE_GRAND_MASTERS_READY = "single_mode_grand_masters_ready.png"
 SINGLE_MODE_GRAND_MASTERS_RED_WISDOM = "single_mode_grand_masters_red_wisdom.png"
 SINGLE_MODE_GRAND_MASTERS_WBC_BUTTON = "single_mode_grand_masters_wbc_button.png"
 SINGLE_MODE_GRAND_MASTERS_WISDOM_PIECE = "single_mode_grand_masters_wisdom_piece.png"
 SINGLE_MODE_GRAND_MASTERS_YELLOW_WISDOM = "single_mode_grand_masters_yellow_wisdom.png"
-SINGLE_MODE_GRAND_MASTERS = "single_mode_grand_masters.png"
-SINGLE_MODE_GRAND_LIVE_DATE_REMAIN = "single_mode_grand_live_date_remain.png"
-SINGLE_MODE_GRAND_LIVE_DATE_REMAIN_POS = "single_mode_grand_live_date_remain.pos.png"
-SINGLE_MODE_GRAND_LIVE_PERFORMANCE = "single_mode_grand_live_performance.png"
 SINGLE_MODE_ITEM_MENU_BUTTON = "single_mode_item_menu_button.png"
 SINGLE_MODE_ITEM_MENU_BUTTON_POS = "single_mode_item_menu_button.pos.png"
 SINGLE_MODE_ITEM_MENU_CURRENT_QUANTITY = "single_mode_item_menu_current_quantity.png"
@@ -253,6 +291,8 @@ SINGLE_MODE_RACE_DETAIL_TITLE = "single_mode_race_detail_title.png"
 SINGLE_MODE_RACE_DETAIL_TITLE_POS = "single_mode_race_detail_title.pos.png"
 SINGLE_MODE_RACE_MENU_FAN_ICON = "single_mode_race_menu_fan_icon.png"
 SINGLE_MODE_RACE_MENU_FAN_ICON_POS = "single_mode_race_menu_fan_icon.pos.png"
+SINGLE_MODE_RACE_MENU_FAN_ICON_LARK = "single_mode_race_menu_fan_icon_lark.png"
+SINGLE_MODE_RACE_MENU_FAN_ICON_LARK_POS = "single_mode_race_menu_fan_icon_lark.pos.png"
 SINGLE_MODE_RACE_NEXT_BUTTON = "single_mode_race_next_button.png"
 SINGLE_MODE_RACE_START_BUTTON = "single_mode_race_start_button.png"
 SINGLE_MODE_REST = "single_mode_rest.png"
@@ -282,6 +322,8 @@ SINGLE_MODE_TARGET_UNFINISHED = "single_mode_target_unfinished.png"
 SINGLE_MODE_TARGET_UNFINISHED_POS = "single_mode_target_unfinished.pos.png"
 SINGLE_MODE_TRAINING_CONFIRM = "single_mode_training_confirm.png"
 SINGLE_MODE_TRAINING_CONFIRM_POS = "single_mode_training_confirm.pos.png"
+SINGLE_MODE_TRAINING_CONFIRM_LARK = "single_mode_training_confirm_lark.png"
+SINGLE_MODE_TRAINING_CONFIRM_LARK_POS = "single_mode_training_confirm_lark.pos.png"
 SINGLE_MODE_URA_FINALS = "single_mode_ura_finals.png"
 SINGLE_MODE_URA_FINALS_POS = "single_mode_ura_finals.pos.png"
 SKIP_BUTTON = "skip_button.png"

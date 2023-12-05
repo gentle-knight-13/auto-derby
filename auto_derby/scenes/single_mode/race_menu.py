@@ -149,7 +149,11 @@ def _recognize_menu(
 ) -> Iterator[Tuple[Course, Tuple[int, int]]]:
     app.log.image("race menu", screenshot, level=app.DEBUG)
     rp = mathtools.ResizeProxy(screenshot.width)
-    for _, pos in template.match(screenshot, templates.SINGLE_MODE_RACE_MENU_FAN_ICON):
+    for _, pos in template.match(
+        screenshot,
+        templates.SINGLE_MODE_RACE_MENU_FAN_ICON,
+        templates.SINGLE_MODE_RACE_MENU_FAN_ICON_LARK,
+    ):
         bbox = _menu_item_bbox(ctx, pos, rp)
         item_img = screenshot.crop(bbox)
         app.log.image("race menu item", item_img, level=app.DEBUG)
@@ -209,7 +213,10 @@ class RaceMenuScene(Scene):
                 action.wait_tap_image(templates.CANCEL_BUTTON)
                 raise RaceTurnsIncorrect()
             action.wait_tap_image(templates.GREEN_OK_BUTTON)
-        action.wait_image(templates.SINGLE_MODE_RACE_MENU_FAN_ICON)
+        action.wait_image(
+            templates.SINGLE_MODE_RACE_MENU_FAN_ICON,
+            templates.SINGLE_MODE_RACE_MENU_FAN_ICON_LARK,
+        )
         return cls()
 
     def visible_courses(self, ctx: Context) -> Iterator[Tuple[Course, Tuple[int, int]]]:

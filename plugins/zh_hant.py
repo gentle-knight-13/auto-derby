@@ -312,7 +312,7 @@ def _year4_date_text(ctx: Context) -> Iterator[Text]:
     if ctx.scenario in (ctx.SCENARIO_URA, ctx.SCENARIO_AOHARU, ctx.SCENARIO_UNKNOWN):
         yield "決勝系列賽舉辦中"
     if ctx.scenario in (ctx.SCENARIO_CLIMAX, ctx.SCENARIO_UNKNOWN):
-        yield "クライマックス開催中"  # Not localized in current verison
+        yield "巔峰賽舉辦中"  # Not localized in current verison
 
 
 def _ocr_date(

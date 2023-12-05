@@ -21,7 +21,6 @@ from auto_derby.infrastructure.web_log_service import WebLogService
 
 
 def main():
-
     parser = argparse.ArgumentParser()
 
     parser.add_argument("image", default="debug/last_screenshot.png")
@@ -50,6 +49,9 @@ def main():
         "ura": Context.SCENARIO_URA,
         "aoharu": Context.SCENARIO_AOHARU,
         "climax": Context.SCENARIO_CLIMAX,
+        "grand-live": Context.SCENARIO_GRAND_LIVE,
+        "grand-masters": Context.SCENARIO_GRAND_MASTERS,
+        "lark": Context.SCENARIO_PROJECT_LARK,
     }.get(args.scenario, args.scenario)
     image = PIL.Image.open(image_path)
     app.device = ImageDeviceService(image)
@@ -57,6 +59,8 @@ def main():
     ctx.scenario = scenario
     training = single_mode.Training.from_training_scene_v2(ctx, image)
     print(training)
+    if args.debug:
+        pass
 
 
 if __name__ == "__main__":

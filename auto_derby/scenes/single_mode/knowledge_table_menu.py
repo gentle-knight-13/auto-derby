@@ -49,13 +49,24 @@ class KnowledgeTableMenuScene(Scene):
         return cls()
 
     def learn_goddess_wisdom(self, ctx: Context, command: commands.Command) -> bool:
+        def after_learn():
+            while True:
+                tmpl, pos = action.wait_image(
+                    templates.CLOSE_BUTTON,
+                    templates.SINGLE_MODE_CHARACTER_DETAIL_BUTTON,
+                )
+                if tmpl.name != templates.CLOSE_BUTTON:
+                    break
+                app.device.tap(action.template_rect(tmpl, pos))
+                time.sleep(2.0)
+
         def learn():
             action.wait_tap_image(
                 templates.SINGLE_MODE_GRAND_MASTERS_LEARN_WISDOM_BUTTON
             )
             action.wait_tap_image(templates.SINGLE_MODE_GRAND_MASTERS_LEARN_BUTTON)
             time.sleep(7.5)
-            action.wait_tap_image(templates.CLOSE_BUTTON)
+            after_learn()
 
         goddess_wisdom = _recognize(app.device.screenshot())
         if goddess_wisdom == GoddessWisdom.RED:
@@ -68,5 +79,5 @@ class KnowledgeTableMenuScene(Scene):
             learn()
             return True
 
-        action.wait_tap_image(templates.CLOSE_BUTTON)
+        after_learn()
         return False

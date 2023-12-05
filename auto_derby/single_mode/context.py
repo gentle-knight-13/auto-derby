@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from . import go_out
 
 import copy
+import re
 
 import cast_unknown as cast
 import cv2
@@ -208,7 +209,7 @@ def _recognize_max_property(img: Image) -> int:
     app.log.image(
         "property limit", cv_img, layers={"binary": binary_img}, level=app.DEBUG
     )
-    return int(ocr.text(imagetools.pil_image(binary_img)))
+    return int(re.sub(r"[^\d]+", "", ocr.text(imagetools.pil_image(binary_img))))
 
 
 def _recognize_scenario(rp: mathtools.ResizeProxy, img: Image) -> Text:
@@ -256,6 +257,18 @@ def _recognize_scenario(rp: mathtools.ResizeProxy, img: Image) -> Text:
             ),
             Context.SCENARIO_GRAND_MASTERS,
         ),
+        (
+            templates.SINGLE_MODE_COMMAND_TRAINING_LARK,
+            Context.SCENARIO_PROJECT_LARK,
+        ),
+        (
+            templates.SINGLE_MODE_COMMAND_OVERSEA_SHOP,
+            Context.SCENARIO_PROJECT_LARK,
+        ),
+        (
+            templates.SINGLE_MODE_COMMAND_OVERSEA_SHOP_FORMAL_RACE,
+            Context.SCENARIO_PROJECT_LARK,
+        ),
         (templates.SINGLE_MODE_GRAND_LIVE_DATE_REMAIN, Context.SCENARIO_GRAND_LIVE),
         (templates.SINGLE_MODE_GRAND_LIVE_PERFORMANCE, Context.SCENARIO_GRAND_LIVE),
         (templates.SINGLE_MODE_AOHARU_CLASS_DETAIL_BUTTON, Context.SCENARIO_AOHARU),
@@ -274,12 +287,15 @@ def _recognize_scenario(rp: mathtools.ResizeProxy, img: Image) -> Text:
 
 
 def _date_bbox(ctx: Context, rp: mathtools.ResizeProxy):
-    if ctx.scenario in (ctx.SCENARIO_AOHARU, ctx.SCENARIO_GRAND_LIVE):
+    if ctx.scenario in (
+        ctx.SCENARIO_AOHARU,
+        ctx.SCENARIO_GRAND_LIVE,
+        ctx.SCENARIO_GRAND_MASTERS,
+        ctx.SCENARIO_PROJECT_LARK,
+    ):
         return rp.vector4((125, 32, 278, 48), 540)
     if ctx.scenario == ctx.SCENARIO_CLIMAX:
         return rp.vector4((11, 32, 163, 48), 540)
-    if ctx.scenario == ctx.SCENARIO_GRAND_MASTERS:
-        return rp.vector4((125, 32, 278, 48), 540)
     return rp.vector4((23, 66, 328, 98), 1080)
 
 
@@ -324,6 +340,7 @@ class Context:
     SCENARIO_CLIMAX = "Make a new track!!  ～クライマックス開幕～"
     SCENARIO_GRAND_LIVE = "つなげ、照らせ、ひかれ。 私たちのグランドライブ"
     SCENARIO_GRAND_MASTERS = "グランドマスターズ ―継ぐ者達へ―"
+    SCENARIO_PROJECT_LARK = "Reach for the stars プロジェクトL'Arc"
 
     @staticmethod
     def new() -> Context:
@@ -395,6 +412,8 @@ class Context:
         self.visual = 0
         self.mental = 0
 
+        self.overseas_point = 0
+
         from . import training
 
         self.training_history = training.History()
@@ -459,14 +478,17 @@ class Context:
         wisdom_bbox = (rp.vector(337, 466), t, rp.vector(381, 466), b)
 
         base2_y = detail_button_pos[1] + rp.vector(89, 466)
-        t2, b2 = base2_y, base2_y + rp.vector(13, 466)
-        max_speed_bbox = (rp.vector(53, 466), t2, rp.vector(87, 466), b2)
-        max_stamina_bbox = (rp.vector(126, 466), t2, rp.vector(161, 466), b2)
-        max_power_bbox = (rp.vector(199, 466), t2, rp.vector(234, 466), b2)
-        max_guts_bbox = (rp.vector(272, 466), t2, rp.vector(308, 466), b2)
-        max_wisdom_bbox = (rp.vector(344, 466), t2, rp.vector(380, 466), b2)
+        t, b = base2_y, base2_y + rp.vector(13, 466)
+        max_speed_bbox = (rp.vector(45, 466), t, rp.vector(90, 466), b)
+        max_stamina_bbox = (rp.vector(120, 466), t, rp.vector(162, 466), b)
+        max_power_bbox = (rp.vector(190, 466), t, rp.vector(234, 466), b)
+        max_guts_bbox = (rp.vector(264, 466), t, rp.vector(308, 466), b)
+        max_wisdom_bbox = (rp.vector(335, 466), t, rp.vector(381, 466), b)
 
-        if not any(
+        if self.scenario not in (
+            self.SCENARIO_GRAND_MASTERS,
+            self.SCENARIO_UNKNOWN,
+        ) or not any(
             [
                 tuple(
                     template.match(
@@ -760,7 +782,6 @@ class Context:
 
     @classmethod
     def from_dict(cls, data: Dict[Text, Any]) -> Context:
-
         ret = cls()
         ret.speed = data["speed"]
         ret.stamina = data["stamina"]

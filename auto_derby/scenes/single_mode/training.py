@@ -5,7 +5,8 @@ from __future__ import annotations
 
 import traceback
 from concurrent import futures
-from typing import Callable, Iterator, Optional, Tuple
+import re
+from typing import Callable, Iterator, Optional, Tuple, List, Union
 
 import cast_unknown as cast
 import cv2
@@ -42,6 +43,7 @@ def _recognize_base_effect(img: Image) -> int:
     white_outline_img = imagetools.constant_color_key(
         sharpened_img,
         (255, 255, 255),
+        (235, 216, 217),
     )
     white_outline_img_dilated = cv2.morphologyEx(
         white_outline_img,
@@ -126,11 +128,14 @@ def _recognize_base_effect(img: Image) -> int:
         return 0
 
     # +100 has different color
-    hash100 = ["000000000000006600ee00ff00ff00ff004e0000000000000000000000000000",
-               "00000000000000000066007e007e007e007e005e005a00420000000000000000" # mumu 12 1080p
-               ]
+    hash100 = [
+        "000000000000006600ee00ff00ff00ff004e0000000000000000000000000000",
+        "00000000000000000066007e007e007e007e005e005a00420000000000000000",  # mumu 12 1080p
+    ]
     text_img_hash = imagetools.image_hash(imagetools.pil_image(text_img))
-    hash_sim = max(map(lambda lst: imagetools.compare_hash(text_img_hash, lst), hash100))
+    hash_sim = max(
+        map(lambda lst: imagetools.compare_hash(text_img_hash, lst), hash100)
+    )
     app.log.image(f"hash100<{hash_sim}>{text_img_hash}", text_img, level=app.DEBUG)
     if hash_sim > 0.9:
         return 100
@@ -178,6 +183,8 @@ def _recognize_red_effect(img: Image) -> int:
         (56, 72, 218),
         (20, 18, 181),
         (27, 35, 202),
+        (123, 131, 238),  # When outline too thin
+        threshold=0.95,
     )
     red_outline_img = cv2.morphologyEx(
         red_outline_img,
@@ -263,7 +270,7 @@ def _recognize_failure_rate(
         x + rp.vector(15, 540),
         y + rp.vector(-155, 540),
         x + rp.vector(75, 540),
-        y + rp.vector(-120, 540),
+        y + rp.vector(-107, 540),
     )
     rate_img = imagetools.cv_image(imagetools.resize(img.crop(bbox), height=48))
     outline_img = imagetools.constant_color_key(
@@ -290,7 +297,7 @@ def _recognize_failure_rate(
         },
     )
     text = ocr.text(imagetools.pil_image(text_img))
-    return int(text.strip("%")) / 100
+    return int(re.sub("[^0-9]", "", text)) / 100
 
 
 def _estimate_vitality(ctx: Context, trn: Training) -> float:
@@ -308,29 +315,44 @@ def _estimate_vitality(ctx: Context, trn: Training) -> float:
     return vit_data[trn.type][trn.level - 1] / ctx.max_vitality
 
 
-def _iter_training_images(static: bool):
+def _iter_training_confirm_pos(ctx: Context) -> List[Tuple[int, int]]:
     rp = action.resize_proxy()
-    radius = rp.vector(30, 540)
-    _, first_confirm_pos = action.wait_image(_TRAINING_CONFIRM)
-    yield app.device.screenshot()
-    if static:
-        return
-    seen_confirm_pos = {
-        first_confirm_pos,
-    }
-    for pos in (
+    if ctx.scenario == ctx.SCENARIO_PROJECT_LARK:
+        return [
+            rp.vector2((33, 835), 540),
+            rp.vector2((121, 835), 540),
+            rp.vector2((209, 835), 540),
+            rp.vector2((297, 835), 540),
+            rp.vector2((385, 835), 540),
+        ]
+    return [
         rp.vector2((78, 850), 540),
         rp.vector2((171, 850), 540),
         rp.vector2((268, 850), 540),
         rp.vector2((367, 850), 540),
         rp.vector2((461, 850), 540),
-    ):
+    ]
+
+
+def _iter_training_images(ctx: Context, static: bool):
+    rp = action.resize_proxy()
+    radius = rp.vector(30, 540)
+    tmpl, first_confirm_pos = action.wait_image(
+        _TRAINING_CONFIRM, templates.SINGLE_MODE_TRAINING_CONFIRM_LARK
+    )
+    yield app.device.screenshot(), first_confirm_pos
+    if static:
+        return
+    seen_confirm_pos = {
+        first_confirm_pos,
+    }
+    for pos in _iter_training_confirm_pos(ctx):
         if mathtools.distance(first_confirm_pos, pos) < radius:
             continue
         app.device.tap((*pos, *rp.vector2((20, 20), 540)))
-        _, pos = action.wait_image(_TRAINING_CONFIRM)
+        _, pos = action.wait_image(tmpl)
         if pos not in seen_confirm_pos:
-            yield app.device.screenshot()
+            yield app.device.screenshot(), pos
             seen_confirm_pos.add(pos)
 
 
@@ -631,6 +653,10 @@ def _recognize_partners(ctx: Context, img: Image) -> Iterator[training.Partner]:
             rp.vector4((448, 147, 516, 220), 540),
             rp.vector(86, 540),
         ),
+        ctx.SCENARIO_PROJECT_LARK: (  # Todo: check correctness
+            rp.vector4((448, 147, 516, 220), 540),
+            rp.vector(86, 540),
+        ),
     }[ctx.scenario]
     icons_bottom = rp.vector(578, 540)
     while icon_bbox[2] < icons_bottom:
@@ -675,11 +701,14 @@ def _effect_recognitions(
     elif ctx.scenario == ctx.SCENARIO_CLIMAX:
         yield _bbox_groups(595, 623), _recognize_base_effect
         yield _bbox_groups(568, 593), _recognize_red_effect
+    elif ctx.scenario == ctx.SCENARIO_GRAND_LIVE:
+        yield _bbox_groups(595, 623), _recognize_base_effect
+        yield _bbox_groups(568, 593), _recognize_red_effect
     elif ctx.scenario == ctx.SCENARIO_GRAND_MASTERS:
         yield _bbox_groups(595, 623), _recognize_base_effect
         yield _bbox_groups(568, 593), _recognize_red_effect
-    elif ctx.scenario == ctx.SCENARIO_GRAND_LIVE:
-        yield _bbox_groups(597, 625), _recognize_base_effect
+    elif ctx.scenario == ctx.SCENARIO_PROJECT_LARK:
+        yield _bbox_groups(595, 623), _recognize_base_effect
         yield _bbox_groups(568, 593), _recognize_red_effect
     else:
         raise NotImplementedError(ctx.scenario)
@@ -710,37 +739,25 @@ def _performance_recognitions(
         raise NotImplementedError(ctx.scenario)
 
 
-def _recognize_training(ctx: Context, img: Image) -> Training:
+def _recognize_training(
+    ctx: Context, img_pair: Tuple[Image, Tuple[int, int]]
+) -> Training:
+    img = img_pair[0]
     try:
         rp = mathtools.ResizeProxy(img.width)
 
         self = Training.new()
-        self.confirm_position = next(
-            template.match(
-                img,
-                template.Specification(
-                    templates.SINGLE_MODE_TRAINING_CONFIRM, threshold=0.8
-                ),
-            )
-        )[1]
-        radius = rp.vector(30, 540)
+        self.confirm_position = img_pair[1]
+        radius = rp.vector(40, 540)
+        min_dist: Union[int, None] = None
         for t, center in zip(
             Training.ALL_TYPES,
-            (
-                rp.vector2((78, 850), 540),
-                rp.vector2((171, 850), 540),
-                rp.vector2((268, 850), 540),
-                rp.vector2((367, 850), 540),
-                rp.vector2((461, 850), 540),
-            ),
+            _iter_training_confirm_pos(ctx),
         ):
-            if mathtools.distance(self.confirm_position, center) < radius:
+            x_dist = abs(self.confirm_position[0] - center[0])
+            if min_dist is None or x_dist < min_dist:
                 self.type = t
-                break
-        else:
-            raise ValueError(
-                "unknown type for confirm position: %s" % self.confirm_position
-            )
+                min_dist = x_dist
 
         self.level = _recognize_level(
             tuple(cast.list_(img.getpixel(rp.vector2((10, 200), 540)), int))
@@ -787,8 +804,14 @@ class TrainingScene(Scene):
     @classmethod
     def _enter(cls, ctx: SceneHolder) -> Scene:
         CommandScene.enter(ctx)
-        action.wait_tap_image(templates.SINGLE_MODE_COMMAND_TRAINING)
-        action.wait_image(_TRAINING_CONFIRM)
+        tmpl, _ = action.wait_tap_image(
+            templates.SINGLE_MODE_COMMAND_TRAINING,
+            templates.SINGLE_MODE_COMMAND_TRAINING_LARK,
+        )
+        if tmpl.name == templates.SINGLE_MODE_COMMAND_TRAINING_LARK:
+            action.wait_image(templates.SINGLE_MODE_TRAINING_CONFIRM_LARK)
+        else:
+            action.wait_image(_TRAINING_CONFIRM)
         return cls()
 
     def __init__(self):
@@ -812,7 +835,7 @@ class TrainingScene(Scene):
                 i.result()
                 for i in [
                     pool.submit(_recognize_training, ctx, j)
-                    for j in _iter_training_images(static)
+                    for j in _iter_training_images(ctx, static)
                 ]
             )
         assert len(set(i.type for i in self.trainings)) == len(

@@ -70,7 +70,7 @@ def _recognize_shop_coin(ctx: Context):
     img = screenshot.crop(bbox)
     img = imagetools.resize(img, height=32)
     cv_img = np.asarray(img.convert("L"))
-    _, binary_img = cv2.threshold(cv_img, 100, 255, cv2.THRESH_BINARY_INV)
+    _, binary_img = cv2.threshold(cv_img, 127, 255, cv2.THRESH_BINARY_INV)
     app.log.image(
         "shop coin",
         cv_img,
@@ -111,6 +111,39 @@ def _recognize_grand_live_performance(ctx: Context):
     ctx.mental = _recognize_property(screenshot.crop(mental_bbox))
 
 
+def _recognize_lark_overseas_point(ctx: Context):
+    rp = action.resize_proxy()
+    screenshot = app.device.screenshot()
+    _, pos = next(
+        template.match(
+            screenshot,
+            templates.SINGLE_MODE_COMMAND_OVERSEA_SHOP,
+            templates.SINGLE_MODE_COMMAND_OVERSEA_SHOP_FORMAL_RACE,
+        )
+    )
+    x, y = pos
+    bbox = (
+        x + rp.vector(18, 540),
+        y + rp.vector(17, 540),
+        x + rp.vector(84, 540),
+        y + rp.vector(32, 540),
+    )
+    img = screenshot.crop(bbox)
+    img = imagetools.resize(img, height=32)
+    cv_img = np.asarray(img.convert("L"))
+    _, binary_img = cv2.threshold(cv_img, 127, 255, cv2.THRESH_BINARY_INV)
+    app.log.image(
+        "oversea point",
+        cv_img,
+        level=app.DEBUG,
+        layers={
+            "binary": binary_img,
+        },
+    )
+    text = ocr.text(imagetools.pil_image(binary_img))
+    ctx.overseas_point = int(text.replace(",", ""))
+
+
 class CommandScene(Scene):
     max_recognition_retry = 10
 
@@ -144,6 +177,7 @@ class CommandScene(Scene):
 
         action.wait_image(
             templates.SINGLE_MODE_COMMAND_TRAINING,
+            templates.SINGLE_MODE_COMMAND_TRAINING_LARK,
             templates.SINGLE_MODE_FORMAL_RACE_BANNER,
             templates.SINGLE_MODE_URA_FINALS,
             timeout=30,
@@ -189,7 +223,9 @@ class CommandScene(Scene):
     def recognize_status(self, ctx: single_mode.Context):
         action.wait_tap_image(templates.SINGLE_MODE_CHARACTER_DETAIL_BUTTON)
         # time.sleep(0.2)  # wait animation
-        action.wait_image_stable(templates.SINGLE_MODE_CHARACTER_DETAIL_TITLE, duration=0.2)
+        action.wait_image_stable(
+            templates.SINGLE_MODE_CHARACTER_DETAIL_TITLE, duration=0.2
+        )
         ctx.update_by_character_detail(app.device.screenshot())
         action.wait_tap_image(templates.CLOSE_BUTTON)
         time.sleep(0.2)  # wait animation
@@ -235,15 +271,23 @@ class CommandScene(Scene):
             return
 
         action.wait_tap_image(single_mode.go_out.command_template(ctx))
-        time.sleep(0.5)
-        if action.count_image(templates.SINGLE_MODE_GO_OUT_MENU_TITLE):
+        try:
+            action.wait_image(
+                template.Specification(
+                    templates.SINGLE_MODE_GO_OUT_MENU_TITLE, threshold=0.8
+                ),
+                timeout=1.0,
+            )
             scene = GoOutMenuScene().enter(ctx)
             scene.recognize(ctx)
             self.enter(ctx)
             ctx.scene = self
+        except TimeoutError:
+            return
 
     def recognize(self, ctx: single_mode.Context, *, static: bool = False):
         app.device.reset_size()
+
         # animation may not finished
         # https://github.com/NateScarlet/auto-derby/issues/201
         class local:
@@ -260,6 +304,8 @@ class CommandScene(Scene):
                 _recognize_climax_grade_point(ctx)
             if self.has_lesson:
                 _recognize_grand_live_performance(ctx)
+            if ctx.scenario == ctx.SCENARIO_PROJECT_LARK:
+                _recognize_lark_overseas_point(ctx)
 
         def _recognize_static_with_retry():
             local.next_retry_count += 1

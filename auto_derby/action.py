@@ -114,17 +114,21 @@ def tap_image(
 
 
 def wait_tap_image(
-    name: Union[Text, template.Specification], *, x: int = 0, y: int = 0, timeout: float = float("inf"),
-) -> None:
-    tmpl, last_pos = wait_image(name, timeout=timeout)
+    *name: Union[Text, template.Specification],
+    x: int = 0,
+    y: int = 0,
+    timeout: float = float("inf"),
+) -> Tuple[template.Specification, Tuple[int, int]]:
+    tmpl, last_pos = wait_image(*name, timeout=timeout)
     while True:
-        tmpl, pos = wait_image(name, timeout=timeout)
+        tmpl, pos = wait_image(*name, timeout=timeout)
         if pos == last_pos:
             break
         last_pos = pos
     img = template.load(tmpl.name)
     w, h = resize_proxy().vector2((img.width, img.height), template.TARGET_WIDTH)
     app.device.tap((pos[0] + x, pos[1] + y, w - x, h - y))
+    return tmpl, pos
 
 
 # DEPRECATED

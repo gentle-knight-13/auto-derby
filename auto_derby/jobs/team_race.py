@@ -38,7 +38,10 @@ def team_race():
         )
         name = tmpl.name
         if name == templates.TEAM_RACE_CHOOSE_COMPETITOR:
-            scene = CompetitorMenuScene.enter(ctx)
+            try:
+                scene = CompetitorMenuScene.enter(ctx)
+            except TimeoutError:
+                continue
             granted_reward_pos = scene.locate_granted_reward()
             if granted_reward_pos:
                 rp = action.resize_proxy()

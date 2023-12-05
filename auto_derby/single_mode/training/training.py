@@ -21,12 +21,23 @@ class Training:
     TYPE_GUTS = TrainingType.GUTS
     TYPE_WISDOM = TrainingType.WISDOM
 
+    TYPE_SS_MATCH = TrainingType.SS_MATCH
+
     ALL_TYPES = (
         TYPE_SPEED,
         TYPE_STAMINA,
         TYPE_POWER,
         TYPE_GUTS,
         TYPE_WISDOM,
+    )
+
+    ALL_TYPES_LARK = (
+        TYPE_SPEED,
+        TYPE_STAMINA,
+        TYPE_POWER,
+        TYPE_GUTS,
+        TYPE_WISDOM,
+        TYPE_SS_MATCH,
     )
 
     @staticmethod
@@ -60,7 +71,6 @@ class Training:
         return obj
 
     def __str__(self):
-
         named_data = (
             ("spd", self.speed),
             ("sta", self.stamina),
@@ -127,9 +137,17 @@ class Training:
             "use TrainingScene.recognize instead",
             DeprecationWarning,
         )
+        from ... import action, template, templates
         from ...scenes.single_mode.training import _recognize_training  # type: ignore
 
-        return _recognize_training(ctx, img)
+        _, pos = action.wait_image_stable(
+            template.Specification(
+                templates.SINGLE_MODE_TRAINING_CONFIRM, threshold=0.8
+            ),
+            templates.SINGLE_MODE_TRAINING_CONFIRM_LARK,
+            duration=0.1,
+        )
+        return _recognize_training(ctx, (img, pos))
 
 
 g.training_class = Training

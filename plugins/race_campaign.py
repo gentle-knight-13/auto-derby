@@ -155,6 +155,22 @@ _end = datetime.datetime(2023, 5, 22, 3, 59, tzinfo=JST)
 _add_campaign(OneTimeCampaign(_start, _end, "オークス", order_lte=1))
 _add_campaign(OneTimeCampaign(_start, _end, "フローラステークス", order_lte=2))
 _add_campaign(OneTimeCampaign(_start, _end, "桜花賞", order_lte=5))
+#   日本ダービー応援ミッション
+_start = datetime.datetime(2023, 5, 22, 4, 0, tzinfo=JST)
+_end = datetime.datetime(2023, 5, 29, 3, 59, tzinfo=JST)
+_add_campaign(OneTimeCampaign(_start, _end, "日本ダービー", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "京都新聞杯", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "皐月賞", order_lte=5))
+_add_campaign(OneTimeCampaign(_start, _end, "青葉賞", order_lte=2))
+#   安田記念応援ミッション
+_start = datetime.datetime(2023, 5, 29, 4, 0, tzinfo=JST)
+_end = datetime.datetime(2023, 6, 5, 3, 59, tzinfo=JST)
+_add_campaign(OneTimeCampaign(_start, _end, "安田記念", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "マイラーズカップ", order_lte=3))
+_add_campaign(OneTimeCampaign(_start, _end, "京王杯スプリングカップ", order_lte=3))
+#   宝塚記念応援ミッション
+_start = datetime.datetime(2023, 6, 19, 4, 0, tzinfo=JST)
+_end = datetime.datetime(2023, 6, 26, 3, 59, tzinfo=JST)
 #   「育成報酬」ピース追加キャンペーン
 _start = datetime.datetime(2023, 5, 6, 4, 0, tzinfo=JST)
 _end = datetime.datetime(2023, 5, 8, 3, 59, tzinfo=JST)
@@ -165,3 +181,40 @@ _add_campaign(OncePerDayCampaign(_start, _end, "ヴィクトリアマイル", or
 _start = datetime.datetime(2023, 5, 20, 4, 0, tzinfo=JST)
 _end = datetime.datetime(2023, 5, 22, 3, 59, tzinfo=JST)
 _add_campaign(OncePerDayCampaign(_start, _end, "オークス", order_lte=1))
+_start = datetime.datetime(2023, 5, 27, 4, 0, tzinfo=JST)
+_end = datetime.datetime(2023, 5, 29, 3, 59, tzinfo=JST)
+_add_campaign(OncePerDayCampaign(_start, _end, "日本ダービー", order_lte=1))
+_start = datetime.datetime(2023, 6, 3, 4, 0, tzinfo=JST)
+_end = datetime.datetime(2023, 6, 5, 3, 59, tzinfo=JST)
+_add_campaign(OncePerDayCampaign(_start, _end, "安田記念", order_lte=1))
+_start = datetime.datetime(2023, 6, 24, 4, 0, tzinfo=JST)
+_end = datetime.datetime(2023, 6, 26, 3, 59, tzinfo=JST)
+_add_campaign(OncePerDayCampaign(_start, _end, "宝塚記念", order_lte=1))
+
+
+# G1 記念ミッション
+#   ジャパンダートダービー応援ミッション
+_start = datetime.datetime(2023, 7, 6, 5, 0, tzinfo=JST)
+_end = datetime.datetime(2023, 7, 13, 4, 59, tzinfo=JST)
+_add_campaign(OneTimeCampaign(_start, _end, "ジャパンダートダービー", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "関東オークス", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "ユニコーンステークス", order_lte=1))
+#   「育成報酬」ピース追加キャンペーン
+_start = datetime.datetime(2023, 7, 11, 5, 0, tzinfo=JST)
+_end = datetime.datetime(2023, 7, 13, 4, 59, tzinfo=JST)
+_add_campaign(OncePerDayCampaign(_start, _end, "ジャパンダートダービー", order_lte=1))
+
+
+# 秋の G1 記念ミッション
+#   チャンピオンズカップ応援ミッション
+_start = datetime.datetime(2023, 11, 26, 15, 0, tzinfo=JST)
+_end = datetime.datetime(2023, 12, 3, 14, 59, tzinfo=JST)
+_add_campaign(OneTimeCampaign(_start, _end, "チャンピオンズカップ", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "みやこステークス", order_lte=3))
+_add_campaign(OneTimeCampaign(_start, _end, "武蔵野ステークス", order_lte=3))
+#   阪神ジュベナイルフィリーズ応援ミッション
+_start = datetime.datetime(2023, 12, 3, 22, 0, tzinfo=JST)
+_end = datetime.datetime(2023, 12, 10, 14, 59, tzinfo=JST)
+_add_campaign(OneTimeCampaign(_start, _end, "阪神ジュベナイルフィリーズ", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "ファンタジーステークス", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "アルテミスステークス", order_lte=1))
