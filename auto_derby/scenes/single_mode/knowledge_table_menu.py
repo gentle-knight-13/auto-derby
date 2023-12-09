@@ -53,9 +53,10 @@ class KnowledgeTableMenuScene(Scene):
             while True:
                 tmpl, pos = action.wait_image(
                     templates.CLOSE_BUTTON,
+                    templates.RETRY_BUTTON,
                     templates.SINGLE_MODE_CHARACTER_DETAIL_BUTTON,
                 )
-                if tmpl.name != templates.CLOSE_BUTTON:
+                if tmpl.name == templates.SINGLE_MODE_CHARACTER_DETAIL_BUTTON:
                     break
                 app.device.tap(action.template_rect(tmpl, pos))
                 time.sleep(2.0)
