@@ -218,3 +218,7 @@ _end = datetime.datetime(2023, 12, 10, 14, 59, tzinfo=JST)
 _add_campaign(OneTimeCampaign(_start, _end, "阪神ジュベナイルフィリーズ", order_lte=1))
 _add_campaign(OneTimeCampaign(_start, _end, "ファンタジーステークス", order_lte=1))
 _add_campaign(OneTimeCampaign(_start, _end, "アルテミスステークス", order_lte=1))
+#   全日本ジュニア優駿応援ミッション
+_start = datetime.datetime(2023, 12, 6, 15, 0, tzinfo=JST)
+_end = datetime.datetime(2023, 12, 13, 14, 59, tzinfo=JST)
+_add_campaign(OneTimeCampaign(_start, _end, "全日本ジュニア優駿", order_lte=1))
