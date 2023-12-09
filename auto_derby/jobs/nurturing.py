@@ -296,7 +296,7 @@ def _handle_target_race(ac: _ActionContext):
     ctx = ac.ctx
     if ctx.scenario in (ctx.SCENARIO_GRAND_MASTERS, ctx.SCENARIO_UNKNOWN):
         try:
-            tmpl, pos = action.wait_image_stable(
+            action.wait_image_stable(
                 templates.SINGLE_MODE_GRAND_MASTERS_GUR_BUTTON,
                 templates.SINGLE_MODE_GRAND_MASTERS_WBC_BUTTON,
                 duration=0.2,
@@ -308,7 +308,7 @@ def _handle_target_race(ac: _ActionContext):
             pass
     if ctx.scenario in (ctx.SCENARIO_AOHARU, ctx.SCENARIO_UNKNOWN):
         try:
-            tmpl, pos = action.wait_image_stable(
+            action.wait_image_stable(
                 templates.SINGLE_MODE_CHARACTER_DETAIL_BUTTON,
                 duration=0.2,
                 timeout=1,
