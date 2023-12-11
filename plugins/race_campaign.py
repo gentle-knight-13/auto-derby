@@ -222,3 +222,9 @@ _add_campaign(OneTimeCampaign(_start, _end, "アルテミスステークス", or
 _start = datetime.datetime(2023, 12, 6, 15, 0, tzinfo=JST)
 _end = datetime.datetime(2023, 12, 13, 14, 59, tzinfo=JST)
 _add_campaign(OneTimeCampaign(_start, _end, "全日本ジュニア優駿", order_lte=1))
+#   朝日杯フューチュリティステークス応援ミッション
+_start = datetime.datetime(2023, 12, 10, 15, 0, tzinfo=JST)
+_end = datetime.datetime(2023, 12, 17, 14, 59, tzinfo=JST)
+_add_campaign(OneTimeCampaign(_start, _end, "朝日杯フューチュリティステークス", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "デイリー杯ジュニアステークス", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "京王杯ジュニアステークス", order_lte=1))
