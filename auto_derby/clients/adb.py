@@ -52,13 +52,12 @@ class ADBClient(Client):
         signer = PythonRSASigner.FromRSAKeyPath(self.key_path)
         self.device.connect(rsa_keys=[signer])
 
-    def _shell(self, *args, **kwargs):
-        for i in range(10):
+    def _shell(self, *args, **kwargs) -> (Text|bytes):
+        while 1:
             try:
                 return self.device.shell(*args, **kwargs)
             except (AdbConnectionError, TcpTimeoutException) as e:
-                app.log.text(traceback.format_exc(), level=app.WARN)
-                self.connect()
+                pass
         return self.device.shell(*args, **kwargs)
 
     def tap(self, point: Tuple[int, int]) -> None:
@@ -70,12 +69,12 @@ class ADBClient(Client):
         time.sleep(self.action_wait)
 
     def start_game(self):
-        self.device.shell(
+        self._shell(
             "am start -n jp.co.cygames.umamusume/jp.co.cygames.umamusume_activity.UmamusumeActivity"
         )
 
     def load_size(self):
-        res = self.device.shell("wm size")
+        res = self._shell("wm size")
         match = re.match(r"Physical size: (\d+)x(\d+)", res)
         assert match, "unexpected command result: %s" % res
         self._width = int(match.group(2))
