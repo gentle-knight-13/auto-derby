@@ -115,6 +115,42 @@ def compute(ctx: Context, trn: Training) -> float:
     if ctx.date[0] == 4:
         vit *= 0.3
 
+    live_performance = 0
+    if ctx.scenario == ctx.SCENARIO_GRAND_LIVE:
+        avg = (trn.dance + trn.passion + trn.vocal + trn.visual + trn.mental) / 5
+        value_map = (
+            (0, 4.0),
+            (round(avg), 2.0),
+            (round(avg * 1.5), 0.1),
+        )
+        live_performance += mathtools.integrate(
+            ctx.dance,
+            trn.dance,
+            value_map,
+        )
+        live_performance += mathtools.integrate(
+            ctx.passion,
+            trn.passion,
+            value_map,
+        )
+        live_performance += mathtools.integrate(
+            ctx.vocal,
+            trn.vocal,
+            value_map,
+        )
+        live_performance += mathtools.integrate(
+            ctx.visual,
+            trn.visual,
+            value_map,
+        )
+        live_performance += mathtools.integrate(
+            ctx.mental,
+            trn.mental,
+            value_map,
+        )
+    if ctx.date[0] == 4:
+        live_performance *= 0.3
+
     skill = trn.skill * 0.5
 
     success_rate = 1 - trn.failure_rate
@@ -153,7 +189,18 @@ def compute(ctx: Context, trn: Training) -> float:
     has_hint = any(i for i in trn.partners if i.has_hint)
     hint = 3 if has_hint else 0
     return (
-        (spd + sta + pow_ + gut + wis + skill + partner + target_level_score + hint)
+        (
+            spd
+            + sta
+            + pow_
+            + gut
+            + wis
+            + skill
+            + partner
+            + target_level_score
+            + hint
+            + live_performance
+        )
         * success_rate
         + vit
         - fail_penalty * trn.failure_rate

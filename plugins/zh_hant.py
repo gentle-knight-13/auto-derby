@@ -129,12 +129,12 @@ def text(img: Image, *, threshold: float = 0.8, segment_only: bool = False) -> T
                         or l - char_non_zero_bbox[2] > max_char_width * 0.1
                     )
                 )
-                or (
-                    # current is punctuation
-                    b - t < max_char_height * 0.4
-                    and l > char_non_zero_bbox[2] + 1
-                    and l > char_non_zero_bbox[0] + max_char_width * 0.3
-                )
+                # or (
+                #     # current is punctuation
+                #     b - t < max_char_height * 0.4
+                #     and l > char_non_zero_bbox[2] + 1
+                #     and l > char_non_zero_bbox[0] + max_char_width * 0.3
+                # )
             )
             and not ocr._bbox_contains(ocr._pad_bbox(char_bbox, 2), bbox)
         )
@@ -161,16 +161,16 @@ def text(img: Image, *, threshold: float = 0.8, segment_only: bool = False) -> T
 
     if os.getenv("DEBUG") == auto_derby.ocr.__name__:
         segmentation_img = cv2.cvtColor(binary_img, cv2.COLOR_GRAY2BGR)
+        chars_img = segmentation_img
+        cropped_chars_img = segmentation_img
         for i in contours:
             x, y, w, h = cv2.boundingRect(i)
             cv2.rectangle(
                 segmentation_img, (x, y), (x + w, y + h), (0, 0, 255), thickness=1
             )
-        chars_img = cv2.cvtColor(binary_img, cv2.COLOR_GRAY2BGR)
         for bbox, _ in char_img_list:
             l, t, r, b = bbox
             cv2.rectangle(chars_img, (l, t), (r, b), (0, 0, 255), thickness=1)
-        cropped_chars_img = cv2.cvtColor(binary_img, cv2.COLOR_GRAY2BGR)
         for bbox, _ in cropped_char_img_list:
             l, t, r, b = bbox
             cv2.rectangle(cropped_chars_img, (l, t), (r, b), (0, 0, 255), thickness=1)
@@ -309,10 +309,17 @@ def _recognize_base_effect(img: Image) -> int:
 
 
 def _year4_date_text(ctx: Context) -> Iterator[Text]:
-    if ctx.scenario in (ctx.SCENARIO_URA, ctx.SCENARIO_AOHARU, ctx.SCENARIO_UNKNOWN):
+    if ctx.scenario in (
+        ctx.SCENARIO_URA,
+        ctx.SCENARIO_AOHARU,
+        ctx.SCENARIO_GRAND_LIVE,
+        ctx.SCENARIO_UNKNOWN,
+    ):
         yield "決勝系列賽舉辦中"
     if ctx.scenario in (ctx.SCENARIO_CLIMAX, ctx.SCENARIO_UNKNOWN):
-        yield "巔峰賽舉辦中"  # Not localized in current verison
+        yield "巔峰賽舉辦中"
+    if ctx.scenario in (ctx.SCENARIO_GRAND_MASTERS, ctx.SCENARIO_UNKNOWN):
+        yield "GM 舉辦中"  # Not localized in current verison
 
 
 def _ocr_date(
