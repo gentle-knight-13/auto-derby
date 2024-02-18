@@ -61,7 +61,7 @@ def create_pos_mask(
         out_img[y - padding : y + padding, x - padding : x + padding] = 255
 
     cv2.imshow("out", out_img)
-    cv2.waitKey()
+    cv2.waitKey(0)
     cv2.destroyWindow("out")
     return PIL.Image.fromarray(out_img).convert("1")
 
@@ -102,7 +102,7 @@ def main():
 
     if args.no_save:
         return
-    dest = (_TEMPLATES_PATH / template.add_middle_ext(name, "pos")).resolve()
+    dest = (templates_path / template.add_middle_ext(name, "pos")).resolve()
     img.save(dest)
     print(dest.name)
 
