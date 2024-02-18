@@ -228,3 +228,37 @@ _end = datetime.datetime(2023, 12, 17, 14, 59, tzinfo=JST)
 _add_campaign(OneTimeCampaign(_start, _end, "朝日杯フューチュリティステークス", order_lte=1))
 _add_campaign(OneTimeCampaign(_start, _end, "デイリー杯ジュニアステークス", order_lte=1))
 _add_campaign(OneTimeCampaign(_start, _end, "京王杯ジュニアステークス", order_lte=1))
+#   ホープフルステークス応援ミッション
+_start = datetime.datetime(2023, 12, 21, 15, 0, tzinfo=JST)
+_end = datetime.datetime(2023, 12, 28, 14, 59, tzinfo=JST)
+_add_campaign(OneTimeCampaign(_start, _end, "ホープフルステークス", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "京都ジュニアステークス", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "東京スポーツ杯ジュニアステークス", order_lte=1))
+#   東京大賞典応援ミッション
+_start = datetime.datetime(2023, 12, 22, 15, 0, tzinfo=JST)
+_end = datetime.datetime(2023, 12, 29, 14, 59, tzinfo=JST)
+_add_campaign(OneTimeCampaign(_start, _end, "東京大賞典", order_lte=1))
+
+
+# 春の G1 記念ミッション
+#   フェブラリーステークス応援ミッション
+_start = datetime.datetime(2024, 2, 11, 22, 0, tzinfo=JST)
+_end = datetime.datetime(2024, 2, 18, 14, 59, tzinfo=JST)
+_add_campaign(OneTimeCampaign(_start, _end, "東海ステークス", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "根岸ステークス", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "フェブラリーステークス", order_lte=1))
+
+
+#   「育成報酬」ピース追加キャンペーン
+_start = datetime.datetime(2023, 12, 23, 5, 0, tzinfo=JST)
+_end = datetime.datetime(2023, 12, 25, 4, 59, tzinfo=JST)
+_add_campaign(OncePerDayCampaign(_start, _end, "有馬記念", order_lte=1))
+_start = datetime.datetime(2023, 12, 27, 5, 0, tzinfo=JST)
+_end = datetime.datetime(2023, 12, 29, 4, 59, tzinfo=JST)
+_add_campaign(OncePerDayCampaign(_start, _end, "ホープフルステークス", order_lte=1))
+_start = datetime.datetime(2023, 12, 28, 5, 0, tzinfo=JST)
+_end = datetime.datetime(2023, 12, 30, 4, 59, tzinfo=JST)
+_add_campaign(OncePerDayCampaign(_start, _end, "東京大賞典", order_lte=1))
+_start = datetime.datetime(2024, 2, 17, 5, 0, tzinfo=JST)
+_end = datetime.datetime(2024, 2, 19, 4, 59, tzinfo=JST)
+_add_campaign(OncePerDayCampaign(_start, _end, "フェブラリーステークス", order_lte=1))
