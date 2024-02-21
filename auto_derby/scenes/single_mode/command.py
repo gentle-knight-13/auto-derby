@@ -13,7 +13,7 @@ from auto_derby.single_mode.context import Context
 
 from ... import action, imagetools, ocr, single_mode, template, templates, terminal, app
 from ...scenes import Scene
-from ..scene import Scene, SceneHolder
+from ..scene import SceneHolder
 
 from .go_out_menu import GoOutMenuScene
 
@@ -97,12 +97,12 @@ def _recognize_grand_live_performance(ctx: Context):
     screenshot = app.device.screenshot()
 
     base_x = rp.vector(37, 540)
-    l, r = base_x, base_x + rp.vector(58, 540)
-    dance_bbox = (l, rp.vector(267, 540), r, rp.vector(289, 540))
-    passion_bbox = (l, rp.vector(316, 540), r, rp.vector(338, 540))
-    vocal_bbox = (l, rp.vector(365, 540), r, rp.vector(387, 540))
-    visual_bbox = (l, rp.vector(414, 540), r, rp.vector(436, 540))
-    mental_bbox = (l, rp.vector(463, 540), r, rp.vector(485, 540))
+    left, right = base_x, base_x + rp.vector(58, 540)
+    dance_bbox = (left, rp.vector(267, 540), right, rp.vector(289, 540))
+    passion_bbox = (left, rp.vector(316, 540), right, rp.vector(338, 540))
+    vocal_bbox = (left, rp.vector(365, 540), right, rp.vector(387, 540))
+    visual_bbox = (left, rp.vector(414, 540), right, rp.vector(436, 540))
+    mental_bbox = (left, rp.vector(463, 540), right, rp.vector(485, 540))
 
     ctx.dance = _recognize_property(screenshot.crop(dance_bbox))
     ctx.passion = _recognize_property(screenshot.crop(passion_bbox))
@@ -145,7 +145,7 @@ def _recognize_lark_overseas_point(ctx: Context):
 
 
 class CommandScene(Scene):
-    max_recognition_retry = 10
+    max_recognition_retry = 3
 
     def __init__(self) -> None:
         super().__init__()
