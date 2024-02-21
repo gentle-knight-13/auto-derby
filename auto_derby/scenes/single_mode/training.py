@@ -722,19 +722,19 @@ def _performance_recognitions(
         Callable[[Image], int],
     ]
 ]:
-    def _bbox_groups(l: int, r: int):
+    def _bbox_groups(left: int, right: int):
         return (
-            (l, rp.vector(265, 540), r, rp.vector(292, 540)),
-            (l, rp.vector(314, 540), r, rp.vector(341, 540)),
-            (l, rp.vector(363, 540), r, rp.vector(390, 540)),
-            (l, rp.vector(412, 540), r, rp.vector(439, 540)),
-            (l, rp.vector(461, 540), r, rp.vector(488, 540)),
+            (left, rp.vector(265, 540), right, rp.vector(292, 540)),
+            (left, rp.vector(314, 540), right, rp.vector(341, 540)),
+            (left, rp.vector(363, 540), right, rp.vector(390, 540)),
+            (left, rp.vector(412, 540), right, rp.vector(439, 540)),
+            (left, rp.vector(461, 540), right, rp.vector(488, 540)),
         )
 
     if ctx.scenario == ctx.SCENARIO_GRAND_LIVE:
         base_x = rp.vector(88, 540)
-        l, r = base_x, base_x + rp.vector(58, 540)
-        yield _bbox_groups(l, r), _recognize_base_effect
+        left, right = base_x, base_x + rp.vector(58, 540)
+        yield _bbox_groups(left, right), _recognize_base_effect
     else:
         raise NotImplementedError(ctx.scenario)
 
@@ -748,7 +748,7 @@ def _recognize_training(
 
         self = Training.new()
         self.confirm_position = img_pair[1]
-        radius = rp.vector(40, 540)
+        rp.vector(40, 540)
         min_dist: Union[int, None] = None
         for t, center in zip(
             Training.ALL_TYPES,
@@ -804,14 +804,15 @@ class TrainingScene(Scene):
     @classmethod
     def _enter(cls, ctx: SceneHolder) -> Scene:
         CommandScene.enter(ctx)
-        tmpl, _ = action.wait_tap_image(
-            templates.SINGLE_MODE_COMMAND_TRAINING,
-            templates.SINGLE_MODE_COMMAND_TRAINING_LARK,
-        )
-        if tmpl.name == templates.SINGLE_MODE_COMMAND_TRAINING_LARK:
-            action.wait_image(templates.SINGLE_MODE_TRAINING_CONFIRM_LARK)
-        else:
-            action.wait_image(_TRAINING_CONFIRM)
+        while True:
+            tmpl, pos = action.wait_image(
+                templates.SINGLE_MODE_COMMAND_TRAINING,
+                templates.SINGLE_MODE_COMMAND_TRAINING_LARK,
+                _TRAINING_CONFIRM,
+            )
+            if tmpl.name == _TRAINING_CONFIRM.name:
+                break
+            app.device.tap(action.template_rect(tmpl, pos))
         return cls()
 
     def __init__(self):
