@@ -657,6 +657,10 @@ def _recognize_partners(ctx: Context, img: Image) -> Iterator[training.Partner]:
             rp.vector4((448, 147, 516, 220), 540),
             rp.vector(86, 540),
         ),
+        ctx.SCENARIO_UAF_READY_GO: (  # Todo: check correctness
+            rp.vector4((448, 147, 516, 220), 540),
+            rp.vector(86, 540),
+        ),
     }[ctx.scenario]
     icons_bottom = rp.vector(578, 540)
     while icon_bbox[2] < icons_bottom:
@@ -698,16 +702,13 @@ def _effect_recognitions(
     elif ctx.scenario == ctx.SCENARIO_AOHARU:
         yield _bbox_groups(597, 625), _recognize_base_effect
         yield _bbox_groups(570, 595), _recognize_red_effect
-    elif ctx.scenario == ctx.SCENARIO_CLIMAX:
-        yield _bbox_groups(595, 623), _recognize_base_effect
-        yield _bbox_groups(568, 593), _recognize_red_effect
-    elif ctx.scenario == ctx.SCENARIO_GRAND_LIVE:
-        yield _bbox_groups(595, 623), _recognize_base_effect
-        yield _bbox_groups(568, 593), _recognize_red_effect
-    elif ctx.scenario == ctx.SCENARIO_GRAND_MASTERS:
-        yield _bbox_groups(595, 623), _recognize_base_effect
-        yield _bbox_groups(568, 593), _recognize_red_effect
-    elif ctx.scenario == ctx.SCENARIO_PROJECT_LARK:
+    elif ctx.scenario in (
+        ctx.SCENARIO_CLIMAX,
+        ctx.SCENARIO_GRAND_LIVE,
+        ctx.SCENARIO_GRAND_MASTERS,
+        ctx.SCENARIO_PROJECT_LARK,
+        ctx.SCENARIO_UAF_READY_GO,
+    ):
         yield _bbox_groups(595, 623), _recognize_base_effect
         yield _bbox_groups(568, 593), _recognize_red_effect
     else:
@@ -759,9 +760,10 @@ def _recognize_training(
                 self.type = t
                 min_dist = x_dist
 
-        self.level = _recognize_level(
-            tuple(cast.list_(img.getpixel(rp.vector2((10, 200), 540)), int))
-        )
+        if ctx.scenario != ctx.SCENARIO_UAF_READY_GO:
+            self.level = _recognize_level(
+                tuple(cast.list_(img.getpixel(rp.vector2((10, 200), 540)), int))
+            )
 
         for bbox_group, recognize in _effect_recognitions(ctx, rp):
             self.speed += recognize(img.crop(bbox_group[0]))

@@ -43,6 +43,7 @@ def _year4_date_text(ctx: Context) -> Iterator[Text]:
         ctx.SCENARIO_URA,
         ctx.SCENARIO_AOHARU,
         ctx.SCENARIO_GRAND_LIVE,
+        ctx.SCENARIO_UAF_READY_GO,
         ctx.SCENARIO_UNKNOWN,
     ):
         yield "ファイナルズ開催中"
@@ -213,6 +214,14 @@ def _recognize_max_property(img: Image) -> int:
 def _recognize_scenario(rp: mathtools.ResizeProxy, img: Image) -> Text:
     spec = (
         (
+            templates.SINGLE_MODE_COMMAND_DISCUSS,
+            Context.SCENARIO_UAF_READY_GO,
+        ),
+        (
+            templates.SINGLE_MODE_UAF_SPORT_GENRE,
+            Context.SCENARIO_UAF_READY_GO,
+        ),
+        (
             template.Specification(
                 templates.SINGLE_MODE_CLIMAX_GRADE_POINT_ICON, threshold=0.8
             ),
@@ -269,7 +278,7 @@ def _recognize_scenario(rp: mathtools.ResizeProxy, img: Image) -> Text:
         ),
         (templates.SINGLE_MODE_GRAND_LIVE_DATE_REMAIN, Context.SCENARIO_GRAND_LIVE),
         (templates.SINGLE_MODE_GRAND_LIVE_PERFORMANCE, Context.SCENARIO_GRAND_LIVE),
-        (templates.SINGLE_MODE_AOHARU_CLASS_DETAIL_BUTTON, Context.SCENARIO_AOHARU),
+        # (templates.SINGLE_MODE_AOHARU_CLASS_DETAIL_BUTTON, Context.SCENARIO_AOHARU), # MAYBE UAF TOO
         (templates.SINGLE_MODE_CLASS_DETAIL_BUTTON, Context.SCENARIO_URA),
     )
     ret = Context.SCENARIO_UNKNOWN
@@ -290,6 +299,7 @@ def _date_bbox(ctx: Context, rp: mathtools.ResizeProxy):
         ctx.SCENARIO_GRAND_LIVE,
         ctx.SCENARIO_GRAND_MASTERS,
         ctx.SCENARIO_PROJECT_LARK,
+        ctx.SCENARIO_UAF_READY_GO,
     ):
         return rp.vector4((125, 32, 278, 48), 540)
     if ctx.scenario == ctx.SCENARIO_CLIMAX:
@@ -339,6 +349,7 @@ class Context:
     SCENARIO_GRAND_LIVE = "つなげ、照らせ、ひかれ。 私たちのグランドライブ"
     SCENARIO_GRAND_MASTERS = "グランドマスターズ ―継ぐ者達へ―"
     SCENARIO_PROJECT_LARK = "Reach for the stars プロジェクトL'Arc"
+    SCENARIO_UAF_READY_GO = "U.A.F. Ready GO! ～アスリートのキラメキ～"
 
     @staticmethod
     def new() -> Context:
