@@ -52,7 +52,7 @@ def _recognize_climax_grade_point(ctx: Context):
             "binary": binary_img,
         },
     )
-    text = ocr.text(imagetools.pil_image(binary_img))
+    text = ocr.text(imagetools.pil_image(binary_img), simple_segment=True)
     ctx.grade_point = int(text.rstrip("pt").replace(",", ""))
 
 

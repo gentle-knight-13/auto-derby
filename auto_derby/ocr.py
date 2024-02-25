@@ -1,13 +1,12 @@
 # -*- coding=UTF-8 -*-
 # pyright: strict
-
+# ruff: noqa: E741
 
 import contextlib
 import json
 import logging
 import os
 import sys
-import time
 import warnings
 from pathlib import Path
 from typing import List, Optional, Text, Tuple
@@ -140,7 +139,7 @@ def _text_from_image(img: np.ndarray, threshold: float = 0.8) -> Text:
 
 
 def _union_bbox(
-    *bbox: Optional[Tuple[int, int, int, int]]
+    *bbox: Optional[Tuple[int, int, int, int]],
 ) -> Tuple[int, int, int, int]:
     b = [i for i in bbox if i]
     ret = b[0]
@@ -182,7 +181,9 @@ def _bbox_contains(a: Tuple[int, int, int, int], b: Tuple[int, int, int, int]) -
 _LINE_HEIGHT = 32
 
 
-def text(img: Image, *, threshold: float = 0.8) -> Text:
+def text(
+    img: Image, *, threshold: float = 0.8, offset: int = 0, simple_segment: bool = False
+) -> Text:
     """Recognize text line, background color should be black.
 
     Args:
@@ -193,12 +194,6 @@ def text(img: Image, *, threshold: float = 0.8) -> Text:
     """
     reload_on_demand()
     ret = ""
-
-    # ret = TextSystem("ja").ocr_single_line(
-    #     cv2.cvtColor(imagetools.cv_image(img), cv2.COLOR_RGB2BGR)
-    # )
-    # app.log.image("ocr result: %s" % str(ret), img, level=app.DEBUG)
-    # return ret[0]
 
     img = imagetools.auto_crop_pil(img)
     w, h = img.width, img.height
@@ -276,7 +271,7 @@ def text(img: Image, *, threshold: float = 0.8) -> Text:
         bbox = _get_expanded_bbox(index)
 
         l, t, r, b = bbox
-        is_new_char = (
+        is_new_char = simple_segment or (
             char_parts
             and l > char_non_zero_bbox[2]
             and (
@@ -351,7 +346,9 @@ def text(img: Image, *, threshold: float = 0.8) -> Text:
     else:
         app.log.image("text", cv_img, level=app.DEBUG, layers={"binary": binary_img})
 
-    for _, i in cropped_char_img_list:
+    for j, (_, i) in enumerate(cropped_char_img_list):
+        if j < offset:
+            continue
         ret += _text_from_image(i, threshold)
 
     app.log.text("ocr result: %s" % ret, level=app.DEBUG)

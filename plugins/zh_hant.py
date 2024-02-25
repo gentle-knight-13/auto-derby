@@ -24,7 +24,9 @@ from PIL.Image import fromarray as image_from_array
 ##############################################################
 
 
-def text(img: Image, *, threshold: float = 0.8, segment_only: bool = False) -> Text:
+def text(
+    img: Image, *, threshold: float = 0.8, offset: int = 0, simple_segment: bool = False
+) -> Text:
     """Recognize text line, background color should be black.
 
     Args:
@@ -113,7 +115,7 @@ def text(img: Image, *, threshold: float = 0.8, segment_only: bool = False) -> T
         bbox = _get_expanded_bbox(index)
 
         l, t, r, b = bbox
-        is_new_char = segment_only or (
+        is_new_char = simple_segment or (
             char_parts
             and l > char_non_zero_bbox[2]
             and (
@@ -161,21 +163,21 @@ def text(img: Image, *, threshold: float = 0.8, segment_only: bool = False) -> T
 
     if os.getenv("DEBUG") == auto_derby.ocr.__name__:
         segmentation_img = cv2.cvtColor(binary_img, cv2.COLOR_GRAY2BGR)
-        chars_img = segmentation_img
-        cropped_chars_img = segmentation_img
         for i in contours:
             x, y, w, h = cv2.boundingRect(i)
             cv2.rectangle(
                 segmentation_img, (x, y), (x + w, y + h), (0, 0, 255), thickness=1
             )
+        chars_img = cv2.cvtColor(binary_img, cv2.COLOR_GRAY2BGR)
         for bbox, _ in char_img_list:
             l, t, r, b = bbox
             cv2.rectangle(chars_img, (l, t), (r, b), (0, 0, 255), thickness=1)
+        cropped_chars_img = cv2.cvtColor(binary_img, cv2.COLOR_GRAY2BGR)
         for bbox, _ in cropped_char_img_list:
             l, t, r, b = bbox
             cv2.rectangle(cropped_chars_img, (l, t), (r, b), (0, 0, 255), thickness=1)
         app.log.image(
-            "text (segment_only)" if segment_only else "text",
+            "text",
             cv_img,
             level=app.DEBUG,
             layers={
@@ -188,7 +190,9 @@ def text(img: Image, *, threshold: float = 0.8, segment_only: bool = False) -> T
     else:
         app.log.image("text", cv_img, level=app.DEBUG, layers={"binary": binary_img})
 
-    for _, i in cropped_char_img_list:
+    for j, (_, i) in enumerate(cropped_char_img_list):
+        if j < offset:
+            continue
         ret += ocr._text_from_image(i, threshold)
 
     app.log.text("ocr result: %s" % ret, level=app.DEBUG)
@@ -391,23 +395,6 @@ def _recognize_fan_count(img: Image) -> int:
     return int(text.rstrip("人").replace(",", "").replace("、", ""))
 
 
-def _recognize_property(img: Image) -> int:
-    img = imagetools.resize(img, height=32)
-    max_match = imagetools.constant_color_key(
-        imagetools.cv_image(img),
-        (210, 249, 255),
-        threshold=0.95,
-    )
-    if np.average(max_match) > 5:
-        return 1200
-
-    cv_img = np.asarray(img.convert("L"))
-    _, binary_img = cv2.threshold(cv_img, 160, 255, cv2.THRESH_BINARY_INV)
-    imagetools.fill_area(binary_img, (0,), size_lt=3)
-    app.log.image("property", cv_img, layers={"binary": binary_img}, level=app.DEBUG)
-    return int(ocr.text(imagetools.pil_image(binary_img), segment_only=True))
-
-
 ##############################################################
 # Race
 ##############################################################
@@ -454,6 +441,7 @@ def _recognize_course(img: Image) -> Course:
         turn=turn,
     )
 
+
 def _menu_item_bbox(
     ctx: Context, fan_icon_pos: Tuple[int, int], rp: mathtools.ResizeProxy
 ):
@@ -483,9 +471,27 @@ def _spec_bbox(ctx: Context, rp: mathtools.ResizeProxy):
 
 _original_from_po = single_mode.race.race.JSONLRepository._from_po
 
-#https://umamusume.jp/news/detail.php?id=896
+# https://umamusume.jp/news/detail.php?id=896
 _REMOVE_COURSES = ["川崎", "船橋", "盛岡"]
-_REMOVE_RACES = ["川崎記念", "全日本ジュニア優駿", "かしわ記念", "マイルチャンピオンシップ南部杯", "レディスプレリュード", "東京盃", "エンプレス杯", "関東オークス", "ダイオライト記念", "さざんかテレビ杯", "TCK女王盃", "東京スプリント", "スパーキングレディーカップ", "マリーンカップ", "クイーン賞", "マーキュリーカップ", "クラスターカップ"]
+_REMOVE_RACES = [
+    "川崎記念",
+    "全日本ジュニア優駿",
+    "かしわ記念",
+    "マイルチャンピオンシップ南部杯",
+    "レディスプレリュード",
+    "東京盃",
+    "エンプレス杯",
+    "関東オークス",
+    "ダイオライト記念",
+    "さざんかテレビ杯",
+    "TCK女王盃",
+    "東京スプリント",
+    "スパーキングレディーカップ",
+    "マリーンカップ",
+    "クイーン賞",
+    "マーキュリーカップ",
+    "クラスターカップ",
+]
 
 
 def _from_po(*args, **kwargs) -> Race:
@@ -550,10 +556,11 @@ class Plugin(auto_derby.Plugin):
     def install(self) -> None:
         single_mode.context._ocr_date = _ocr_date
         single_mode.context._recognize_fan_count = _recognize_fan_count
-        single_mode.context._recognize_property = _recognize_property
         single_mode.race.game_data._recognize_course = _recognize_course
         auto_derby.scenes.single_mode.race_menu._recognize_course = _recognize_course
-        auto_derby.scenes.single_mode.training._recognize_base_effect = _recognize_base_effect
+        auto_derby.scenes.single_mode.training._recognize_base_effect = (
+            _recognize_base_effect
+        )
         auto_derby.scenes.single_mode.race_menu._menu_item_bbox = _menu_item_bbox
         # limited_sale.buy_first_n = buy_first_n
         single_mode.race.game_data._spec_bbox = _spec_bbox

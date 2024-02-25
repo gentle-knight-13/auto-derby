@@ -142,7 +142,7 @@ def _recognize_fan_count(img: Image) -> int:
     )
     _, binary_img = cv2.threshold(cv_img, 50, 255, cv2.THRESH_BINARY_INV)
     app.log.image("fan count", cv_img, level=app.DEBUG, layers={"binary": binary_img})
-    text = ocr.text(imagetools.pil_image(binary_img))
+    text = ocr.text(imagetools.pil_image(binary_img), simple_segment=True)
     return int(text.rstrip("人").replace(",", ""))
 
 
@@ -163,9 +163,7 @@ def _recognize_status(img: Image) -> Tuple[int, Text]:
     )
     text_img = cv2.medianBlur(text_img, 5)
     h = cv_img.shape[0]
-    imagetools.fill_area(
-        text_img, (0,), mode=cv2.RETR_LIST, size_lt=round(h * 0.2**2)
-    )
+    imagetools.fill_area(text_img, (0,), mode=cv2.RETR_LIST, size_lt=round(h * 0.2**2))
     app.log.image(
         "status",
         cv_img,
@@ -198,7 +196,7 @@ def _recognize_property(img: Image) -> int:
     _, binary_img = cv2.threshold(cv_img, 160, 255, cv2.THRESH_BINARY_INV)
     imagetools.fill_area(binary_img, (0,), size_lt=3)
     app.log.image("property", cv_img, layers={"binary": binary_img}, level=app.DEBUG)
-    return int(ocr.text(imagetools.pil_image(binary_img)))
+    return int(ocr.text(imagetools.pil_image(binary_img), simple_segment=True))
 
 
 def _recognize_max_property(img: Image) -> int:
@@ -459,9 +457,9 @@ class Context:
     # TODO: refactor update_by_* to *Scene.recognize
     def update_by_command_scene(self, screenshot: Image) -> None:
         rp = mathtools.ResizeProxy(screenshot.width)
-        if not self.scenario:
+        if not self.scenario or self.scenario == Context.SCENARIO_UNKNOWN:
             self.scenario = _recognize_scenario(rp, screenshot)
-        if not self.scenario:
+        if not self.scenario or self.scenario == Context.SCENARIO_UNKNOWN:
             raise ValueError("unknown scenario")
         date_bbox = _date_bbox(self, rp)
         vitality_bbox = rp.vector4((148, 106, 327, 108), 466)
@@ -485,23 +483,7 @@ class Context:
         max_guts_bbox = (rp.vector(264, 466), t, rp.vector(308, 466), b)
         max_wisdom_bbox = (rp.vector(335, 466), t, rp.vector(381, 466), b)
 
-        if self.scenario not in (
-            self.SCENARIO_GRAND_MASTERS,
-            self.SCENARIO_UNKNOWN,
-        ) or not any(
-            [
-                tuple(
-                    template.match(
-                        screenshot, templates.SINGLE_MODE_GRAND_MASTERS_WBC_BUTTON
-                    )
-                ),
-                tuple(
-                    template.match(
-                        screenshot, templates.SINGLE_MODE_GRAND_MASTERS_GUR_BUTTON
-                    )
-                ),
-            ]
-        ):
+        if self.scenario != self.SCENARIO_GRAND_MASTERS:
             self.date = _ocr_date(self, screenshot.crop(date_bbox))
 
             self.vitality = _recognize_vitality(screenshot.crop(vitality_bbox))
