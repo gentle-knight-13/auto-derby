@@ -15,6 +15,7 @@ import argparse
 
 import PIL.Image
 from auto_derby import single_mode, app
+from auto_derby.scenes.single_mode import command
 from auto_derby.infrastructure.image_device_service import ImageDeviceService
 
 
@@ -29,8 +30,9 @@ def main():
     image_path = args.image
     image = PIL.Image.open(image_path)
     app.device = ImageDeviceService(image)
-    ctx = single_mode.Context()
-    ctx.update_by_command_scene(image)
+    scene = command.CommandScene()
+    ctx = single_mode.Context.new()
+    scene.recognize(ctx, static=True)
     print(ctx)
 
 
