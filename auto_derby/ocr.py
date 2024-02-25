@@ -100,7 +100,7 @@ def _prompt(img: np.ndarray, h: Text, value: Text, similarity: float) -> Text:
 
     ret = ""
     app.log.image("ocr prompt", img)
-    close_img = imagetools.show(fromarray(_pad_img(img)), h)
+    # close_img = imagetools.show(fromarray(_pad_img(img)), h)
     try:
         while len(ret) != 1:
             ans = ""
@@ -116,7 +116,8 @@ def _prompt(img: np.ndarray, h: Text, value: Text, similarity: float) -> Text:
                     "Corresponding text for current displaying image:"
                 )
     finally:
-        close_img()
+        # close_img()
+        pass
     _g.labels.label(h, ret)
     app.log.image("labeled: hash=%s, value=%s" % (h, ret), img)
     return ret
