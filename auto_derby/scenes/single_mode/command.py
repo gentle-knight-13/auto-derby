@@ -290,8 +290,6 @@ class CommandScene(Scene):
 
         # animation may not finished
         # https://github.com/NateScarlet/auto-derby/issues/201
-        class local:
-            next_retry_count = 0
 
         max_retry = 0 if static else self.max_recognition_retry
 
@@ -307,16 +305,8 @@ class CommandScene(Scene):
             if ctx.scenario == ctx.SCENARIO_PROJECT_LARK:
                 _recognize_lark_overseas_point(ctx)
 
-        def _recognize_static_with_retry():
-            local.next_retry_count += 1
-            if local.next_retry_count > max_retry:
-                _recognize_static()
-                return
-            with ocr.prompt_disabled(False), terminal.prompt_disabled(True):
-                _recognize_static()
-
         action.run_with_retry(
-            _recognize_static_with_retry,
+            _recognize_static,
             max_retry,
         )
 
