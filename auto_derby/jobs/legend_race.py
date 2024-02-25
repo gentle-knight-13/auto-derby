@@ -1,7 +1,6 @@
 # -*- coding=UTF-8 -*-
 # pyright: strict
 
-from auto_derby.single_mode.commands.race import _RACE_ORDER_TEMPLATES
 from .. import action, templates, config, app
 
 
@@ -19,7 +18,14 @@ def legend_race():
             templates.LIMITED_SALE_OPEN,
             templates.LEGEND_RACE_REWARD,
             templates.LEGEND_RACE_COLLECT_ALL_REWARD,
-            *_RACE_ORDER_TEMPLATES.keys(),
+            templates.RACE_RESULT_NO1,
+            templates.RACE_RESULT_NO2,
+            templates.RACE_RESULT_NO3,
+            templates.RACE_RESULT_NO4,
+            templates.RACE_RESULT_NO5,
+            templates.RACE_RESULT_NO6,
+            templates.RACE_RESULT_NO8,
+            templates.RACE_RESULT_NO10,
         )
         name = tmpl.name
         if name == templates.CONNECTING:
