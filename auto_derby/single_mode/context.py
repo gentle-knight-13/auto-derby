@@ -208,7 +208,7 @@ def _recognize_max_property(img: Image) -> int:
     app.log.image(
         "property limit", cv_img, layers={"binary": binary_img}, level=app.DEBUG
     )
-    return int(re.sub(r"[^\d]+", "", ocr.text(imagetools.pil_image(binary_img))))
+    return int(ocr.text(imagetools.pil_image(binary_img), offset=1, simple_segment=True))
 
 
 def _recognize_scenario(rp: mathtools.ResizeProxy, img: Image) -> Text:
@@ -423,6 +423,13 @@ class Context:
 
         self.overseas_point = 0
 
+        self.sphere_lvl = 0
+        self.sphere_remain = 0
+        self.fight_lvl = 0
+        self.fight_remain = 0
+        self.free_lvl = 0
+        self.free_remain = 0
+
         from . import training
 
         self.training_history = training.History()
@@ -582,6 +589,8 @@ class Context:
             msg += f",pt={self.grade_point},coin={self.shop_coin},items={self.items.quantity()}"
         if self.scenario == Context.SCENARIO_GRAND_LIVE:
             msg += f",da={self.dance}pa,={self.passion},vo={self.vocal},vi={self.visual},me={self.mental}"
+        if self.scenario == Context.SCENARIO_UAF_READY_GO:
+            msg += f"sphere=({self.sphere_lvl},{self.sphere_remain}),fight=({self.fight_lvl},{self.fight_remain}),free=({self.free_lvl},{self.free_remain})"
         if self.go_out_options:
             msg += ",go_out="
             msg += " ".join(

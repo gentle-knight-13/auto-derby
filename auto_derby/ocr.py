@@ -177,6 +177,9 @@ def _pad_bbox(v: Tuple[int, int, int, int], padding: int) -> Tuple[int, int, int
 def _bbox_contains(a: Tuple[int, int, int, int], b: Tuple[int, int, int, int]) -> bool:
     return a[0] <= b[0] and a[1] <= b[1] and a[2] >= b[2] and a[3] >= b[3]
 
+def _bbox_contains_x(a: Tuple[int, int, int, int], b: Tuple[int, int, int, int]) -> bool:
+    return a[0] <= b[0] and a[2] >= b[2]
+
 
 _LINE_HEIGHT = 32
 
@@ -271,7 +274,9 @@ def text(
         bbox = _get_expanded_bbox(index)
 
         l, t, r, b = bbox
-        is_new_char = simple_segment or (
+        is_new_char = (simple_segment
+            and not _bbox_contains_x(_pad_bbox(char_bbox, -1), bbox)
+        ) or (
             char_parts
             and l > char_non_zero_bbox[2]
             and (

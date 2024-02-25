@@ -51,26 +51,23 @@ def _retry_method(ctx: Context) -> Optional[Callable[[], None]]:
 
         def _retry():
             action.tap_image(templates.SINGLE_MODE_CLIMAX_WHITE_CONTINUE_BUTTON)
-            if ctx.scenario == ctx.SCENARIO_GRAND_MASTERS:
-                action.wait_tap_image(
-                    templates.SINGLE_MODE_GRAND_MASTERS_GREEN_CONTINUE_BUTTON
-                )
-            else:
-                action.wait_tap_image(
-                    templates.SINGLE_MODE_CLIMAX_GREEN_CONTINUE_BUTTON
-                )
+            action.wait_tap_image(
+                templates.SINGLE_MODE_CLIMAX_GREEN_CONTINUE_BUTTON,
+                templates.SINGLE_MODE_GRAND_MASTERS_GREEN_CONTINUE_BUTTON,
+            )
 
         return _retry
 
 
 def _handle_race_result(ctx: Context, race: Race):
-    tmpl, pos = action.wait_image(templates.RACE_RESULT_BUTTON, templates.GO_TO_RACE_BUTTON)
+    tmpl, pos = action.wait_image(
+        templates.RACE_RESULT_BUTTON, templates.GO_TO_RACE_BUTTON
+    )
     app.device.tap(action.template_rect(tmpl, pos))
 
     res = RaceResult()
     res.ctx = ctx.clone()
     res.race = race
-
 
     if tmpl.name == templates.GO_TO_RACE_BUTTON:
         while True:

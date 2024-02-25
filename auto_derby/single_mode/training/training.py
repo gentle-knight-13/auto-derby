@@ -66,6 +66,10 @@ class Training:
         self.visual: int = 0
         self.mental: int = 0
 
+        self.sphere: int = 0
+        self.fight: int = 0
+        self.free: int = 0
+
     def clone(self) -> Training:
         obj = copy.copy(self)
         return obj
@@ -83,6 +87,9 @@ class Training:
             ("vo", self.vocal),
             ("vi", self.visual),
             ("me", self.mental),
+            ("sp", self.sphere),
+            ("fi", self.fight),
+            ("fr", self.free),
         )
         partner_text = ",".join(i.to_short_text() for i in self.partners)
         return (

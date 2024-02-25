@@ -2,6 +2,7 @@
 # pyright: strict
 
 from __future__ import annotations
+import re
 
 import time
 from typing import Any, Dict, Text
@@ -11,7 +12,7 @@ import numpy as np
 from PIL.Image import Image
 from auto_derby.single_mode.context import Context
 
-from ... import action, imagetools, ocr, single_mode, template, templates, terminal, app
+from ... import action, imagetools, ocr, single_mode, template, templates, app
 from ...scenes import Scene
 from ..scene import SceneHolder
 
@@ -142,6 +143,79 @@ def _recognize_lark_overseas_point(ctx: Context):
     )
     text = ocr.text(imagetools.pil_image(binary_img))
     ctx.overseas_point = int(text.replace(",", ""))
+
+
+def _recognize_uaf_level(ctx: Context):
+    def _recognize_remain(img: Image) -> int:
+        cv_img = imagetools.cv_image(imagetools.resize(img, height=32))
+        gray_img = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
+        _, text_img = cv2.threshold(gray_img, 220, 255, cv2.THRESH_BINARY_INV)
+
+        app.log.image(
+            "uaf: remain",
+            img,
+            level=app.DEBUG,
+            layers={
+                "cv": cv_img,
+                "gray": gray_img,
+                "text": text_img,
+            },
+        )
+        return int(
+            ocr.text(imagetools.pil_image(text_img), offset=2, simple_segment=True)
+        )
+
+    def _recognize_level(img: Image) -> int:
+        cv_img = imagetools.cv_image(imagetools.resize(img, height=32))
+        outline_img = imagetools.constant_color_key(
+            cv_img,
+            # sphere
+            (255, 98, 68),
+            (255, 133, 114),
+            # fight
+            (94, 84, 255),
+            (61, 46, 255),
+            # free
+            (0, 153, 255),
+            (33, 149, 255),
+        )
+        masked_img = imagetools.inside_outline(cv_img, outline_img)
+
+        text_img = imagetools.constant_color_key(
+            masked_img, (255, 255, 255), threshold=0.85
+        )
+        app.log.image(
+            "uaf: level",
+            cv_img,
+            level=app.DEBUG,
+            layers={
+                "outline": outline_img,
+                "masked": masked_img,
+                "text": text_img,
+            },
+        )
+        text = ocr.text(imagetools.pil_image(text_img), offset=2)
+        return int(re.sub("[^0-9]", "", text))
+
+    rp = action.resize_proxy()
+    screenshot = app.device.screenshot()
+
+    left, right = rp.vector2((26, 92), 540)
+    sphere_lvl_bbox = (left, rp.vector(294, 540), right, rp.vector(310, 540))
+    fight_lvl_bbox = (left, rp.vector(373, 540), right, rp.vector(389, 540))
+    free_lvl_bbox = (left, rp.vector(452, 540), right, rp.vector(468, 540))
+
+    ctx.sphere_lvl = _recognize_level(screenshot.crop(sphere_lvl_bbox))
+    ctx.fight_lvl = _recognize_level(screenshot.crop(fight_lvl_bbox))
+    ctx.free_lvl = _recognize_level(screenshot.crop(free_lvl_bbox))
+
+    sphere_remain_bbox = (left, rp.vector(311, 540), right, rp.vector(327, 540))
+    fight_remain_bbox = (left, rp.vector(390, 540), right, rp.vector(406, 540))
+    free_remain_bbox = (left, rp.vector(469, 540), right, rp.vector(485, 540))
+
+    ctx.sphere_remain = _recognize_remain(screenshot.crop(sphere_remain_bbox))
+    ctx.fight_remain = _recognize_remain(screenshot.crop(fight_remain_bbox))
+    ctx.free_remain = _recognize_remain(screenshot.crop(free_remain_bbox))
 
 
 class CommandScene(Scene):
@@ -304,6 +378,8 @@ class CommandScene(Scene):
                 _recognize_grand_live_performance(ctx)
             if ctx.scenario == ctx.SCENARIO_PROJECT_LARK:
                 _recognize_lark_overseas_point(ctx)
+            if ctx.scenario == ctx.SCENARIO_UAF_READY_GO:
+                _recognize_uaf_level(ctx)
 
         action.run_with_retry(
             _recognize_static,

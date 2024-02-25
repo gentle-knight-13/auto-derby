@@ -715,29 +715,6 @@ def _effect_recognitions(
         raise NotImplementedError(ctx.scenario)
 
 
-def _performance_recognitions(
-    ctx: Context, rp: mathtools.ResizeProxy
-) -> Iterator[
-    Tuple[
-        Tuple[_Vector4, _Vector4, _Vector4, _Vector4, _Vector4],
-        Callable[[Image], int],
-    ]
-]:
-    def _bbox_groups(left: int, right: int):
-        return (
-            (left, rp.vector(265, 540), right, rp.vector(292, 540)),
-            (left, rp.vector(314, 540), right, rp.vector(341, 540)),
-            (left, rp.vector(363, 540), right, rp.vector(390, 540)),
-            (left, rp.vector(412, 540), right, rp.vector(439, 540)),
-            (left, rp.vector(461, 540), right, rp.vector(488, 540)),
-        )
-
-    if ctx.scenario == ctx.SCENARIO_GRAND_LIVE:
-        base_x = rp.vector(88, 540)
-        left, right = base_x, base_x + rp.vector(58, 540)
-        yield _bbox_groups(left, right), _recognize_base_effect
-    else:
-        raise NotImplementedError(ctx.scenario)
 
 
 def _recognize_training(
@@ -774,12 +751,22 @@ def _recognize_training(
             self.skill += recognize(img.crop(bbox_group[5]))
 
         if ctx.scenario == ctx.SCENARIO_GRAND_LIVE:
-            for bbox_group, recognize in _performance_recognitions(ctx, rp):
-                self.dance += recognize(img.crop(bbox_group[0]))
-                self.passion += recognize(img.crop(bbox_group[1]))
-                self.vocal += recognize(img.crop(bbox_group[2]))
-                self.visual += recognize(img.crop(bbox_group[3]))
-                self.mental += recognize(img.crop(bbox_group[4]))
+            left, right = rp.vector2((88, 146), 540)
+            def _recognize(t:int, b:int):
+                return _recognize_base_effect(img.crop((left, rp.vector(t, 540), right, rp.vector(b, 540))))
+            self.dance += _recognize(265, 292)
+            self.passion += _recognize(314, 341)
+            self.vocal += _recognize(363, 390)
+            self.visual += _recognize(412, 439)
+            self.mental += _recognize(461, 488)
+
+        if ctx.scenario == ctx.SCENARIO_UAF_READY_GO:
+            left, right = rp.vector2((91, 147), 540)
+            def _recognize(t:int, b:int):
+                return _recognize_base_effect(img.crop((left, rp.vector(t, 540), right, rp.vector(b, 540))))
+            self.sphere += _recognize(287, 310)
+            self.fight += _recognize(366, 389)
+            self.free += _recognize(445, 469)
 
         # TODO: recognize vitality
         # plugin hook
