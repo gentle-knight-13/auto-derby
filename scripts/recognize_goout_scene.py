@@ -18,6 +18,9 @@ from auto_derby import app
 from auto_derby.single_mode import Context
 from auto_derby.infrastructure.image_device_service import ImageDeviceService
 from auto_derby.scenes.single_mode.go_out_menu import GoOutMenuScene
+from auto_derby.infrastructure.multi_log_service import MultiLogService
+from auto_derby.infrastructure.web_log_service import WebLogService
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -33,17 +36,24 @@ def main():
         "ura": Context.SCENARIO_URA,
         "aoharu": Context.SCENARIO_AOHARU,
         "climax": Context.SCENARIO_CLIMAX,
+        "uaf": Context.SCENARIO_UAF_READY_GO,
     }.get(args.scenario, args.scenario)
 
     image = PIL.Image.open(image_path)
     app.device = ImageDeviceService(image)
-    ctx = Context.new()
-    ctx.scenario = scenario
-
-    scene = GoOutMenuScene()
-    scene.recognize(ctx)
-    for option in ctx.go_out_options:
-        print(option)
+    
+    with app.cleanup as cleanup:
+        app.log = MultiLogService(
+            app.log,
+            WebLogService(cleanup),
+        )
+        ctx = Context.new()
+        ctx.scenario = scenario
+    
+        scene = GoOutMenuScene()
+        scene.recognize(ctx)
+        for option in ctx.go_out_options:
+            print(option)
 
 
 if __name__ == "__main__":

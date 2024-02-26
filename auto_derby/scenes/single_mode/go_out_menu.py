@@ -97,7 +97,7 @@ def _recognize_item(rp: mathtools.ResizeProxy, img: Image) -> go_out.Option:
             )
             v.current_event_count = int(current_event_count_text)
             v.total_event_count = int(total_event_count_text)
-            name_bbox = rp.vector4((95, 16, 316, 40), 540)
+            name_bbox = rp.vector4((99, 16, 316, 40), 540)
             v.name = _recognize_name(img.crop(name_bbox))
 
         app.log.image("recognize: %s" % v, img, level=app.DEBUG)

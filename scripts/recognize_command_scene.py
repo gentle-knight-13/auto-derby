@@ -17,6 +17,8 @@ import PIL.Image
 from auto_derby import single_mode, app
 from auto_derby.scenes.single_mode import command
 from auto_derby.infrastructure.image_device_service import ImageDeviceService
+from auto_derby.infrastructure.multi_log_service import MultiLogService
+from auto_derby.infrastructure.web_log_service import WebLogService
 
 
 def main():
@@ -30,10 +32,17 @@ def main():
     image_path = args.image
     image = PIL.Image.open(image_path)
     app.device = ImageDeviceService(image)
-    scene = command.CommandScene()
-    ctx = single_mode.Context.new()
-    scene.recognize(ctx, static=True)
-    print(ctx)
+
+    with app.cleanup as cleanup:
+        app.log = MultiLogService(
+            app.log,
+            WebLogService(cleanup),
+        )
+
+        scene = command.CommandScene()
+        ctx = single_mode.Context.new()
+        scene.recognize(ctx, static=True)
+        print(ctx)
 
 
 if __name__ == "__main__":
