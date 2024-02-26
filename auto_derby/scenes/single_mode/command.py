@@ -149,7 +149,7 @@ def _recognize_uaf_level(ctx: Context):
     def _recognize_remain(img: Image) -> int:
         cv_img = imagetools.cv_image(imagetools.resize(img, height=32))
         gray_img = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
-        _, text_img = cv2.threshold(gray_img, 220, 255, cv2.THRESH_BINARY_INV)
+        _, text_img = cv2.threshold(gray_img, 200, 255, cv2.THRESH_BINARY_INV)
 
         app.log.image(
             "uaf: remain",

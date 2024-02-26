@@ -419,7 +419,10 @@ def _handle_grand_masters_race(ac: _ActionContext):
 
 
 def _handle_uaf_live(ac: _ActionContext):
-    action.wait_tap_image(templates.SINGLE_MODE_SKIP_BUTTON)
+    try:
+        action.wait_tap_image(templates.SINGLE_MODE_SKIP_BUTTON, timeout=1)
+    except TimeoutError:
+        pass
 
 
 def _template_actions(ctx: Context) -> Iterator[Tuple[_Template, _Handler]]:
