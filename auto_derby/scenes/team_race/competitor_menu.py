@@ -45,7 +45,7 @@ class CompetitorMenuScene(Scene):
 
     @classmethod
     def _enter(cls, ctx: SceneHolder) -> Scene:
-        action.wait_image_stable(templates.TEAM_RACE_CHOOSE_COMPETITOR)
+        action.wait_image_stable(templates.TEAM_RACE_CHOOSE_COMPETITOR, timeout=5)
         return cls()
 
     def locate_granted_reward(self) -> Optional[Tuple[int, int]]:

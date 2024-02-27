@@ -6,6 +6,8 @@ from __future__ import annotations
 import time
 from typing import Text
 
+from auto_derby import templates
+
 from ... import action, app
 from ...scenes import UnknownScene
 from ...scenes.single_mode import TrainingScene
@@ -27,6 +29,9 @@ class TrainingCommand(Command):
         x, y = self.training.confirm_position
         rp = action.resize_proxy()
         w, h = rp.vector2((30, 80), 540)
+        action.wait_image(
+            templates.SINGLE_MODE_TRAINING_CONFIRM, templates.SINGLE_MODE_TRAINING_CONFIRM_LARK
+        )
         current_training = Training.from_training_scene_v2(ctx, app.device.screenshot())
         if current_training.type != self.training.type:
             app.device.tap((x, y - h, w, h))

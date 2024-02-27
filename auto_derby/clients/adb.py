@@ -7,6 +7,9 @@ import io
 import logging
 import re
 import time
+import sys
+import os
+import traceback
 from pathlib import Path
 from typing import Callable, List, Text, Tuple
 
@@ -14,6 +17,7 @@ import PIL.Image
 from adb_shell.adb_device import AdbDeviceTcp
 from adb_shell.auth.keygen import keygen
 from adb_shell.auth.sign_pythonrsa import PythonRSASigner
+from adb_shell.exceptions import TcpTimeoutException, AdbConnectionError
 
 from .client import Client
 from .. import app
@@ -21,7 +25,7 @@ from .. import app
 
 class ADBClient(Client):
     key_path: Text = "adb.local.key"
-    action_wait = 1
+    action_wait = 0.25
 
     def __init__(self, address: Text):
         hostname, port = address.split(":", 2)
@@ -48,6 +52,14 @@ class ADBClient(Client):
         signer = PythonRSASigner.FromRSAKeyPath(self.key_path)
         self.device.connect(rsa_keys=[signer])
 
+    def _shell(self, *args, **kwargs) -> (Text|bytes):
+        while 1:
+            try:
+                return self.device.shell(*args, **kwargs)
+            except (AdbConnectionError, TcpTimeoutException) as e:
+                pass
+        return self.device.shell(*args, **kwargs)
+
     def tap(self, point: Tuple[int, int]) -> None:
         x, y = point
         command = f"input tap {x} {y}"
@@ -57,12 +69,12 @@ class ADBClient(Client):
         time.sleep(self.action_wait)
 
     def start_game(self):
-        self.device.shell(
+        self._shell(
             "am start -n jp.co.cygames.umamusume/jp.co.cygames.umamusume_activity.UmamusumeActivity"
         )
 
     def load_size(self):
-        res = self.device.shell("wm size")
+        res = self._shell("wm size")
         match = re.match(r"Physical size: (\d+)x(\d+)", res)
         assert match, "unexpected command result: %s" % res
         self._width = int(match.group(2))
@@ -113,8 +125,8 @@ class ADBClient(Client):
         return self._screenshot()
 
     def _screenshot_png(self) -> PIL.Image.Image:
-        img_data = self.device.shell(
-            f"screencap -p",
+        img_data = self._shell(
+            "screencap -p",
             decode=False,
             transport_timeout_s=None,
         )
@@ -123,8 +135,8 @@ class ADBClient(Client):
 
     def _screenshot_raw(self) -> PIL.Image.Image:
         # https://stackoverflow.com/a/59470924
-        img_data = self.device.shell(
-            f"screencap",
+        img_data = self._shell(
+            "screencap",
             decode=False,
             transport_timeout_s=None,
         )

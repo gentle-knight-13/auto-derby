@@ -41,7 +41,7 @@ def _race_by_course(ctx: Context, course: Course) -> Iterator[Race]:
             continue
         if (month, half) not in ((i.month, i.half), (0, 0)):
             continue
-        if i.is_available(ctx) == False:
+        if i.is_available(ctx) is False:
             continue
         if course not in i.courses:
             continue
@@ -158,7 +158,11 @@ def _recognize_menu(
 ) -> Iterator[Tuple[Course, Tuple[int, int], bool]]:
     app.log.image("race menu", screenshot, level=app.DEBUG)
     rp = mathtools.ResizeProxy(screenshot.width)
-    for _, pos in template.match(screenshot, templates.SINGLE_MODE_RACE_MENU_FAN_ICON):
+    for _, pos in template.match(
+        screenshot,
+        templates.SINGLE_MODE_RACE_MENU_FAN_ICON,
+        templates.SINGLE_MODE_RACE_MENU_FAN_ICON_LARK,
+    ):
         bbox = _menu_item_bbox(ctx, pos, rp)
         item_img = screenshot.crop(bbox)
         app.log.image("race menu item", item_img, level=app.DEBUG)
@@ -188,8 +192,8 @@ class RaceMenuScene(Scene):
         rp = action.resize_proxy()
         self._scroll = VerticalScroll(
             origin=rp.vector2((15, 600), 540),
-            page_size=50,
-            max_page=10,
+            page_size=100,
+            max_page=15,
         )
 
     @classmethod
@@ -204,6 +208,7 @@ class RaceMenuScene(Scene):
             templates.SINGLE_MODE_FORMAL_RACE_BANNER,
             templates.SINGLE_MODE_URA_FINALS,
             templates.SINGLE_MODE_SCHEDULED_RACE_OPENING_BANNER,
+            templates.SINGLE_MODE_GRAND_MASTERS,
         )
         x, y = pos
         rp = action.resize_proxy()
@@ -222,7 +227,10 @@ class RaceMenuScene(Scene):
                 action.wait_tap_image(templates.CANCEL_BUTTON)
                 raise RaceTurnsIncorrect()
             action.wait_tap_image(templates.GREEN_OK_BUTTON)
-        action.wait_image(templates.SINGLE_MODE_RACE_MENU_FAN_ICON)
+        action.wait_image(
+            templates.SINGLE_MODE_RACE_MENU_FAN_ICON,
+            templates.SINGLE_MODE_RACE_MENU_FAN_ICON_LARK,
+        )
         return cls()
 
     def visible_courses(self, ctx: Context) -> Iterator[Tuple[Course, Tuple[int, int]]]:

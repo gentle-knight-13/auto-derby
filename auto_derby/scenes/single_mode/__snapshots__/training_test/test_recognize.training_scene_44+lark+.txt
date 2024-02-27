@@ -1,0 +1,1 @@
+Training<wis=22 ski=12 spd=4 vit=5.0% fail=0% lv=1 ptn=oth,spd@2,wis@2>

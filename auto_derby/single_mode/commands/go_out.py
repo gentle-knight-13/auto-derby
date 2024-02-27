@@ -8,6 +8,7 @@ from typing import Optional, Text
 
 from ... import action, templates, app
 from ...scenes.single_mode.command import CommandScene
+from ...scenes.single_mode.go_out_group_menu import GoOutGroupMenuScene
 from .. import Context, go_out
 from .command import Command
 from .globals import g
@@ -30,6 +31,8 @@ class GoOutCommand(Command):
             return f"GoOut<main:{o.position}>"
         if o.type == o.TYPE_SUPPORT:
             return f"GoOut<support:{o.name or o.position}:{o.current_event_count}/{o.total_event_count}>"
+        if o.type == o.TYPE_GROUP:
+            return f"GoOut<group:{o.name or o.position}:{o.current_event_count}/{o.total_event_count}>"
         return f"GoOut<{o}>"
 
     def execute(self, ctx: Context) -> None:
@@ -49,8 +52,23 @@ class GoOutCommand(Command):
                     if i.type == self.option.type
                 )
             app.device.tap((*self.option.position, *rp.vector2((200, 20), 540)))
+            if self.option.type == self.option.TYPE_GROUP:
+                scene = GoOutGroupMenuScene.enter(ctx)
+                scene.recognize(ctx)
+                if scene.go_out_options:
+                    option = scene.go_out_options[0]
+                    app.device.tap((*option.position, *rp.vector2((200, 20), 540)))
+                    self.option.current_group_event_count += 1
+
         if self.option.total_event_count > 0:
             self.option.current_event_count += 1
+
+        if (
+            self.option.type == self.option.TYPE_GROUP
+            and self.option.current_event_count >= self.option.total_event_count
+        ):
+            app.log.text("reset go_out_options", level=app.LogLevel.DEBUG)
+            ctx.go_out_options = ()
         return
 
     def score(self, ctx: Context) -> float:

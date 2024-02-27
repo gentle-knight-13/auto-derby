@@ -23,6 +23,14 @@ def test_recognize(name: Text):
         ctx.scenario = ctx.SCENARIO_AOHARU
     if "+climax+" in name:
         ctx.scenario = ctx.SCENARIO_CLIMAX
+    if "+grand-masters+" in name:
+        ctx.scenario = ctx.SCENARIO_GRAND_MASTERS
+    if "+grand+live+" in name:
+        ctx.scenario = ctx.SCENARIO_GRAND_LIVE
+    if "+lark+" in name:
+        ctx.scenario = ctx.SCENARIO_PROJECT_LARK
+    if "+uaf+" in name:
+        ctx.scenario = ctx.SCENARIO_UAF_READY_GO
     scene = TrainingScene()
     scene.recognize_v2(ctx, static=True)
     (training,) = scene.trainings

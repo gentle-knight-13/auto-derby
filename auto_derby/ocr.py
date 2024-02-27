@@ -1,11 +1,12 @@
 # -*- coding=UTF-8 -*-
 # pyright: strict
-
+# ruff: noqa: E741
 
 import contextlib
 import json
 import logging
 import os
+import sys
 import warnings
 from pathlib import Path
 from typing import List, Optional, Text, Tuple
@@ -81,18 +82,21 @@ def _pad_img(img: np.ndarray, padding: int = _PREVIEW_PADDING) -> np.ndarray:
 
 def _prompt(img: np.ndarray, h: Text, value: Text, similarity: float) -> Text:
     # TODO: use web prompt
-    if g.prompt_disabled:
+    if g.prompt_disabled or "pytest" in sys.modules:
         app.log.image(
             "using low similarity label: hash=%s, value=%s, similarity=%s"
             % (h, value, similarity),
             img,
             level=app.WARN,
         )
+        if "pytest" in sys.modules:
+            raise terminal.PromptDisabled
         return value
 
     if terminal.g.prompt_disabled:
         # avoid show image during loop
         raise terminal.PromptDisabled
+
     ret = ""
     app.log.image("ocr prompt", img)
     close_img = imagetools.show(fromarray(_pad_img(img)), h)
@@ -112,6 +116,7 @@ def _prompt(img: np.ndarray, h: Text, value: Text, similarity: float) -> Text:
                 )
     finally:
         close_img()
+        pass
     _g.labels.label(h, ret)
     app.log.image("labeled: hash=%s, value=%s" % (h, ret), img)
     return ret
@@ -134,7 +139,7 @@ def _text_from_image(img: np.ndarray, threshold: float = 0.8) -> Text:
 
 
 def _union_bbox(
-    *bbox: Optional[Tuple[int, int, int, int]]
+    *bbox: Optional[Tuple[int, int, int, int]],
 ) -> Tuple[int, int, int, int]:
     b = [i for i in bbox if i]
     ret = b[0]
@@ -172,11 +177,16 @@ def _pad_bbox(v: Tuple[int, int, int, int], padding: int) -> Tuple[int, int, int
 def _bbox_contains(a: Tuple[int, int, int, int], b: Tuple[int, int, int, int]) -> bool:
     return a[0] <= b[0] and a[1] <= b[1] and a[2] >= b[2] and a[3] >= b[3]
 
+def _bbox_contains_x(a: Tuple[int, int, int, int], b: Tuple[int, int, int, int]) -> bool:
+    return a[0] <= b[0] and a[2] >= b[2]
+
 
 _LINE_HEIGHT = 32
 
 
-def text(img: Image, *, threshold: float = 0.8) -> Text:
+def text(
+    img: Image, *, threshold: float = 0.8, offset: int = 0, simple_segment: bool = False
+) -> Text:
     """Recognize text line, background color should be black.
 
     Args:
@@ -264,7 +274,9 @@ def text(img: Image, *, threshold: float = 0.8) -> Text:
         bbox = _get_expanded_bbox(index)
 
         l, t, r, b = bbox
-        is_new_char = (
+        is_new_char = (simple_segment
+            and not _bbox_contains_x(_pad_bbox(char_bbox, -1), bbox)
+        ) or (
             char_parts
             and l > char_non_zero_bbox[2]
             and (
@@ -339,7 +351,9 @@ def text(img: Image, *, threshold: float = 0.8) -> Text:
     else:
         app.log.image("text", cv_img, level=app.DEBUG, layers={"binary": binary_img})
 
-    for _, i in cropped_char_img_list:
+    for j, (_, i) in enumerate(cropped_char_img_list):
+        if j < offset:
+            continue
         ret += _text_from_image(i, threshold)
 
     app.log.text("ocr result: %s" % ret, level=app.DEBUG)

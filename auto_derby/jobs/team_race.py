@@ -1,5 +1,6 @@
 # -*- coding=UTF-8 -*-
 # pyright: strict
+import time
 
 from .. import action, app, config, templates
 from ..scenes.scene import Scene
@@ -37,7 +38,10 @@ def team_race():
         )
         name = tmpl.name
         if name == templates.TEAM_RACE_CHOOSE_COMPETITOR:
-            scene = CompetitorMenuScene.enter(ctx)
+            try:
+                scene = CompetitorMenuScene.enter(ctx)
+            except TimeoutError:
+                continue
             granted_reward_pos = scene.locate_granted_reward()
             if granted_reward_pos:
                 rp = action.resize_proxy()
@@ -49,6 +53,7 @@ def team_race():
                 action.wait_tap_image(templates.RACE_ITEM_PARFAIT)
             else:
                 scene.choose(ctx, 1)
+                time.sleep(1)
         elif name == templates.RP_NOT_ENOUGH:
             break
         elif name == templates.CONNECTING:

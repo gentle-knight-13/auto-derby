@@ -16,9 +16,11 @@ from ..scenes.single_mode import (
     RaceMenuScene,
     RaceTurnsIncorrect,
     ShopScene,
+    KnowledgeTableMenuScene,
+    GrandMastersRaceMenuScene,
 )
 from ..scenes.single_mode.item_menu import ItemMenuScene
-from ..single_mode import Context, commands, event, item
+from ..single_mode import Context, commands, event, item, Race
 
 ALL_OPTIONS = [
     templates.SINGLE_MODE_OPTION1,
@@ -29,8 +31,22 @@ ALL_OPTIONS = [
 ]
 
 
-def _handle_option():
+def _handle_option(ctx: Context):
     time.sleep(0.2)  # wait animation
+    if ctx.scenario in (ctx.SCENARIO_URA, ctx.SCENARIO_UNKNOWN):
+        predict_tmpl = [
+            templates.PREDICTION_TRIANGLE_OUTLINE,
+            templates.PREDICTION_CIRCLE_OUTLINE,
+            templates.PREDICTION_DOUBLE_CIRCLE,
+        ]
+        screenshot = app.device.screenshot(max_age=0)
+        predicts = list(template.match(screenshot, *predict_tmpl))
+        if len(predicts) > 0:
+            tmpl, pos = max(predicts, key=lambda i: predict_tmpl.index(i[0].name))
+            app.log.image(f"URA勝負予想: {tmpl.name}", screenshot, level=app.DEBUG)
+            app.device.tap(action.template_rect(tmpl, pos))
+            ctx.scenario = ctx.SCENARIO_URA
+            return
     ans = event.get_choice(app.device.screenshot(max_age=0))
     action.tap_image(ALL_OPTIONS[ans - 1])
 
@@ -89,6 +105,17 @@ def _handle_item_list(ctx: Context, cs: CommandScene):
     return
 
 
+def _handle_knowledge_table(
+    ctx: Context, cs: CommandScene, command: commands.Command
+) -> bool:
+    if not cs.has_learn_wisdom:
+        return False
+    scene = KnowledgeTableMenuScene.enter(ctx)
+    is_learn = scene.learn_goddess_wisdom(ctx, command)
+    cs.enter(ctx)
+    return is_learn
+
+
 class _CommandPlan:
     def __init__(
         self,
@@ -127,6 +154,16 @@ def _has_command_changing_effect(es: item.EffectSummary) -> bool:
     return False
 
 
+def _sort_command_plans(
+    ctx: Context, turn_commands: tuple[commands.Command, ...]
+) -> List[_CommandPlan]:
+    return sorted(
+        (_CommandPlan(ctx, i) for i in turn_commands),
+        key=lambda x: x.score,
+        reverse=True,
+    )
+
+
 def _handle_turn(ctx: Context):
     scene = CommandScene.enter(ctx)
     scene.recognize(ctx)
@@ -140,15 +177,18 @@ def _handle_turn(ctx: Context):
         turn_commands = tuple(commands.from_context(ctx))
         es_delta = ctx.item_history.effect_summary_delta()
         _handle_item_list(ctx, scene)
+
+    plan = _sort_command_plans(ctx, turn_commands)[0]
+    if _handle_knowledge_table(ctx, scene, plan.command):
+        scene = CommandScene.enter(ctx)
+        scene.recognize(ctx)
+        turn_commands = tuple(commands.from_context(ctx))
+
     ctx.next_turn()
     app.log.text("context: %s" % ctx)
     for i in ctx.items:
         app.log.text("item:\t#%s\tx%s\t%s" % (i.id, i.quantity, i.name))
-    command_plans = sorted(
-        (_CommandPlan(ctx, i) for i in turn_commands),
-        key=lambda x: x.score,
-        reverse=True,
-    )
+    command_plans = _sort_command_plans(ctx, turn_commands)
     for cp in command_plans:
         app.log.text(
             "score:\t%2.2f\t%s;%s" % (cp.score, cp.command.name(), cp.explain())
@@ -182,11 +222,42 @@ def _tap(ac: _ActionContext):
 
 
 def _cancel(ac: _ActionContext):
-    action.wait_tap_image(templates.CANCEL_BUTTON)
+    try:
+        # avoid fast tap cause original template is still matched and wait for cancel again
+        tmpl, pos = action.wait_image_stable(
+            templates.CANCEL_BUTTON, duration=0.2, timeout=1
+        )
+        app.device.tap(action.template_rect(tmpl, pos))
+    except TimeoutError:
+        # a warned fallback when the situation is still happening
+        app.log.text("cancel timeout, return to main loop", level=app.WARN)
+        return
 
 
 def _close(ac: _ActionContext):
-    action.wait_tap_image(templates.CLOSE_BUTTON)
+    try:
+        tmpl, pos = action.wait_image_stable(
+            templates.CLOSE_BUTTON, duration=0.2, timeout=1
+        )
+        app.device.tap(action.template_rect(tmpl, pos))
+    except TimeoutError:
+        app.log.text("close timeout, return to main loop", level=app.WARN)
+        return
+
+
+def _handle_go_to_shop(ac: _ActionContext):
+    try:
+        tmpl, pos = action.wait_image_stable(
+            *[templates.CLOSE_BUTTON, templates.CANCEL_BUTTON], duration=0.2, timeout=1
+        )
+    except TimeoutError:
+        app.log.text("go to shop timeout, return to main loop", level=app.WARN)
+        return
+    if tmpl.name == templates.CANCEL_BUTTON:
+        ac.ctx.scenario = Context.SCENARIO_CLIMAX
+    if tmpl.name == templates.CLOSE_BUTTON:
+        ac.ctx.scenario = Context.SCENARIO_GRAND_LIVE
+    app.device.tap(action.template_rect(tmpl, pos))
 
 
 def _ac_handle_turn(ac: _ActionContext):
@@ -234,16 +305,52 @@ def _handle_fan_not_enough(ac: _ActionContext):
         ctx.target_fan_count = max(ctx.fan_count + 1, ctx.target_fan_count)
 
     ctx.defer_next_turn(_set_target_fan_count)
-    action.wait_tap_image(templates.CANCEL_BUTTON)
+    try:
+        action.wait_tap_image(templates.CANCEL_BUTTON, timeout=5)
+    except TimeoutError:
+        pass
 
 
 def _handle_target_race(ac: _ActionContext):
     ctx = ac.ctx
+    if ctx.scenario in (ctx.SCENARIO_UAF_READY_GO, ctx.SCENARIO_UNKNOWN):
+        try:
+            action.wait_tap_image(
+                templates.SINGLE_MODE_COMMAND_UAF,
+                timeout=1,
+            )
+            ac.ctx.scenario = ctx.SCENARIO_UAF_READY_GO
+            return
+        except TimeoutError:
+            pass
+    if ctx.scenario in (ctx.SCENARIO_GRAND_MASTERS, ctx.SCENARIO_UNKNOWN):
+        try:
+            action.wait_image_stable(
+                templates.SINGLE_MODE_GRAND_MASTERS_GUR_BUTTON,
+                templates.SINGLE_MODE_GRAND_MASTERS_WBC_BUTTON,
+                duration=0.2,
+                timeout=1,
+            )
+            ac.ctx.scenario = ctx.SCENARIO_GRAND_MASTERS
+            return _handle_grand_masters_race(ac)
+        except TimeoutError:
+            pass
+    if ctx.scenario in (ctx.SCENARIO_AOHARU, ctx.SCENARIO_UNKNOWN):
+        try:
+            action.wait_image_stable(
+                templates.SINGLE_MODE_CHARACTER_DETAIL_BUTTON,
+                duration=0.2,
+                timeout=1,
+            )
+        except TimeoutError:
+            ac.ctx.scenario = ctx.SCENARIO_AOHARU
+            return _handle_aoharu_team_race(ac)
     scene = CommandScene.enter(ctx)
     scene.recognize(ctx)
     ctx.pause_on_specified_turn()
     _handle_item_list(ctx, scene)
     _handle_shop(ctx, scene)
+    _handle_knowledge_table(ctx, scene, commands.RaceCommand(Race()))
     ctx.next_turn()
     try:
         scene = RaceMenuScene().enter(ctx)
@@ -255,7 +362,7 @@ def _handle_target_race(ac: _ActionContext):
 
 
 def _ac_handle_option(ac: _ActionContext):
-    _handle_option()
+    _handle_option(ac.ctx)
 
 
 def _handle_crane_game(ac: _ActionContext):
@@ -265,6 +372,7 @@ def _handle_crane_game(ac: _ActionContext):
 
 def _set_scenario(scenario: Text, _handler: _Handler) -> _Handler:
     def _func(ac: _ActionContext):
+        app.log.text("set scenario: %s" % scenario)
         ac.ctx.scenario = scenario
         _handler(ac)
 
@@ -318,9 +426,38 @@ def _handle_aoharu_team_race(ac: _ActionContext):
             break
 
 
+def _handle_grand_masters_race(ac: _ActionContext):
+    ctx = ac.ctx
+    scene = CommandScene.enter(ctx)
+    scene.recognize(ctx)
+    scene = GrandMastersRaceMenuScene().enter(ctx)
+    race = scene.recognize(ctx)
+    action.wait_tap_image(templates.SINGLE_MODE_GRAND_MASTERS_RACE_START_BUTTON)
+    _CommandPlan(
+        ctx, commands.RaceCommand(race, selected=True, skip_menu=True)
+    ).execute(ctx)
+
+
+def _handle_uaf_live(ac: _ActionContext):
+    try:
+        action.wait_tap_image(templates.SINGLE_MODE_SKIP_BUTTON, timeout=1)
+    except TimeoutError:
+        pass
+
+
 def _template_actions(ctx: Context) -> Iterator[Tuple[_Template, _Handler]]:
     yield templates.CONNECTING, _pass
+    yield templates.CLOSE_BUTTON, _tap
     yield templates.RETRY_BUTTON, _tap
+    if ctx.scenario in (ctx.SCENARIO_GRAND_MASTERS, ctx.SCENARIO_UNKNOWN):
+        yield templates.SINGLE_MODE_GRAND_MASTERS_GUR_BUTTON, _handle_grand_masters_race
+        yield templates.SINGLE_MODE_GRAND_MASTERS_WBC_BUTTON, _handle_grand_masters_race
+        yield templates.SINGLE_MODE_GRAND_MASTERS, _handle_target_race
+    if ctx.scenario in (ctx.SCENARIO_PROJECT_LARK, ctx.SCENARIO_UNKNOWN):
+        yield (
+            templates.SINGLE_MODE_COMMAND_TRAINING_LARK,
+            _set_scenario(ctx.SCENARIO_PROJECT_LARK, _ac_handle_turn),
+        )
     yield templates.SINGLE_MODE_COMMAND_TRAINING, _ac_handle_turn
     yield templates.SINGLE_MODE_FANS_NOT_ENOUGH, _handle_fan_not_enough
     yield templates.SINGLE_MODE_TARGET_RACE_NO_PERMISSION, _handle_fan_not_enough
@@ -335,19 +472,35 @@ def _template_actions(ctx: Context) -> Iterator[Tuple[_Template, _Handler]]:
     yield templates.SINGLE_MODE_GENE_INHERIT, _tap
     yield templates.SINGLE_MODE_CRANE_GAME_BUTTON, _handle_crane_game
     if ctx.scenario in (ctx.SCENARIO_AOHARU, ctx.SCENARIO_UNKNOWN):
-        yield templates.SINGLE_MODE_AOHARU_AUTO_FORMATION_TITLE, _set_scenario(
-            ctx.SCENARIO_AOHARU, _close
+        yield (
+            templates.SINGLE_MODE_AOHARU_AUTO_FORMATION_TITLE,
+            _set_scenario(ctx.SCENARIO_AOHARU, _close),
         )
-        yield templates.SINGLE_MODE_AOHARU_FORMAL_RACE_BANNER, _set_scenario(
-            ctx.SCENARIO_AOHARU, _handle_aoharu_team_race
+        yield (
+            templates.SINGLE_MODE_AOHARU_FORMAL_RACE_BANNER,
+            _set_scenario(ctx.SCENARIO_AOHARU, _handle_aoharu_team_race),
         )
     if ctx.scenario in (ctx.SCENARIO_CLIMAX, ctx.SCENARIO_UNKNOWN):
-        yield templates.SINGLE_MODE_GO_TO_SHOP_BUTTON, _set_scenario(
-            ctx.SCENARIO_CLIMAX, _cancel
+        yield (
+            templates.SINGLE_MODE_TARGET_GRADE_POINT_NOT_ENOUGH,
+            _set_scenario(ctx.SCENARIO_CLIMAX, _cancel),
         )
-        yield templates.SINGLE_MODE_TARGET_GRADE_POINT_NOT_ENOUGH, _set_scenario(
-            ctx.SCENARIO_CLIMAX, _cancel
+    if ctx.scenario in (ctx.SCENARIO_UAF_READY_GO, ctx.SCENARIO_UNKNOWN):
+        yield (
+            templates.SINGLE_MODE_UAF_SHOWDOWN_LAUNCH,
+            _set_scenario(ctx.SCENARIO_UAF_READY_GO, _tap),
         )
+        yield (templates.SINGLE_MODE_LIVE_CONFIRM_TITLE, _handle_uaf_live)
+    # if ctx.scenario in (ctx.SCENARIO_GRAND_MASTERS, ctx.SCENARIO_UNKNOWN):
+    #     yield templates.SINGLE_MODE_GRAND_MASTERS_KNOWLEDGE_TABLE_BUTTON, _set_scenario(
+    #         ctx.SCENARIO_GRAND_MASTERS, _close
+    #     )
+    if ctx.scenario is ctx.SCENARIO_CLIMAX:
+        yield templates.SINGLE_MODE_GO_TO_SHOP_BUTTON, _cancel
+    if ctx.scenario is ctx.SCENARIO_GRAND_LIVE:
+        yield templates.SINGLE_MODE_GO_TO_SHOP_BUTTON, _close
+    if ctx.scenario is ctx.SCENARIO_UNKNOWN:
+        yield templates.SINGLE_MODE_GO_TO_SHOP_BUTTON, _handle_go_to_shop
 
 
 def _spec_key(tmpl: _Template) -> Text:

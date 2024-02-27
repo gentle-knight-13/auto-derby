@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import time
+
 from . import action, app, templates
 
 
@@ -40,4 +42,9 @@ def buy_first_n(n: int) -> None:
 
 
 def ignore() -> None:
-    action.wait_tap_image(templates.CANCEL_BUTTON)
+    try:
+        action.wait_tap_image(templates.CANCEL_BUTTON, timeout=60)
+    except TimeoutError:
+        pass
+    time.sleep(0.5)
+

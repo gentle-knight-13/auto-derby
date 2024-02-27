@@ -62,6 +62,7 @@ class TrainingType(enum.Enum):
     POWER = 3
     GUTS = 4
     WISDOM = 5
+    SS_MATCH = 6
 
 
 @functools.total_ordering

@@ -244,7 +244,8 @@ def main():
     )
     args = parser.parse_args()
     path: Text = args.path
-
+    import sys
+    sys.setrecursionlimit(10000)
     Race.repository.replace_data(_merge_races(_read_master_mdb(path)))
 
 

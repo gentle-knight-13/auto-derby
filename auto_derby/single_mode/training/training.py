@@ -21,12 +21,23 @@ class Training:
     TYPE_GUTS = TrainingType.GUTS
     TYPE_WISDOM = TrainingType.WISDOM
 
+    TYPE_SS_MATCH = TrainingType.SS_MATCH
+
     ALL_TYPES = (
         TYPE_SPEED,
         TYPE_STAMINA,
         TYPE_POWER,
         TYPE_GUTS,
         TYPE_WISDOM,
+    )
+
+    ALL_TYPES_LARK = (
+        TYPE_SPEED,
+        TYPE_STAMINA,
+        TYPE_POWER,
+        TYPE_GUTS,
+        TYPE_WISDOM,
+        TYPE_SS_MATCH,
     )
 
     @staticmethod
@@ -49,12 +60,21 @@ class Training:
         self.confirm_position: Tuple[int, int] = (0, 0)
         self.partners: Tuple[Partner, ...] = ()
 
+        self.dance: int = 0
+        self.passion: int = 0
+        self.vocal: int = 0
+        self.visual: int = 0
+        self.mental: int = 0
+
+        self.sphere: int = 0
+        self.fight: int = 0
+        self.free: int = 0
+
     def clone(self) -> Training:
         obj = copy.copy(self)
         return obj
 
     def __str__(self):
-
         named_data = (
             ("spd", self.speed),
             ("sta", self.stamina),
@@ -62,6 +82,14 @@ class Training:
             ("gut", self.guts),
             ("wis", self.wisdom),
             ("ski", self.skill),
+            ("da", self.dance),
+            ("pa", self.passion),
+            ("vo", self.vocal),
+            ("vi", self.visual),
+            ("me", self.mental),
+            ("sp", self.sphere),
+            ("fi", self.fight),
+            ("fr", self.free),
         )
         partner_text = ",".join(i.to_short_text() for i in self.partners)
         return (
@@ -116,9 +144,17 @@ class Training:
             "use TrainingScene.recognize instead",
             DeprecationWarning,
         )
+        from ... import action, template, templates
         from ...scenes.single_mode.training import _recognize_training  # type: ignore
 
-        return _recognize_training(ctx, img)
+        _, pos = action.wait_image_stable(
+            template.Specification(
+                templates.SINGLE_MODE_TRAINING_CONFIRM, threshold=0.8
+            ),
+            templates.SINGLE_MODE_TRAINING_CONFIRM_LARK,
+            duration=0.1,
+        )
+        return _recognize_training(ctx, (img, pos))
 
 
 g.training_class = Training

@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from . import go_out
 
 import copy
+import re
 
 import cast_unknown as cast
 import cv2
@@ -41,10 +42,18 @@ class g:
 
 
 def _year4_date_text(ctx: Context) -> Iterator[Text]:
-    if ctx.scenario in (ctx.SCENARIO_URA, ctx.SCENARIO_AOHARU, ctx.SCENARIO_UNKNOWN):
+    if ctx.scenario in (
+        ctx.SCENARIO_URA,
+        ctx.SCENARIO_AOHARU,
+        ctx.SCENARIO_GRAND_LIVE,
+        ctx.SCENARIO_UAF_READY_GO,
+        ctx.SCENARIO_UNKNOWN,
+    ):
         yield "ファイナルズ開催中"
     if ctx.scenario in (ctx.SCENARIO_CLIMAX, ctx.SCENARIO_UNKNOWN):
         yield "クライマックス開催中"
+    if ctx.scenario in (ctx.SCENARIO_GRAND_MASTERS, ctx.SCENARIO_UNKNOWN):
+        yield "GM 開催中"
 
 
 def _ocr_date(ctx: Context, img: Image) -> Tuple[int, int, int]:
@@ -137,7 +146,7 @@ def _recognize_fan_count(img: Image) -> int:
     )
     _, binary_img = cv2.threshold(cv_img, 50, 255, cv2.THRESH_BINARY_INV)
     app.log.image("fan count", cv_img, level=app.DEBUG, layers={"binary": binary_img})
-    text = ocr.text(imagetools.pil_image(binary_img))
+    text = ocr.text(imagetools.pil_image(binary_img), simple_segment=True)
     return int(text.rstrip("人").replace(",", ""))
 
 
@@ -158,9 +167,7 @@ def _recognize_status(img: Image) -> Tuple[int, Text]:
     )
     text_img = cv2.medianBlur(text_img, 5)
     h = cv_img.shape[0]
-    imagetools.fill_area(
-        text_img, (0,), mode=cv2.RETR_LIST, size_lt=round(h * 0.2**2)
-    )
+    imagetools.fill_area(text_img, (0,), mode=cv2.RETR_LIST, size_lt=round(h * 0.2**2))
     app.log.image(
         "status",
         cv_img,
@@ -193,11 +200,30 @@ def _recognize_property(img: Image) -> int:
     _, binary_img = cv2.threshold(cv_img, 160, 255, cv2.THRESH_BINARY_INV)
     imagetools.fill_area(binary_img, (0,), size_lt=3)
     app.log.image("property", cv_img, layers={"binary": binary_img}, level=app.DEBUG)
-    return int(ocr.text(imagetools.pil_image(binary_img)))
+    return int(ocr.text(imagetools.pil_image(binary_img), simple_segment=True))
+
+
+def _recognize_max_property(img: Image) -> int:
+    img = imagetools.resize(img, height=32)
+    cv_img = np.asarray(img.convert("L"))
+    _, binary_img = cv2.threshold(cv_img, 160, 255, cv2.THRESH_BINARY_INV)
+    imagetools.fill_area(binary_img, (0,), size_lt=2)
+    app.log.image(
+        "property limit", cv_img, layers={"binary": binary_img}, level=app.DEBUG
+    )
+    return int(ocr.text(imagetools.pil_image(binary_img), offset=1, simple_segment=True))
 
 
 def _recognize_scenario(rp: mathtools.ResizeProxy, img: Image) -> Text:
     spec = (
+        (
+            templates.SINGLE_MODE_COMMAND_DISCUSS,
+            Context.SCENARIO_UAF_READY_GO,
+        ),
+        (
+            templates.SINGLE_MODE_UAF_SPORT_GENRE,
+            Context.SCENARIO_UAF_READY_GO,
+        ),
         (
             template.Specification(
                 templates.SINGLE_MODE_CLIMAX_GRADE_POINT_ICON, threshold=0.8
@@ -210,7 +236,52 @@ def _recognize_scenario(rp: mathtools.ResizeProxy, img: Image) -> Text:
             ),
             Context.SCENARIO_CLIMAX,
         ),
-        (templates.SINGLE_MODE_AOHARU_CLASS_DETAIL_BUTTON, Context.SCENARIO_AOHARU),
+        (
+            template.Specification(
+                templates.SINGLE_MODE_GRAND_MASTERS_KNOWLEDGE_TABLE_BUTTON,
+                threshold=0.8,
+            ),
+            Context.SCENARIO_GRAND_MASTERS,
+        ),
+        (
+            template.Specification(
+                templates.SINGLE_MODE_GRAND_MASTERS_WISDOM_PIECE, threshold=0.8
+            ),
+            Context.SCENARIO_GRAND_MASTERS,
+        ),
+        (
+            template.Specification(
+                templates.SINGLE_MODE_GRAND_MASTERS_READY, threshold=0.8
+            ),
+            Context.SCENARIO_GRAND_MASTERS,
+        ),
+        (
+            template.Specification(
+                templates.SINGLE_MODE_GRAND_MASTERS_GUR_BUTTON, threshold=0.8
+            ),
+            Context.SCENARIO_GRAND_MASTERS,
+        ),
+        (
+            template.Specification(
+                templates.SINGLE_MODE_GRAND_MASTERS_WBC_BUTTON, threshold=0.8
+            ),
+            Context.SCENARIO_GRAND_MASTERS,
+        ),
+        (
+            templates.SINGLE_MODE_COMMAND_TRAINING_LARK,
+            Context.SCENARIO_PROJECT_LARK,
+        ),
+        (
+            templates.SINGLE_MODE_COMMAND_OVERSEA_SHOP,
+            Context.SCENARIO_PROJECT_LARK,
+        ),
+        (
+            templates.SINGLE_MODE_COMMAND_OVERSEA_SHOP_FORMAL_RACE,
+            Context.SCENARIO_PROJECT_LARK,
+        ),
+        (templates.SINGLE_MODE_GRAND_LIVE_DATE_REMAIN, Context.SCENARIO_GRAND_LIVE),
+        (templates.SINGLE_MODE_GRAND_LIVE_PERFORMANCE, Context.SCENARIO_GRAND_LIVE),
+        # (templates.SINGLE_MODE_AOHARU_CLASS_DETAIL_BUTTON, Context.SCENARIO_AOHARU), # MAYBE UAF TOO
         (templates.SINGLE_MODE_CLASS_DETAIL_BUTTON, Context.SCENARIO_URA),
     )
     ret = Context.SCENARIO_UNKNOWN
@@ -226,7 +297,13 @@ def _recognize_scenario(rp: mathtools.ResizeProxy, img: Image) -> Text:
 
 
 def _date_bbox(ctx: Context, rp: mathtools.ResizeProxy):
-    if ctx.scenario == ctx.SCENARIO_AOHARU:
+    if ctx.scenario in (
+        ctx.SCENARIO_AOHARU,
+        ctx.SCENARIO_GRAND_LIVE,
+        ctx.SCENARIO_GRAND_MASTERS,
+        ctx.SCENARIO_PROJECT_LARK,
+        ctx.SCENARIO_UAF_READY_GO,
+    ):
         return rp.vector4((125, 32, 278, 48), 540)
     if ctx.scenario == ctx.SCENARIO_CLIMAX:
         return rp.vector4((11, 32, 163, 48), 540)
@@ -272,6 +349,10 @@ class Context:
     SCENARIO_URA = "新設！　URAファイナルズ！！"
     SCENARIO_AOHARU = "アオハル杯～輝け、チームの絆～"
     SCENARIO_CLIMAX = "Make a new track!!  ～クライマックス開幕～"
+    SCENARIO_GRAND_LIVE = "つなげ、照らせ、ひかれ。 私たちのグランドライブ"
+    SCENARIO_GRAND_MASTERS = "グランドマスターズ ―継ぐ者達へ―"
+    SCENARIO_PROJECT_LARK = "Reach for the stars プロジェクトL'Arc"
+    SCENARIO_UAF_READY_GO = "U.A.F. Ready GO! ～アスリートのキラメキ～"
 
     @staticmethod
     def new() -> Context:
@@ -284,6 +365,12 @@ class Context:
         self.power = 0
         self.guts = 0
         self.wisdom = 0
+        self.max_speed = 0
+        self.max_stamina = 0
+        self.max_power = 0
+        self.max_guts = 0
+        self.max_wisdom = 0
+
         # (year, month, half-month), 1-base
         self.date = (0, 0, 0)
         self.vitality = 0.0
@@ -330,6 +417,21 @@ class Context:
 
         self.grade_point = 0
         self.shop_coin = 0
+
+        self.dance = 0
+        self.passion = 0
+        self.vocal = 0
+        self.visual = 0
+        self.mental = 0
+
+        self.overseas_point = 0
+
+        self.sphere_lvl = 0
+        self.sphere_remain = 0
+        self.fight_lvl = 0
+        self.fight_remain = 0
+        self.free_lvl = 0
+        self.free_remain = 0
 
         from . import training
 
@@ -387,9 +489,9 @@ class Context:
     # TODO: refactor update_by_* to *Scene.recognize
     def update_by_command_scene(self, screenshot: Image) -> None:
         rp = mathtools.ResizeProxy(screenshot.width)
-        if not self.scenario:
+        if not self.scenario or self.scenario == Context.SCENARIO_UNKNOWN:
             self.scenario = _recognize_scenario(rp, screenshot)
-        if not self.scenario:
+        if not self.scenario or self.scenario == Context.SCENARIO_UNKNOWN:
             raise ValueError("unknown scenario")
         date_bbox = _date_bbox(self, rp)
         vitality_bbox = rp.vector4((148, 106, 327, 108), 466)
@@ -405,33 +507,48 @@ class Context:
         guts_bbox = (rp.vector(264, 466), t, rp.vector(308, 466), b)
         wisdom_bbox = (rp.vector(337, 466), t, rp.vector(381, 466), b)
 
-        self.date = _ocr_date(self, screenshot.crop(date_bbox))
+        base2_y = detail_button_pos[1] + rp.vector(89, 466)
+        t, b = base2_y, base2_y + rp.vector(13, 466)
+        max_speed_bbox = (rp.vector(45, 466), t, rp.vector(90, 466), b)
+        max_stamina_bbox = (rp.vector(120, 466), t, rp.vector(162, 466), b)
+        max_power_bbox = (rp.vector(190, 466), t, rp.vector(234, 466), b)
+        max_guts_bbox = (rp.vector(264, 466), t, rp.vector(308, 466), b)
+        max_wisdom_bbox = (rp.vector(335, 466), t, rp.vector(381, 466), b)
 
-        self.vitality = _recognize_vitality(screenshot.crop(vitality_bbox))
+        if self.scenario != self.SCENARIO_GRAND_MASTERS:
+            self.date = _ocr_date(self, screenshot.crop(date_bbox))
 
-        # mood_pos change when vitality increase
-        for index, mood_pos in enumerate(
-            (
-                rp.vector2((395, 113), 466),
-                rp.vector2((473, 133), 540),
-            )
-        ):
-            mood_color = screenshot.getpixel(mood_pos)
-            assert isinstance(mood_color, tuple), mood_color
-            try:
-                self.mood = _recognize_mood(
-                    (mood_color[0], mood_color[1], mood_color[2])
+            self.vitality = _recognize_vitality(screenshot.crop(vitality_bbox))
+
+            # mood_pos change when vitality increase
+            for index, mood_pos in enumerate(
+                (
+                    rp.vector2((395, 113), 466),
+                    rp.vector2((473, 133), 540),
                 )
-                break
-            except ValueError:
-                if index == 1:
-                    raise
+            ):
+                mood_color = screenshot.getpixel(mood_pos)
+                assert isinstance(mood_color, tuple), mood_color
+                try:
+                    self.mood = _recognize_mood(
+                        (mood_color[0], mood_color[1], mood_color[2])
+                    )
+                    break
+                except ValueError:
+                    if index == 1:
+                        raise
 
         self.speed = _recognize_property(screenshot.crop(speed_bbox))
         self.stamina = _recognize_property(screenshot.crop(stamina_bbox))
         self.power = _recognize_property(screenshot.crop(power_bbox))
         self.guts = _recognize_property(screenshot.crop(guts_bbox))
         self.wisdom = _recognize_property(screenshot.crop(wisdom_bbox))
+
+        self.max_speed = _recognize_max_property(screenshot.crop(max_speed_bbox))
+        self.max_stamina = _recognize_max_property(screenshot.crop(max_stamina_bbox))
+        self.max_power = _recognize_max_property(screenshot.crop(max_power_bbox))
+        self.max_guts = _recognize_max_property(screenshot.crop(max_guts_bbox))
+        self.max_wisdom = _recognize_max_property(screenshot.crop(max_wisdom_bbox))
 
     def update_by_class_detail(self, screenshot: Image) -> None:
         rp = mathtools.ResizeProxy(screenshot.width)
@@ -484,6 +601,10 @@ class Context:
         msg = ""
         if self.scenario == Context.SCENARIO_CLIMAX:
             msg += f",pt={self.grade_point},coin={self.shop_coin},items={self.items.quantity()}"
+        if self.scenario == Context.SCENARIO_GRAND_LIVE:
+            msg += f",da={self.dance}pa,={self.passion},vo={self.vocal},vi={self.visual},me={self.mental}"
+        if self.scenario == Context.SCENARIO_UAF_READY_GO:
+            msg += f"sphere=({self.sphere_lvl},{self.sphere_remain}),fight=({self.fight_lvl},{self.fight_remain}),free=({self.free_lvl},{self.free_remain})"
         if self.go_out_options:
             msg += ",go_out="
             msg += " ".join(
@@ -660,6 +781,12 @@ class Context:
         if self.scenario == self.SCENARIO_CLIMAX:
             d["gradePoint"] = self.grade_point
             d["shopCoin"] = self.shop_coin
+        if self.scenario == self.SCENARIO_GRAND_LIVE:
+            d["dance"] = self.dance
+            d["passion"] = self.passion
+            d["vocal"] = self.vocal
+            d["visual"] = self.visual
+            d["mental"] = self.mental
         return d
 
     @classmethod
@@ -671,7 +798,6 @@ class Context:
 
     @classmethod
     def from_dict(cls, data: Dict[Text, Any]) -> Context:
-
         ret = cls()
         ret.speed = data["speed"]
         ret.stamina = data["stamina"]
@@ -706,6 +832,11 @@ class Context:
         ret.scenario = data["scenario"]
         ret.grade_point = data.get("gradePoint", 0)
         ret.shop_coin = data.get("shopCoin", 0)
+        ret.dance = data.get("dance", 0)
+        ret.passion = data.get("passion", 0)
+        ret.vocal = data.get("vocal", 0)
+        ret.visual = data.get("visual", 0)
+        ret.mental = data.get("mental", 0)
 
         return ret
 

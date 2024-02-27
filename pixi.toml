@@ -1,0 +1,20 @@
+[project]
+name = "auto-derby"
+version = "0.1.0"
+description = "Add a short description here"
+authors = ["Small_Ku <small_ku@outlook.com>"]
+channels = ["conda-forge"]
+platforms = ["win-64"]
+
+[tasks]
+
+[dependencies]
+pywin32 = "*"
+adb-shell = "*"
+opencv = "*"
+pillow = "*"
+numpy = "*"
+
+[pypi-dependencies]
+mouse = "*"
+cast-unknown = "*"

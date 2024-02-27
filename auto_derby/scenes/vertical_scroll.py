@@ -44,7 +44,7 @@ class VerticalScroll:
         self._direction_change_count = 0
 
     def next(self) -> bool:
-        if self._direction_change_count > 6:
+        if self._direction_change_count > 2:
             self.complete()
             return False
         if self._same_direction_count == 0:

@@ -6,3 +6,5 @@ from .aoharu_competitor import AoharuCompetitorScene
 from .aoharu_main import AoharuMainScene
 from .shop import ShopScene
 from .item_menu import ItemMenuScene
+from .knowledge_table_menu import KnowledgeTableMenuScene
+from .grand_masters_race_menu import GrandMastersRaceMenuScene

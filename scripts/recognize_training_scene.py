@@ -17,10 +17,10 @@ import PIL.Image
 from auto_derby import single_mode, config, app
 from auto_derby.single_mode import Context
 from auto_derby.infrastructure.image_device_service import ImageDeviceService
+from auto_derby.infrastructure.web_log_service import WebLogService
 
 
 def main():
-
     parser = argparse.ArgumentParser()
 
     parser.add_argument("image", default="debug/last_screenshot.png")
@@ -28,6 +28,11 @@ def main():
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--debug-partner", action="store_true")
     args = parser.parse_args()
+    if args.debug:
+        app.log = WebLogService(
+            app.cleanup,
+            buffer_path=":memory:",
+        )
     if args.debug:
         os.environ["DEBUG"] = "auto_derby.single_mode.training.training"
     if args.debug_partner:
@@ -44,6 +49,9 @@ def main():
         "ura": Context.SCENARIO_URA,
         "aoharu": Context.SCENARIO_AOHARU,
         "climax": Context.SCENARIO_CLIMAX,
+        "grand-live": Context.SCENARIO_GRAND_LIVE,
+        "grand-masters": Context.SCENARIO_GRAND_MASTERS,
+        "lark": Context.SCENARIO_PROJECT_LARK,
     }.get(args.scenario, args.scenario)
     image = PIL.Image.open(image_path)
     app.device = ImageDeviceService(image)
@@ -51,6 +59,8 @@ def main():
     ctx.scenario = scenario
     training = single_mode.Training.from_training_scene_v2(ctx, image)
     print(training)
+    if args.debug:
+        pass
 
 
 if __name__ == "__main__":

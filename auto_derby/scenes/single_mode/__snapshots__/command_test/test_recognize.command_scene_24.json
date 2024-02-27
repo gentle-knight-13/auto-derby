@@ -1,0 +1,42 @@
+{
+  "ctx": {
+    "date": [
+      1,
+      0,
+      0
+    ],
+    "mood": "NORMAL",
+    "scenario": "つなげ、照らせ、ひかれ。 私たちのグランドライブ",
+    "vitality": 0.8309178743961353,
+    "maxVitality": 100,
+    "speed": 173,
+    "stamina": 112,
+    "power": 227,
+    "guts": 101,
+    "wisdom": 78,
+    "fanCount": 0,
+    "turf": "",
+    "dart": "",
+    "sprint": "",
+    "mile": "",
+    "intermediate": "",
+    "long": "",
+    "last": "",
+    "middle": "",
+    "head": "",
+    "lead": "",
+    "conditions": [],
+    "dance": 0,
+    "passion": 0,
+    "vocal": 0,
+    "visual": 0,
+    "mental": 0
+  },
+  "scene": {
+    "hasHealthCare": false,
+    "hasScheduledRace": false,
+    "canGoOutWithFriend": false,
+    "hasShop": false,
+    "hasLesson": false
+  }
+}

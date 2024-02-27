@@ -14,6 +14,12 @@ if TYPE_CHECKING:
 
 def compute(ctx: Context, trn: Training) -> float:
     t_now = ctx.turn_count_v2()
+
+    max_speed_list = [
+        int(ctx.max_speed * 0.8),
+        int(ctx.max_speed * 0.9),
+    ]
+
     spd = mathtools.integrate(
         ctx.speed,
         trn.speed,
@@ -22,13 +28,17 @@ def compute(ctx: Context, trn: Training) -> float:
             (300, 1.0),
             (600, 0.8),
             (900, 0.7),
-            (1100, 0.5),
-            (1120, 0.1),
+            (max_speed_list[0], 0.5),
+            (max_speed_list[1], 0.1),
         ),
     )
     if ctx.speed < t_now / 24 * 300:
         spd *= 1.5
 
+    max_stamina_list = [
+        int(ctx.max_stamina * 0.8),
+        int(ctx.max_stamina * 0.9),
+    ]
     sta = mathtools.integrate(
         ctx.stamina,
         trn.stamina,
@@ -39,10 +49,15 @@ def compute(ctx: Context, trn: Training) -> float:
                 600,
                 ctx.speed / 900 * 0.6 + 0.1 * ctx.date[0] if ctx.speed > 900 else 0.6,
             ),
-            (900, ctx.speed / 900 * 0.3),
-            (1120, 0.1),
+            (max_stamina_list[0], ctx.speed / 900 * 0.3),
+            (max_stamina_list[1], 0.1),
         ),
     )
+
+    max_power_list = [
+        int(ctx.max_power * 0.8),
+        int(ctx.max_power * 0.9),
+    ]
     pow_ = mathtools.integrate(
         ctx.power,
         trn.power,
@@ -50,10 +65,15 @@ def compute(ctx: Context, trn: Training) -> float:
             (0, 1.0),
             (300, 0.2 + ctx.speed / 600),
             (600, 0.1 + ctx.speed / 900),
-            (900, ctx.speed / 900 / 3),
-            (1120, 0.1),
+            (max_power_list[0], ctx.speed / 900 / 3),
+            (max_power_list[1], 0.1),
         ),
     )
+
+    max_guts_list = [
+        int(ctx.max_guts * 0.8),
+        int(ctx.max_guts * 0.9),
+    ]
     gut = mathtools.integrate(
         ctx.guts,
         trn.guts,
@@ -62,13 +82,17 @@ def compute(ctx: Context, trn: Training) -> float:
             (300, 1.0 * ctx.speed / 400),
             (400, 0.6 * ctx.speed / 400),
             (600, 0.2 * ctx.speed / 400),
-            (900, 0.1 * ctx.speed / 400),
-            (1120, 0.1),
+            (max_guts_list[0], 0.1 * ctx.speed / 400),
+            (max_guts_list[1], 0.1),
         ),
     )
     if ctx.guts > 300 and ctx.speed < min(1120, 400 / 24 * t_now):
         gut *= 0.5
 
+    max_wisdom_list = [
+        int(ctx.max_wisdom * 0.8),
+        int(ctx.max_wisdom * 0.9),
+    ]
     wis = mathtools.integrate(
         ctx.wisdom,
         trn.wisdom,
@@ -76,8 +100,8 @@ def compute(ctx: Context, trn: Training) -> float:
             (0, 2.0),
             (300, 0.8),
             (600, 0.5),
-            (900, 0.3),
-            (1120, 0.1),
+            (max_wisdom_list[0], 0.3),
+            (max_wisdom_list[1], 0.1),
         ),
     )
     if ctx.wisdom > 300 and ctx.speed < min(1120, 300 / 24 * t_now):
@@ -90,6 +114,42 @@ def compute(ctx: Context, trn: Training) -> float:
         vit *= 1.5
     if ctx.date[0] == 4:
         vit *= 0.3
+
+    live_performance = 0
+    if ctx.scenario == ctx.SCENARIO_GRAND_LIVE:
+        avg = (trn.dance + trn.passion + trn.vocal + trn.visual + trn.mental) / 5
+        value_map = (
+            (0, 4.0),
+            (round(avg), 2.0),
+            (round(avg * 1.5), 0.1),
+        )
+        live_performance += mathtools.integrate(
+            ctx.dance,
+            trn.dance,
+            value_map,
+        )
+        live_performance += mathtools.integrate(
+            ctx.passion,
+            trn.passion,
+            value_map,
+        )
+        live_performance += mathtools.integrate(
+            ctx.vocal,
+            trn.vocal,
+            value_map,
+        )
+        live_performance += mathtools.integrate(
+            ctx.visual,
+            trn.visual,
+            value_map,
+        )
+        live_performance += mathtools.integrate(
+            ctx.mental,
+            trn.mental,
+            value_map,
+        )
+    if ctx.date[0] == 4:
+        live_performance *= 0.3
 
     skill = trn.skill * 0.5
 
@@ -129,7 +189,18 @@ def compute(ctx: Context, trn: Training) -> float:
     has_hint = any(i for i in trn.partners if i.has_hint)
     hint = 3 if has_hint else 0
     return (
-        (spd + sta + pow_ + gut + wis + skill + partner + target_level_score + hint)
+        (
+            spd
+            + sta
+            + pow_
+            + gut
+            + wis
+            + skill
+            + partner
+            + target_level_score
+            + hint
+            + live_performance
+        )
         * success_rate
         + vit
         - fail_penalty * trn.failure_rate

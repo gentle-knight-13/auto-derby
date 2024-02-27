@@ -1,0 +1,1 @@
+Training<vit=-27.0% fail=33% lv=5 ptn=grp@5,spd@5>
