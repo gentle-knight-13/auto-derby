@@ -130,6 +130,7 @@ def _has_command_changing_effect(es: item.EffectSummary) -> bool:
 def _handle_turn(ctx: Context):
     scene = CommandScene.enter(ctx)
     scene.recognize(ctx)
+    ctx.pause_on_specified_turn()
     # see training before use items
     turn_commands = tuple(commands.from_context(ctx))
     es_delta = ctx.item_history.effect_summary_delta()
@@ -240,6 +241,7 @@ def _handle_target_race(ac: _ActionContext):
     ctx = ac.ctx
     scene = CommandScene.enter(ctx)
     scene.recognize(ctx)
+    ctx.pause_on_specified_turn()
     _handle_item_list(ctx, scene)
     _handle_shop(ctx, scene)
     ctx.next_turn()
