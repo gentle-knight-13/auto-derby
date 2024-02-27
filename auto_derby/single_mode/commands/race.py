@@ -21,8 +21,13 @@ def _choose_running_style(ctx: Context, race1: Race) -> None:
     # NOTE: Since the scene transition after the race will not go well,
     #       it will transition to the paddock scene.
     scene = PaddockScene.enter(ctx)
+    tmpl, _ = action.wait_image(
+        templates.RACE_RUNNING_STYLE_CHANGE_BUTTON,
+        templates.RACE_RUNNING_STYLE_CHANGE_GRAY_BUTTON,
+    )
+
     global can_choose_running_style
-    if can_choose_running_style:
+    if can_choose_running_style and tmpl.name == templates.RACE_RUNNING_STYLE_CHANGE_BUTTON:
         style_scores = sorted(race1.style_scores_v2(ctx), key=lambda x: x[1], reverse=True)
         for style, score in style_scores:
             app.log.text("running style score:\t%.2f:\t%s" % (score, style))
@@ -154,6 +159,9 @@ def _handle_race_result(ctx: Context, race: Race):
             retry()
             _handle_race_result(ctx, race)
             return
+
+    if res.order > 1 and res.race.grade == Race.GRADE_DEBUT:
+        terminal.pause("failed make debut")
 
     app.device.tap(action.template_rect(tmpl, pos))
     if res.is_failed:

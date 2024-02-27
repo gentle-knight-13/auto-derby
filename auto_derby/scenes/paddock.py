@@ -17,7 +17,10 @@ class PaddockScene(Scene):
 
     @classmethod
     def _enter(cls, ctx: SceneHolder) -> Scene:
-        action.wait_image(templates.RACE_RUNNING_STYLE_CHANGE_BUTTON)
+        action.wait_image(
+            templates.RACE_RUNNING_STYLE_CHANGE_BUTTON,
+            templates.RACE_RUNNING_STYLE_CHANGE_GRAY_BUTTON,
+        )
         return cls()
 
     def choose_running_style(self, style: RunningStyle):
