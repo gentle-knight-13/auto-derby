@@ -246,6 +246,17 @@ def _handle_fan_not_enough(ac: _ActionContext):
 
 def _handle_target_race(ac: _ActionContext):
     ctx = ac.ctx
+    if ctx.scenario in (ctx.SCENARIO_GRAND_MASTERS, ctx.SCENARIO_UNKNOWN):
+        try:
+            _, _ = action.wait_image_stable(
+                templates.SINGLE_MODE_GRAND_MASTERS_GUR_BUTTON,
+                templates.SINGLE_MODE_GRAND_MASTERS_WBC_BUTTON,
+                duration = 0.2, timeout = 1
+            )
+            return _handle_grand_masters_race(ac)
+        except TimeoutError:
+            pass
+
     scene = CommandScene.enter(ctx)
     scene.recognize(ctx)
     _handle_item_list(ctx, scene)
@@ -341,9 +352,10 @@ def _template_actions(ctx: Context) -> Iterator[Tuple[_Template, _Handler]]:
     yield templates.CONNECTING, _pass
     yield templates.CLOSE_BUTTON, _tap
     yield templates.RETRY_BUTTON, _tap
-    yield templates.SINGLE_MODE_GRAND_MASTERS_GUR_BUTTON, _handle_grand_masters_race
-    yield templates.SINGLE_MODE_GRAND_MASTERS_WBC_BUTTON, _handle_grand_masters_race
-    yield templates.SINGLE_MODE_GRAND_MASTERS, _handle_target_race
+    if ctx.scenario in (ctx.SCENARIO_GRAND_MASTERS, ctx.SCENARIO_UNKNOWN):
+        yield templates.SINGLE_MODE_GRAND_MASTERS_GUR_BUTTON, _handle_grand_masters_race
+        yield templates.SINGLE_MODE_GRAND_MASTERS_WBC_BUTTON, _handle_grand_masters_race
+        yield templates.SINGLE_MODE_GRAND_MASTERS, _handle_target_race
     yield templates.SINGLE_MODE_COMMAND_TRAINING, _ac_handle_turn
     yield templates.SINGLE_MODE_FANS_NOT_ENOUGH, _handle_fan_not_enough
     yield templates.SINGLE_MODE_TARGET_RACE_NO_PERMISSION, _handle_fan_not_enough
@@ -370,10 +382,10 @@ def _template_actions(ctx: Context) -> Iterator[Tuple[_Template, _Handler]]:
         yield templates.SINGLE_MODE_TARGET_GRADE_POINT_NOT_ENOUGH, _set_scenario(
             ctx.SCENARIO_CLIMAX, _cancel
         )
-    # if ctx.scenario in (ctx.SCENARIO_GRAND_MASTERS, ctx.SCENARIO_UNKNOWN):
-    #     yield templates.SINGLE_MODE_GRAND_MASTERS_KNOWLEDGE_TABLE_BUTTON, _set_scenario(
-    #         ctx.SCENARIO_GRAND_MASTERS, _close
-    #     )
+    if ctx.scenario in (ctx.SCENARIO_GRAND_MASTERS, ctx.SCENARIO_UNKNOWN):
+        yield templates.SINGLE_MODE_GRAND_MASTERS_KNOWLEDGE_TABLE_BUTTON, _set_scenario(
+            ctx.SCENARIO_GRAND_MASTERS, _close
+        )
 
 
 def _spec_key(tmpl: _Template) -> Text:
