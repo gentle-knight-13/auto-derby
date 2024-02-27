@@ -112,7 +112,16 @@ def set_foreground(h_wnd: int) -> None:
     g.on_foreground_will_change()
     app.log.text("set foreground window: h_wnd=%s" % h_wnd, level=app.DEBUG)
     try:
-        win32gui.SetForegroundWindow(h_wnd)
+        win32gui.SetWindowPos(
+            h_wnd,
+            win32con.HWND_TOP,
+            0,
+            0,
+            0,
+            0,
+            win32con.SWP_NOMOVE | win32con.SWP_NOSIZE,
+        )
+
     except Exception as ex:
         app.log.text(
             "set foreground window failed: h_wnd=%s error='%s'"
