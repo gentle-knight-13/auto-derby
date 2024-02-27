@@ -515,7 +515,23 @@ class Context:
         max_guts_bbox = (rp.vector(264, 466), t, rp.vector(308, 466), b)
         max_wisdom_bbox = (rp.vector(335, 466), t, rp.vector(381, 466), b)
 
-        if self.scenario != self.SCENARIO_GRAND_MASTERS:
+        if self.scenario not in (
+            self.SCENARIO_GRAND_MASTERS,
+            self.SCENARIO_UNKNOWN,
+        ) or not any(
+            [
+                tuple(
+                    template.match(
+                        screenshot, templates.SINGLE_MODE_GRAND_MASTERS_WBC_BUTTON
+                    )
+                ),
+                tuple(
+                    template.match(
+                        screenshot, templates.SINGLE_MODE_GRAND_MASTERS_GUR_BUTTON
+                    )
+                ),
+            ]
+        ):
             self.date = _ocr_date(self, screenshot.crop(date_bbox))
 
             self.vitality = _recognize_vitality(screenshot.crop(vitality_bbox))
