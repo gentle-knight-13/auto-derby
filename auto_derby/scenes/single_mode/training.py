@@ -15,6 +15,7 @@ from PIL.Image import Image
 from PIL.Image import fromarray as image_from_array
 
 from ... import action, app, imagetools, mathtools, ocr, template, templates
+from ...constants import TrainingType
 from ...single_mode import Context, Training, training
 from ...single_mode.training import Partner
 from ..scene import Scene, SceneHolder
@@ -262,6 +263,16 @@ def _recognize_level(rgb_color: Tuple[int, ...]) -> int:
     raise ValueError("_recognize_level: unknown level color: %s" % (rgb_color,))
 
 
+def _recognize_uaf_genre(rgb_color: Tuple[int, ...]) -> int:
+    if imagetools.compare_color((52, 122, 247), rgb_color) > 0.9:
+        return 1  # sphere
+    if imagetools.compare_color((255, 72, 77), rgb_color) > 0.9:
+        return 2  # fight
+    if imagetools.compare_color((255, 147, 0), rgb_color) > 0.9:
+        return 3  # free
+    raise ValueError("_recognize_uaf_genre: unknown uaf genre color: %s" % (rgb_color,))
+
+
 def _recognize_failure_rate(
     rp: mathtools.ResizeProxy, trn: Training, img: Image
 ) -> float:
@@ -298,6 +309,99 @@ def _recognize_failure_rate(
     )
     text = ocr.text(imagetools.pil_image(text_img))
     return int(re.sub("[^0-9]", "", text)) / 100
+
+
+def _recognize_uaf_level(rp: mathtools.ResizeProxy, trn: Training, img: Image) -> int:
+    x, y = trn.confirm_position
+    bbox = (
+        x + rp.vector(14, 540),
+        y + rp.vector(-106, 540),
+        x + rp.vector(53, 540),
+        y + rp.vector(-87, 540),
+    )
+    cv_img = imagetools.cv_image(imagetools.resize(img.crop(bbox), height=32))
+    outline_img = imagetools.constant_color_key(
+        cv_img,
+        # sphere
+        (255, 98, 68),
+        (255, 133, 114),
+        # fight
+        (94, 84, 255),
+        (61, 46, 255),
+        # free
+        (0, 153, 255),
+        (33, 149, 255),
+    )
+    masked_img = imagetools.inside_outline(cv_img, outline_img)
+
+    text_img = imagetools.constant_color_key(
+        masked_img, (255, 255, 255), threshold=0.85
+    )
+    app.log.image(
+        "uaf: training level",
+        cv_img,
+        level=app.DEBUG,
+        layers={
+            "outline": outline_img,
+            "masked": masked_img,
+            "text": text_img,
+        },
+    )
+
+    text = ocr.text(imagetools.pil_image(text_img))
+    if text:
+        return int(re.sub("[^0-9]", "", text))
+
+    # +100 has different color
+    max_bbox = (
+        x + rp.vector(14, 540),
+        y + rp.vector(-100, 540),
+        x + rp.vector(28, 540),
+        y + rp.vector(-90, 540),
+    )
+    hash100 = [
+        "0f0f9f0f9f0f9f0f9f0f9f8f9f8f9f8f938fb38ef3c4f3c462c4624400000000",
+    ]
+    max_img = img.crop(max_bbox)
+    max_img_hash = imagetools.image_hash(max_img)
+    hash_sim = max(map(lambda lst: imagetools.compare_hash(max_img_hash, lst), hash100))
+    app.log.image(f"hash100<{hash_sim}>{max_img_hash}", max_img, level=app.DEBUG)
+    if hash_sim > 0.9:
+        return 100
+
+    raise ValueError("_recognize_uaf_level: unknown uaf level")
+
+
+def _recognize_uaf_level_up(
+    rp: mathtools.ResizeProxy, trn: Training, img: Image
+) -> int:
+    x, y = trn.confirm_position
+    bbox = (
+        x + rp.vector(-6, 540),
+        y + rp.vector(-123, 540),
+        x + rp.vector(12, 540),
+        y + rp.vector(-107, 540),
+    )
+    cv_img = imagetools.cv_image(imagetools.resize(img.crop(bbox), height=32))
+    white_img = imagetools.constant_color_key(
+        cv_img, (255, 255, 255), (191, 178, 180), threshold=0.85
+    )
+    white_img_extra = imagetools.constant_color_key(
+        cv_img, (151, 110, 119), (166, 121, 119), (201, 143, 119), threshold=0.95
+    )
+    text_img = white_img + white_img_extra
+    app.log.image(
+        "uaf: training level up",
+        cv_img,
+        level=app.DEBUG,
+        layers={
+            "text": text_img,
+            "white": white_img,
+            "text_extra": white_img_extra,
+        },
+    )
+    text = ocr.text(imagetools.pil_image(text_img))
+    return int(re.sub("[^0-9]", "", text))
 
 
 def _estimate_vitality(ctx: Context, trn: Training) -> float:
@@ -350,7 +454,11 @@ def _iter_training_images(ctx: Context, static: bool):
         if mathtools.distance(first_confirm_pos, pos) < radius:
             continue
         app.device.tap((*pos, *rp.vector2((20, 20), 540)))
-        _, pos = action.wait_image(tmpl)
+        _, pos = (
+            action.wait_image_stable(tmpl, duration=0.06)
+            if ctx.scenario == ctx.SCENARIO_UAF_READY_GO
+            else action.wait_image(tmpl)
+        )
         if pos not in seen_confirm_pos:
             yield app.device.screenshot(), pos
             seen_confirm_pos.add(pos)
@@ -715,8 +823,6 @@ def _effect_recognitions(
         raise NotImplementedError(ctx.scenario)
 
 
-
-
 def _recognize_training(
     ctx: Context, img_pair: Tuple[Image, Tuple[int, int]]
 ) -> Training:
@@ -737,7 +843,20 @@ def _recognize_training(
                 self.type = t
                 min_dist = x_dist
 
-        if ctx.scenario != ctx.SCENARIO_UAF_READY_GO:
+        if ctx.scenario == ctx.SCENARIO_UAF_READY_GO:
+            sport_genre = _recognize_uaf_genre(
+                tuple(cast.list_(img.getpixel(rp.vector2((10, 200), 540)), int))
+            )
+            self.type = TrainingType(sport_genre * 5 + int(self.type) + 1)
+            self.level = (
+                _recognize_uaf_level(rp, self, img)
+                if self.type not in ctx.training_levels or ctx.training_levels[self.type] != 100
+                else 100
+            )
+            self.level_up = (
+                _recognize_uaf_level_up(rp, self, img) if self.level != 100 else 0
+            )
+        else:
             self.level = _recognize_level(
                 tuple(cast.list_(img.getpixel(rp.vector2((10, 200), 540)), int))
             )
@@ -752,21 +871,17 @@ def _recognize_training(
 
         if ctx.scenario == ctx.SCENARIO_GRAND_LIVE:
             left, right = rp.vector2((88, 146), 540)
-            def _recognize(t:int, b:int):
-                return _recognize_base_effect(img.crop((left, rp.vector(t, 540), right, rp.vector(b, 540))))
+
+            def _recognize(t: int, b: int):
+                return _recognize_base_effect(
+                    img.crop((left, rp.vector(t, 540), right, rp.vector(b, 540)))
+                )
+
             self.dance += _recognize(265, 292)
             self.passion += _recognize(314, 341)
             self.vocal += _recognize(363, 390)
             self.visual += _recognize(412, 439)
             self.mental += _recognize(461, 488)
-
-        if ctx.scenario == ctx.SCENARIO_UAF_READY_GO:
-            left, right = rp.vector2((91, 147), 540)
-            def _recognize(t:int, b:int):
-                return _recognize_base_effect(img.crop((left, rp.vector(t, 540), right, rp.vector(b, 540))))
-            self.sphere += _recognize(287, 310)
-            self.fight += _recognize(366, 389)
-            self.free += _recognize(445, 469)
 
         # TODO: recognize vitality
         # plugin hook

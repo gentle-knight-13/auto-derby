@@ -63,6 +63,29 @@ class TrainingType(enum.Enum):
     GUTS = 4
     WISDOM = 5
     SS_MATCH = 6
+    SPHERE_SPEED = 7
+    SPHERE_STAMINA = 8
+    SPHERE_POWER = 9
+    SPHERE_GUTS = 10
+    SPHERE_WISDOM = 11
+    FIGHT_SPEED = 12
+    FIGHT_STAMINA = 13
+    FIGHT_POWER = 14
+    FIGHT_GUTS = 15
+    FIGHT_WISDOM = 16
+    FREE_SPEED = 17
+    FREE_STAMINA = 18
+    FREE_POWER = 19
+    FREE_GUTS = 20
+    FREE_WISDOM = 21
+
+    def __new__(cls, value: int):
+        member = object.__new__(cls)
+        member._value_ = value
+        return member
+
+    def __int__(self):
+        return self.value
 
 
 @functools.total_ordering

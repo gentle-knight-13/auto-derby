@@ -146,25 +146,6 @@ def _recognize_lark_overseas_point(ctx: Context):
 
 
 def _recognize_uaf_level(ctx: Context):
-    def _recognize_remain(img: Image) -> int:
-        cv_img = imagetools.cv_image(imagetools.resize(img, height=32))
-        gray_img = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
-        _, text_img = cv2.threshold(gray_img, 200, 255, cv2.THRESH_BINARY_INV)
-
-        app.log.image(
-            "uaf: remain",
-            img,
-            level=app.DEBUG,
-            layers={
-                "cv": cv_img,
-                "gray": gray_img,
-                "text": text_img,
-            },
-        )
-        return int(
-            ocr.text(imagetools.pil_image(text_img), offset=2, simple_segment=True)
-        )
-
     def _recognize_level(img: Image) -> int:
         cv_img = imagetools.cv_image(imagetools.resize(img, height=32))
         outline_img = imagetools.constant_color_key(
@@ -185,7 +166,7 @@ def _recognize_uaf_level(ctx: Context):
             masked_img, (255, 255, 255), threshold=0.85
         )
         app.log.image(
-            "uaf: level",
+            "uaf: level sum",
             cv_img,
             level=app.DEBUG,
             layers={
@@ -205,17 +186,9 @@ def _recognize_uaf_level(ctx: Context):
     fight_lvl_bbox = (left, rp.vector(373, 540), right, rp.vector(389, 540))
     free_lvl_bbox = (left, rp.vector(452, 540), right, rp.vector(468, 540))
 
-    ctx.sphere_lvl = _recognize_level(screenshot.crop(sphere_lvl_bbox))
-    ctx.fight_lvl = _recognize_level(screenshot.crop(fight_lvl_bbox))
-    ctx.free_lvl = _recognize_level(screenshot.crop(free_lvl_bbox))
-
-    sphere_remain_bbox = (left, rp.vector(311, 540), right, rp.vector(327, 540))
-    fight_remain_bbox = (left, rp.vector(390, 540), right, rp.vector(406, 540))
-    free_remain_bbox = (left, rp.vector(469, 540), right, rp.vector(485, 540))
-
-    ctx.sphere_remain = _recognize_remain(screenshot.crop(sphere_remain_bbox))
-    ctx.fight_remain = _recognize_remain(screenshot.crop(fight_remain_bbox))
-    ctx.free_remain = _recognize_remain(screenshot.crop(free_remain_bbox))
+    ctx.sphere_sum = _recognize_level(screenshot.crop(sphere_lvl_bbox))
+    ctx.fight_sum = _recognize_level(screenshot.crop(fight_lvl_bbox))
+    ctx.free_sum = _recognize_level(screenshot.crop(free_lvl_bbox))
 
 
 class CommandScene(Scene):

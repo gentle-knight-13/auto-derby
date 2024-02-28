@@ -52,6 +52,7 @@ def main():
         "grand-live": Context.SCENARIO_GRAND_LIVE,
         "grand-masters": Context.SCENARIO_GRAND_MASTERS,
         "lark": Context.SCENARIO_PROJECT_LARK,
+        "uaf": Context.SCENARIO_UAF_READY_GO,
     }.get(args.scenario, args.scenario)
     image = PIL.Image.open(image_path)
     app.device = ImageDeviceService(image)

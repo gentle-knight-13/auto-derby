@@ -23,6 +23,22 @@ class Training:
 
     TYPE_SS_MATCH = TrainingType.SS_MATCH
 
+    TYPE_SPHERE_SPEED = TrainingType.SPHERE_SPEED
+    TYPE_SPHERE_STAMINA = TrainingType.SPHERE_STAMINA
+    TYPE_SPHERE_POWER = TrainingType.SPHERE_POWER
+    TYPE_SPHERE_GUTS = TrainingType.SPHERE_GUTS
+    TYPE_SPHERE_WISDOM = TrainingType.SPHERE_WISDOM
+    TYPE_FIGHT_SPEED = TrainingType.FIGHT_SPEED
+    TYPE_FIGHT_STAMINA = TrainingType.FIGHT_STAMINA
+    TYPE_FIGHT_POWER = TrainingType.FIGHT_POWER
+    TYPE_FIGHT_GUTS = TrainingType.FIGHT_GUTS
+    TYPE_FIGHT_WISDOM = TrainingType.FIGHT_WISDOM
+    TYPE_FREE_SPEED = TrainingType.FREE_SPEED
+    TYPE_FREE_STAMINA = TrainingType.FREE_STAMINA
+    TYPE_FREE_POWER = TrainingType.FREE_POWER
+    TYPE_FREE_GUTS = TrainingType.FREE_GUTS
+    TYPE_FREE_WISDOM = TrainingType.FREE_WISDOM
+
     ALL_TYPES = (
         TYPE_SPEED,
         TYPE_STAMINA,
@@ -38,6 +54,24 @@ class Training:
         TYPE_GUTS,
         TYPE_WISDOM,
         TYPE_SS_MATCH,
+    )
+
+    ALL_TYPES_UAF: Tuple[TrainingType, ...] = (
+        TYPE_SPHERE_SPEED,
+        TYPE_SPHERE_STAMINA,
+        TYPE_SPHERE_POWER,
+        TYPE_SPHERE_GUTS,
+        TYPE_SPHERE_WISDOM,
+        TYPE_FIGHT_SPEED,
+        TYPE_FIGHT_STAMINA,
+        TYPE_FIGHT_POWER,
+        TYPE_FIGHT_GUTS,
+        TYPE_FIGHT_WISDOM,
+        TYPE_FREE_SPEED,
+        TYPE_FREE_STAMINA,
+        TYPE_FREE_POWER,
+        TYPE_FREE_GUTS,
+        TYPE_FREE_WISDOM,
     )
 
     @staticmethod
@@ -65,10 +99,8 @@ class Training:
         self.vocal: int = 0
         self.visual: int = 0
         self.mental: int = 0
-
-        self.sphere: int = 0
-        self.fight: int = 0
-        self.free: int = 0
+        
+        self.level_up: int = 0
 
     def clone(self) -> Training:
         obj = copy.copy(self)
@@ -87,13 +119,11 @@ class Training:
             ("vo", self.vocal),
             ("vi", self.visual),
             ("me", self.mental),
-            ("sp", self.sphere),
-            ("fi", self.fight),
-            ("fr", self.free),
+            ("+lv", self.level_up),
         )
         partner_text = ",".join(i.to_short_text() for i in self.partners)
         return (
-            "Training<"
+            f"{self.type}<"
             + (
                 "".join(
                     (
