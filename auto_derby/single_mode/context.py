@@ -20,7 +20,6 @@ if TYPE_CHECKING:
     from . import go_out
 
 import copy
-import re
 
 import cast_unknown as cast
 import cv2
@@ -206,7 +205,7 @@ def _recognize_property(img: Image) -> int:
 def _recognize_max_property(img: Image) -> int:
     img = imagetools.resize(img, height=32)
     cv_img = np.asarray(img.convert("L"))
-    _, binary_img = cv2.threshold(cv_img, 160, 255, cv2.THRESH_BINARY_INV)
+    _, binary_img = cv2.threshold(cv_img, 180, 255, cv2.THRESH_BINARY_INV)
     imagetools.fill_area(binary_img, (0,), size_lt=2)
     app.log.image(
         "property limit", cv_img, layers={"binary": binary_img}, level=app.DEBUG
@@ -511,9 +510,9 @@ class Context:
         t, b = base2_y, base2_y + rp.vector(13, 466)
         max_speed_bbox = (rp.vector(45, 466), t, rp.vector(90, 466), b)
         max_stamina_bbox = (rp.vector(120, 466), t, rp.vector(162, 466), b)
-        max_power_bbox = (rp.vector(190, 466), t, rp.vector(234, 466), b)
+        max_power_bbox = (rp.vector(192, 466), t, rp.vector(234, 466), b)
         max_guts_bbox = (rp.vector(264, 466), t, rp.vector(308, 466), b)
-        max_wisdom_bbox = (rp.vector(335, 466), t, rp.vector(381, 466), b)
+        max_wisdom_bbox = (rp.vector(335, 466), t, rp.vector(380, 466), b)
 
         if self.scenario not in (
             self.SCENARIO_GRAND_MASTERS,
@@ -638,11 +637,11 @@ class Context:
             f"turn={self.turn_count_v2()},"
             f"mood={self.mood},"
             f"vit={self.vitality:.3f},"
-            f"spd={self.speed},"
-            f"sta={self.stamina},"
-            f"pow={self.power},"
-            f"gut={self.guts},"
-            f"wis={self.wisdom},"
+            f"spd={self.speed}/{self.max_speed},"
+            f"sta={self.stamina}/{self.max_stamina},"
+            f"pow={self.power}/{self.max_power},"
+            f"gut={self.guts}/{self.max_guts},"
+            f"wis={self.wisdom}/{self.max_wisdom},"
             f"fan={self.fan_count},"
             f"ground={''.join(i[1] for i in (self.turf, self.dart))},"
             f"distance={''.join(i[1] for i in (self.sprint, self.mile, self.intermediate, self.long))},"
