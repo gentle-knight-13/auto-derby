@@ -34,7 +34,9 @@ def _gradient(colors: Tuple[Tuple[Tuple[int, int, int], int], ...]) -> np.ndarra
     return ret
 
 
-def _recognize_base_effect(img: Image) -> int:
+def _recognize_base_effect(
+        img: Image, overflow: bool = False, img_threshold: float = 0.85, text_img_threshold: float = 0.95
+) -> int:
     cv_img = imagetools.cv_image(imagetools.resize(img, height=32))
     sharpened_img = imagetools.sharpen(cv_img)
     sharpened_img = imagetools.mix(sharpened_img, cv_img, 0.4)
@@ -59,8 +61,7 @@ def _recognize_base_effect(img: Image) -> int:
     )
     masked_img = cv2.copyTo(cv_img, 255 - bg_mask_img)
 
-    brown_img = imagetools.constant_color_key(
-        cv_img,
+    colors = [
         (29, 62, 194),
         (24, 113, 218),
         (30, 109, 216),
@@ -68,7 +69,21 @@ def _recognize_base_effect(img: Image) -> int:
         (119, 139, 224),
         (103, 147, 223),
         (59, 142, 226),
-        threshold=0.85,
+    ]
+    if overflow:
+        colors = [
+            (40, 146, 197),
+            (22, 129, 180),
+            (7, 75, 121),
+            (4, 56, 103),
+            (44, 122, 164),
+            (85, 154, 193),
+        ]
+
+    brown_img = imagetools.constant_color_key(
+        cv_img,
+        *colors,
+        threshold=img_threshold,
     )
     _, non_brown_img = cv2.threshold(brown_img, 120, 255, cv2.THRESH_BINARY_INV)
     border_brown_img = imagetools.border_flood_fill(non_brown_img)
@@ -97,7 +112,7 @@ def _recognize_base_effect(img: Image) -> int:
     text_img_extra = imagetools.constant_color_key(
         masked_img,
         (175, 214, 255),
-        threshold=0.95,
+        threshold=text_img_threshold,
     )
     text_img = np.array(np.maximum(text_img, text_img_extra))
     imagetools.fill_area(text_img, (0,), size_lt=48)
@@ -138,10 +153,19 @@ def _recognize_base_effect(img: Image) -> int:
     text = ocr.text(image_from_array(text_img))
     if not text:
         return 0
-    return int(text.lstrip("+"))
+    return int(text.partition("+")[2])
 
 
-def _recognize_red_effect(img: Image) -> int:
+def _recognize_overflow_base_effect(img: Image) -> int:
+    effect_value = _recognize_base_effect(img)
+    if effect_value == 0:
+        effect_value = _recognize_base_effect(img, True, 0.70, 0.50)
+    return effect_value
+
+
+def _recognize_special_effect(
+    img: Image, overflow: bool = False, img_threshold: float = 0.80, text_img_threshold: float = 0.95
+) -> int:
     cv_img = imagetools.cv_image(
         imagetools.resize(
             imagetools.resize(img, height=24),
@@ -172,13 +196,39 @@ def _recognize_red_effect(img: Image) -> int:
 
     masked_img = imagetools.inside_outline(cv_img, white_outline_img)
 
-    red_outline_img = imagetools.constant_color_key(
-        cv_img,
+    colors = [
         (15, 18, 216),
         (34, 42, 234),
         (56, 72, 218),
         (20, 18, 181),
         (27, 35, 202),
+    ]
+    fill_color = [
+        (129, 211, 255),
+        (126, 188, 255),
+        (82, 134, 255),
+        (36, 62, 211),
+    ]
+    if overflow:
+        colors = [
+            (40, 146, 197),
+            (22, 129, 180),
+            (7, 75, 121),
+            (4, 56, 103),
+            (44, 122, 164),
+            (85, 154, 193),
+        ]
+        fill_color = [
+            (201, 244, 255),
+            (158, 240, 255),
+            (92, 220, 247),
+            (79, 212, 247),
+        ]
+
+    red_outline_img = imagetools.constant_color_key(
+        cv_img,
+        *colors,
+        threshold=img_threshold,
     )
     red_outline_img = cv2.morphologyEx(
         red_outline_img,
@@ -191,10 +241,10 @@ def _recognize_red_effect(img: Image) -> int:
     height = cv_img.shape[0]
     fill_gradient = _gradient(
         (
-            ((129, 211, 255), 0),
-            ((126, 188, 255), round(height * 0.5)),
-            ((82, 134, 255), round(height * 0.75)),
-            ((36, 62, 211), height),
+            (fill_color[0], 0),
+            (fill_color[1], round(height * 0.5)),
+            (fill_color[2], round(height * 0.75)),
+            (fill_color[3], height),
         )
     ).astype(np.uint8)
     fill_img = np.repeat(np.expand_dims(fill_gradient, 1), cv_img.shape[1], axis=1)
@@ -215,15 +265,15 @@ def _recognize_red_effect(img: Image) -> int:
         (92, 145, 244),
         (91, 143, 238),
         (140, 228, 254),
-        threshold=0.95,
+        threshold=text_img_threshold,
     )
     text_img = np.array(np.maximum(text_img_base, text_img_extra))
     h = cv_img.shape[0]
     imagetools.fill_area(text_img, (0,), size_lt=round(h * 0.2**2))
 
     app.log.image(
-        "red effect",
-        cv_img,
+        "special effect",
+        img,
         level=app.DEBUG,
         layers={
             "sharpened": sharpened_img,
@@ -236,10 +286,32 @@ def _recognize_red_effect(img: Image) -> int:
             "text": text_img,
         },
     )
+
+    if cv2.countNonZero(text_img) < 100:
+        # ignore skin match result
+        return 0
+
+    # +100 has different color
+    hash100 = "000000000000006600ee00ff00ff00ff004e0000000000000000000000000000"
+    if (
+        imagetools.compare_hash(
+            imagetools.image_hash(imagetools.pil_image(text_img)),
+            hash100,
+        )
+        > 0.9
+    ):
+        return 100
     text = ocr.text(image_from_array(text_img))
     if not text:
         return 0
-    return int(text.lstrip("+"))
+    return int(text.partition("+")[2])
+
+
+def _recognize_overflow_special_effect(img: Image) -> int:
+    effect_value = _recognize_special_effect(img)
+    if effect_value == 0:
+        effect_value = _recognize_special_effect(img, True, 0.80, 0.81)
+    return effect_value
 
 
 def _recognize_level(rgb_color: Tuple[int, ...]) -> int:
@@ -665,16 +737,16 @@ def _effect_recognitions(
         )
 
     if ctx.scenario == ctx.SCENARIO_URA:
-        yield _bbox_groups(582, 616), _recognize_base_effect
+        yield _bbox_groups(582, 616), _recognize_overflow_base_effect
     elif ctx.scenario == ctx.SCENARIO_AOHARU:
-        yield _bbox_groups(597, 625), _recognize_base_effect
-        yield _bbox_groups(570, 595), _recognize_red_effect
+        yield _bbox_groups(597, 625), _recognize_overflow_base_effect
+        yield _bbox_groups(570, 595), _recognize_overflow_special_effect
     elif ctx.scenario == ctx.SCENARIO_CLIMAX:
-        yield _bbox_groups(595, 623), _recognize_base_effect
-        yield _bbox_groups(568, 593), _recognize_red_effect
+        yield _bbox_groups(595, 623), _recognize_overflow_base_effect
+        yield _bbox_groups(568, 593), _recognize_overflow_special_effect
     elif ctx.scenario == ctx.SCENARIO_GRAND_MASTERS:
-        yield _bbox_groups(595, 623), _recognize_base_effect
-        yield _bbox_groups(568, 593), _recognize_red_effect
+        yield _bbox_groups(595, 623), _recognize_overflow_base_effect
+        yield _bbox_groups(568, 593), _recognize_overflow_special_effect
     else:
         raise NotImplementedError(ctx.scenario)
 
