@@ -163,44 +163,43 @@ def compute(ctx: Context, trn: Training) -> float:
     target_level_score = 0
     if ctx.is_summer_camp:
         pass
-    elif ctx.scenario == ctx.SCENARIO_UAF_READY_GO and t_now <= 71:
+    elif ctx.scenario == ctx.SCENARIO_UAF_READY_GO:
+        if t_now <= 71 and trn.type in trn.ALL_TYPES_UAF:
 
-        def target_lv(turn: int):
-            if turn <= 23:
-                return 10
-            if turn <= 35:
-                return 20
-            if turn <= 47:
-                return 30
-            if turn <= 59:
-                return 40
-            if turn <= 71:
-                return 50
-            return 0
+            def target_lv(turn: int):
+                if turn <= 23:
+                    return 10
+                if turn <= 35:
+                    return 20
+                if turn <= 47:
+                    return 30
+                if turn <= 59:
+                    return 40
+                if turn <= 71:
+                    return 50
+                return 0
 
-        genre = (int(trn.type) - 2) // 5
-        target = target_lv(t_now)
-        trainings = [i for i in ctx.trainings if (int(i.type) - 2) // 5 == genre]
-        target_level_score = sum(
-            mathtools.integrate(
-                i.level,
-                i.level_up,
-                (
-                    (1, 6.0),
-                    (target, 2.0),
-                    (target + 5, 0.4),
-                    (60, 0.1),
-                    (100, -2.0),
-                ),
+            genre = (int(trn.type) - 2) // 5
+            target = target_lv(t_now)
+            trainings = [i for i in ctx.trainings if (int(i.type) - 2) // 5 == genre]
+            target_level_score = sum(
+                mathtools.integrate(
+                    i.level,
+                    i.level_up,
+                    (
+                        (1, 6.0),
+                        (target, 2.0),
+                        (target + 5, 0.4),
+                        (60, 0.1),
+                        (100, -2.0),
+                    ),
+                )
+                for i in trainings
             )
-            for i in trainings
-        )
-        if genre != 0:
-            target_level_score -= min((target * 5) - ctx.sphere_sum, 0)
-        if genre != 1:
-            target_level_score -= min((target * 5) - ctx.fight_sum, 0)
-        if genre != 2:
-            target_level_score -= min((target * 5) - ctx.free_sum, 0)
+            genre_sum = {1: ctx.sphere_sum, 2: ctx.fight_sum, 3: ctx.free_sum}[genre]
+            target_level_score -= genre_sum - (
+                (ctx.sphere_sum + ctx.fight_sum + ctx.free_sum) / 3
+            )
     elif trn.level < target_level:
         target_level_score += mathtools.interpolate(
             t_now,
