@@ -37,6 +37,15 @@ class TrainingCommand(Command):
             app.device.tap((x, y - h, w, h))
             time.sleep(0.1)
         app.device.tap((x, y - h, w, h))
+        if ctx.scenario == ctx.SCENARIO_UAF_READY_GO:
+            trainings = ctx.trainings
+            genre = (int(self.training.type) - 2) // 5  # 0 sphere / 1 fight / 2 free
+            trainings = [i for i in trainings if (int(i.type) - 2) // 5 == genre]
+            for trn in trainings:
+                if trn.type not in ctx.training_levels:
+                    ctx.training_levels[trn.type] = 0
+                ctx.training_levels[trn.type] += trn.level_up
+
         ctx.training_history.append(ctx, current_training)
         UnknownScene.enter(ctx)
 

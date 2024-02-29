@@ -210,7 +210,9 @@ def _recognize_max_property(img: Image) -> int:
     app.log.image(
         "property limit", cv_img, layers={"binary": binary_img}, level=app.DEBUG
     )
-    return int(ocr.text(imagetools.pil_image(binary_img), offset=1, simple_segment=True))
+    return int(
+        ocr.text(imagetools.pil_image(binary_img), offset=1, simple_segment=True)
+    )
 
 
 def _recognize_scenario(rp: mathtools.ResizeProxy, img: Image) -> Text:
@@ -425,12 +427,9 @@ class Context:
 
         self.overseas_point = 0
 
-        self.sphere_lvl = 0
-        self.sphere_remain = 0
-        self.fight_lvl = 0
-        self.fight_remain = 0
-        self.free_lvl = 0
-        self.free_remain = 0
+        self._sphere_sum: int = 0
+        self._fight_sum: int = 0
+        self._free_sum: int = 0
 
         from . import training
 
@@ -448,6 +447,56 @@ class Context:
         self.items = item.ItemList()
         self.items_last_updated_turn = 0
         self.item_history = item.History()
+
+    @property
+    def sphere_sum(self):
+        return self._sphere_sum
+
+    @sphere_sum.setter
+    def sphere_sum(self, new_sum: int):
+        self._sphere_sum = new_sum
+        # get sum of all sphere sport
+        # genre = (int(trn.type) - 2) // 5  # 0 sphere / 1 fight / 2 free
+        _sum = sum(
+            self.training_levels[t] if (int(t) - 2) // 5 == 0 else 0
+            for t in self.training_levels
+        )
+        if _sum != new_sum:
+            app.log.text(
+                "sphere sum mismatch: %s != %s" % (_sum, new_sum), level=app.WARN
+            )
+
+    @property
+    def fight_sum(self):
+        return self._fight_sum
+
+    @fight_sum.setter
+    def fight_sum(self, new_sum: int):
+        self._fight_sum = new_sum
+        _sum = sum(
+            self.training_levels[t] if (int(t) - 2) // 5 == 1 else 0
+            for t in self.training_levels
+        )
+        if _sum != new_sum:
+            app.log.text(
+                "fight sum mismatch: %s != %s" % (_sum, new_sum), level=app.WARN
+            )
+
+    @property
+    def free_sum(self):
+        return self._free_sum
+
+    @free_sum.setter
+    def free_sum(self, new_sum: int):
+        self._free_sum = new_sum
+        _sum = sum(
+            self.training_levels[t] if (int(t) - 2) // 5 == 2 else 0
+            for t in self.training_levels
+        )
+        if _sum != new_sum:
+            app.log.text(
+                "fight sum mismatch: %s != %s" % (_sum, new_sum), level=app.WARN
+            )
 
     def clone(self) -> Context:
         obj = copy.copy(self)
@@ -619,7 +668,8 @@ class Context:
         if self.scenario == Context.SCENARIO_GRAND_LIVE:
             msg += f",da={self.dance}pa,={self.passion},vo={self.vocal},vi={self.visual},me={self.mental}"
         if self.scenario == Context.SCENARIO_UAF_READY_GO:
-            msg += f"sphere=({self.sphere_lvl},{self.sphere_remain}),fight=({self.fight_lvl},{self.fight_remain}),free=({self.free_lvl},{self.free_remain})"
+            # msg += f"sphere=({self.sphere}),fight=({self.fight}),free=({self.free})"
+            pass
         if self.go_out_options:
             msg += ",go_out="
             msg += " ".join(
