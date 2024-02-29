@@ -378,7 +378,7 @@ def _recognize_uaf_level_up(
     x, y = trn.confirm_position
     bbox = (
         x + rp.vector(-6, 540),
-        y + rp.vector(-123, 540),
+        y + rp.vector(-122, 540),
         x + rp.vector(12, 540),
         y + rp.vector(-107, 540),
     )
