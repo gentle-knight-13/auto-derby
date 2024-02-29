@@ -329,7 +329,6 @@ SINGLE_MODE_SHOP_DECIDE_BUTTON = "single_mode_shop_decide_button.png"
 SINGLE_MODE_SHOP_ITEM_PRICE = "single_mode_shop_item_price.png"
 SINGLE_MODE_SHOP_USE_CONFIRM_BUTTON = "single_mode_shop_use_confirm_button.png"
 SINGLE_MODE_SKIP_BUTTON = "single_mode_skip_button.png"
-SINGLE_MODE_SKIP_BUTTON_POS = "single_mode_skip_button.pos.png"
 SINGLE_MODE_SKIP_TITLE_BUTTON = "single_mode_skip_title_button.png"
 SINGLE_MODE_TARGET_GRADE_POINT_NOT_ENOUGH = (
     "single_mode_target_grade_point_not_enough.png"
