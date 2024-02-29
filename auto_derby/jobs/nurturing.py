@@ -440,7 +440,7 @@ def _handle_grand_masters_race(ac: _ActionContext):
 
 def _handle_uaf_live(ac: _ActionContext):
     try:
-        action.wait_tap_image(templates.SINGLE_MODE_SKIP_BUTTON, timeout=1)
+        action.wait_tap_image(templates.SINGLE_MODE_SKIP_TITLE_BUTTON, timeout=1)
     except TimeoutError:
         pass
 
