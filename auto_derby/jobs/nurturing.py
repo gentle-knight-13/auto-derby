@@ -272,12 +272,12 @@ def _ac_handle_turn(ac: _ActionContext):
 def _ac_handle_nurturing_settings(ac: _ActionContext):
     while True:
         tmpl, pos = action.wait_image(
-            templates.GREEN_START_NURTURING_BUTTON, templates.SINGLE_MODE_SKIP_BUTTON
+            templates.GREEN_START_NURTURING_BUTTON, templates.SKIP_BUTTON
         )
         name = tmpl.name
         if name == templates.GREEN_START_NURTURING_BUTTON:
             app.device.tap(action.template_rect(tmpl, pos))
-        elif name == templates.SINGLE_MODE_SKIP_BUTTON:
+        elif name == templates.SKIP_BUTTON:
             app.device.tap(action.template_rect(tmpl, pos))
             break
 
