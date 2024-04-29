@@ -240,15 +240,6 @@ _end = datetime.datetime(2023, 12, 29, 14, 59, tzinfo=JST)
 _add_campaign(OneTimeCampaign(_start, _end, "東京大賞典", order_lte=1))
 
 
-# 春の G1 記念ミッション
-#   フェブラリーステークス応援ミッション
-_start = datetime.datetime(2024, 2, 11, 22, 0, tzinfo=JST)
-_end = datetime.datetime(2024, 2, 18, 14, 59, tzinfo=JST)
-_add_campaign(OneTimeCampaign(_start, _end, "東海ステークス", order_lte=1))
-_add_campaign(OneTimeCampaign(_start, _end, "根岸ステークス", order_lte=1))
-_add_campaign(OneTimeCampaign(_start, _end, "フェブラリーステークス", order_lte=1))
-
-
 #   「育成報酬」ピース追加キャンペーン
 _start = datetime.datetime(2023, 12, 23, 5, 0, tzinfo=JST)
 _end = datetime.datetime(2023, 12, 25, 4, 59, tzinfo=JST)
@@ -259,6 +250,86 @@ _add_campaign(OncePerDayCampaign(_start, _end, "ホープフルステークス",
 _start = datetime.datetime(2023, 12, 28, 5, 0, tzinfo=JST)
 _end = datetime.datetime(2023, 12, 30, 4, 59, tzinfo=JST)
 _add_campaign(OncePerDayCampaign(_start, _end, "東京大賞典", order_lte=1))
+
+
+# 春の G1 記念ミッション
+#   フェブラリーステークス応援ミッション
+_start = datetime.datetime(2024, 2, 11, 22, 0, tzinfo=JST)
+_end = datetime.datetime(2024, 2, 18, 14, 59, tzinfo=JST)
+_add_campaign(OneTimeCampaign(_start, _end, "東海ステークス", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "根岸ステークス", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "フェブラリーステークス", order_lte=1))
+#   高松宮記念応援ミッション
+_start = datetime.datetime(2024, 3, 17, 23, 0, tzinfo=JST)
+_end = datetime.datetime(2024, 3, 24, 15, 59, tzinfo=JST)
+_add_campaign(OneTimeCampaign(_start, _end, "阪急杯", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "オーシャンステークス", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "高松宮記念", order_lte=1))
+
+#   高松宮記念応援ミッション
+_start = datetime.datetime(2024, 4, 7, 16, 0, tzinfo=JST)
+_end = datetime.datetime(2024, 4, 14, 15, 59, tzinfo=JST)
+_add_campaign(OneTimeCampaign(_start, _end, "皐月賞", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "スプリングステークス", order_lte=3))
+_add_campaign(OneTimeCampaign(_start, _end, "弥生賞", order_lte=3))
+
+#   天皇賞春応援ミッション
+_start = datetime.datetime(2024, 4, 21, 16, 0, tzinfo=JST)
+_end = datetime.datetime(2024, 4, 28, 15, 59, tzinfo=JST)
+_add_campaign(OneTimeCampaign(_start, _end, "天皇賞春", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "阪神大賞典", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "日経賞", order_lte=1))
+
+#   かしわ記念応援ミッション
+_start = datetime.datetime(2024, 4, 24, 23, 0, tzinfo=JST)
+_end = datetime.datetime(2024, 5, 1, 15, 59, tzinfo=JST)
+_add_campaign(OneTimeCampaign(_start, _end, "かしわ記念", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "東京スプリント", order_lte=2))
+
+#   NHKマイルカップ応援ミッション
+_start = datetime.datetime(2024, 4, 28, 16, 0, tzinfo=JST)
+_end = datetime.datetime(2024, 5, 5, 15, 59, tzinfo=JST)
+_add_campaign(OneTimeCampaign(_start, _end, "NHKマイルカップ", order_lte=1))
+_add_campaign(OneTimeCampaign(_start, _end, "ニュージーランドトロフィー", order_lte=3))
+_add_campaign(OneTimeCampaign(_start, _end, "アーリントンカップ", order_lte=3))
+
+#   「育成報酬」ピース追加キャンペーン
+#       第1弾
 _start = datetime.datetime(2024, 2, 17, 5, 0, tzinfo=JST)
 _end = datetime.datetime(2024, 2, 19, 4, 59, tzinfo=JST)
 _add_campaign(OncePerDayCampaign(_start, _end, "フェブラリーステークス", order_lte=1))
+_start = datetime.datetime(2024, 3, 23, 5, 0, tzinfo=JST)
+_end = datetime.datetime(2024, 3, 25, 4, 59, tzinfo=JST)
+_add_campaign(OncePerDayCampaign(_start, _end, "高松宮記念", order_lte=1))
+_start = datetime.datetime(2024, 3, 30, 5, 0, tzinfo=JST)
+_end = datetime.datetime(2024, 4, 1, 4, 59, tzinfo=JST)
+_add_campaign(OncePerDayCampaign(_start, _end, "大阪杯", order_lte=1))
+_start = datetime.datetime(2024, 4, 2, 5, 0, tzinfo=JST)
+_end = datetime.datetime(2024, 4, 4, 4, 59, tzinfo=JST)
+_add_campaign(OncePerDayCampaign(_start, _end, "川崎記念", order_lte=1))
+_start = datetime.datetime(2024, 4, 6, 5, 0, tzinfo=JST)
+_end = datetime.datetime(2024, 4, 8, 4, 59, tzinfo=JST)
+_add_campaign(OncePerDayCampaign(_start, _end, "桜花賞", order_lte=1))
+_start = datetime.datetime(2024, 4, 13, 5, 0, tzinfo=JST)
+_end = datetime.datetime(2024, 4, 15, 4, 59, tzinfo=JST)
+_add_campaign(OncePerDayCampaign(_start, _end, "皐月賞", order_lte=1))
+_start = datetime.datetime(2024, 4, 27, 5, 0, tzinfo=JST)
+_end = datetime.datetime(2024, 4, 29, 4, 59, tzinfo=JST)
+_add_campaign(OncePerDayCampaign(_start, _end, "天皇賞春", order_lte=1))
+
+#       第2弾
+_start = datetime.datetime(2024, 4, 30, 5, 0, tzinfo=JST)
+_end = datetime.datetime(2024, 5, 2, 4, 59, tzinfo=JST)
+_add_campaign(OncePerDayCampaign(_start, _end, "かしわ記念", order_lte=1))
+_start = datetime.datetime(2024, 5, 4, 5, 0, tzinfo=JST)
+_end = datetime.datetime(2024, 5, 6, 4, 59, tzinfo=JST)
+_add_campaign(OncePerDayCampaign(_start, _end, "NHKマイルカップ", order_lte=1))
+_start = datetime.datetime(2024, 5, 11, 5, 0, tzinfo=JST)
+_end = datetime.datetime(2024, 5, 13, 4, 59, tzinfo=JST)
+_add_campaign(OncePerDayCampaign(_start, _end, "ヴィクトリアマイル", order_lte=1))
+_start = datetime.datetime(2024, 5, 18, 5, 0, tzinfo=JST)
+_end = datetime.datetime(2024, 5, 20, 4, 59, tzinfo=JST)
+_add_campaign(OncePerDayCampaign(_start, _end, "オークス", order_lte=1))
+_start = datetime.datetime(2024, 5, 25, 5, 0, tzinfo=JST)
+_end = datetime.datetime(2024, 5, 27, 4, 59, tzinfo=JST)
+_add_campaign(OncePerDayCampaign(_start, _end, "日本ダービー", order_lte=1))
