@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import time
-from typing import Iterator, Tuple
+from typing import Iterator, Optional, Tuple
 
 
 from ...single_mode import Context, Race, Course
@@ -219,11 +219,22 @@ class RaceMenuScene(Scene):
         )
         return cls()
 
-    def visible_courses(self, ctx: Context) -> Iterator[Tuple[Course, Tuple[int, int]]]:
-        return _recognize_menu(ctx, app.device.screenshot())
+    def visible_courses(
+        self, ctx: Context, *, screenshot: Optional[Image] = None
+    ) -> Iterator[Tuple[Course, Tuple[int, int]]]:
+        if screenshot is None:
+            screenshot = app.device.screenshot()
+        return _recognize_menu(ctx, screenshot)
 
     def first_race(self, ctx: single_mode.Context) -> Race:
-        return next(_race_by_course(ctx, next(self.visible_courses(ctx))[0]))
+        screenshot = app.device.screenshot()
+        try:
+            return next(
+                _race_by_course(ctx, next(self.visible_courses(ctx, screenshot=screenshot))[0])
+            )
+        except StopIteration:
+            app.log.image("first race not found", screenshot, level=app.ERROR)
+            raise RuntimeError("first race not found")
 
     def choose_race(self, ctx: single_mode.Context, race: Race) -> None:
         time.sleep(0.2)  # wait animation

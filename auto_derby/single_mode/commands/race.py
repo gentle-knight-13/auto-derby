@@ -169,7 +169,13 @@ class RaceCommand(Command):
         if not self.skip_menu:
             scene = RaceMenuScene.enter(ctx)
             if not self.selected:
-                scene.choose_race(ctx, self.race)
+                try:
+                    scene.choose_race(ctx, self.race)
+                except Exception as e:
+                    app.log.text(
+                        "Choose race error: %s\n%s" % (self.race, e), level=app.ERROR
+                    )
+                    raise RuntimeError("Choose race error: %s" % e)
                 self.selected = True
         race1 = self.race
         estimate_order = race1.estimate_order(ctx)
