@@ -25,6 +25,8 @@ _TRAINING_CONFIRM = template.Specification(
     templates.SINGLE_MODE_TRAINING_CONFIRM, threshold=0.8
 )
 
+_CONFIRM_TMPL = (_TRAINING_CONFIRM, templates.SINGLE_MODE_TRAINING_CONFIRM_LARK)
+
 
 def _gradient(colors: Tuple[Tuple[Tuple[int, int, int], int], ...]) -> np.ndarray:
     ret = np.linspace((0, 0, 0), colors[0][0], colors[0][1])
@@ -71,6 +73,7 @@ def _recognize_base_effect(img: Image) -> int:
         (119, 139, 224),
         (103, 147, 223),
         (59, 142, 226),
+        (44, 91, 167),
         threshold=0.85,
     )
     _, non_brown_img = cv2.threshold(brown_img, 120, 255, cv2.THRESH_BINARY_INV)
@@ -177,7 +180,7 @@ def _recognize_red_effect(img: Image) -> int:
 
     masked_img = imagetools.inside_outline(cv_img, white_outline_img)
 
-    red_outline_img = imagetools.constant_color_key(
+    red_outline_img_base = imagetools.constant_color_key(
         cv_img,
         (15, 18, 216),
         (34, 42, 234),
@@ -185,15 +188,39 @@ def _recognize_red_effect(img: Image) -> int:
         (20, 18, 181),
         (27, 35, 202),
         (123, 131, 238),  # When outline too thin
+        (101, 107, 232),  # When outline too thin
         threshold=0.95,
     )
+    red_outline_img_extra = imagetools.constant_color_key(
+        cv_img,
+        # uaf
+        (0, 10, 177),
+        (9, 14, 196),
+        (10, 22, 173),
+        (22, 29, 200),
+        (29, 29, 220),
+        (29, 34, 182),
+        (33, 49, 186),
+        (37, 57, 207),
+        (38, 47, 222),
+        (36, 49, 202),
+        (45, 60, 230),
+        (47, 54, 196),
+        (53, 60, 229),
+        (57, 64, 201),
+        (57, 75, 234),
+        (66, 83, 227),
+        (90, 95, 222),
+        threshold=0.9,
+    )
+    red_outline_img = np.array(np.maximum(red_outline_img_base, red_outline_img_extra))
     red_outline_img = cv2.morphologyEx(
         red_outline_img,
         cv2.MORPH_CLOSE,
         np.ones((3, 3)),
     )
 
-    masked_img = imagetools.inside_outline(masked_img, red_outline_img)
+    masked_img = imagetools.inside_outline(cv_img, red_outline_img)
 
     height = cv_img.shape[0]
     fill_gradient = _gradient(
@@ -244,6 +271,161 @@ def _recognize_red_effect(img: Image) -> int:
         },
     )
     text = ocr.text(image_from_array(text_img))
+    if not text:
+        return 0
+    return int(text.lstrip("+"))
+
+
+def _recognize_light_gold_effect(img: Image) -> int:
+    cv_img = imagetools.cv_image(imagetools.resize(img, height=32))
+
+    height = cv_img.shape[0]
+    outline_gradient = _gradient(
+        (
+            ((128, 207, 240), 0),
+            ((128, 207, 240), round(height * 0.2)),
+            ((62, 151, 191), round(height * 0.5)),
+            ((31, 109, 162), round(height * 0.9)),
+            ((31, 109, 162), height),
+        )
+    ).astype(np.uint8)
+    outline_img = np.repeat(
+        np.expand_dims(outline_gradient, 1), cv_img.shape[1], axis=1
+    )
+    assert outline_img.shape == cv_img.shape
+
+    brown_outline_img_base = imagetools.color_key(cv_img, outline_img)
+    brown_outline_img_extra = imagetools.constant_color_key(
+        cv_img,
+        (22, 103, 163),
+        threshold=0.9,
+    )
+    brown_outline_img = np.array(
+        np.maximum(brown_outline_img_base, brown_outline_img_extra)
+    )
+    masked_img = imagetools.inside_outline(cv_img, brown_outline_img)
+
+    height = masked_img.shape[0]
+    fill_gradient = _gradient(
+        (
+            ((255, 255, 255), 0),
+            ((184, 255, 255), round(height * 0.5)),
+            # ((88, 215, 251), round(height * 0.75)),
+            ((80, 192, 247), height),
+        )
+    ).astype(np.uint8)
+    fill_img = np.repeat(np.expand_dims(fill_gradient, 1), masked_img.shape[1], axis=1)
+    assert fill_img.shape == masked_img.shape
+
+    text_img = imagetools.color_key(masked_img, fill_img)
+    imagetools.fill_area(text_img, (0,), size_lt=8)
+
+    app.log.image(
+        "gold effect with light outline",
+        cv_img,
+        level=app.DEBUG,
+        layers={
+            "outline": outline_img,
+            "brown_outline_base": brown_outline_img_base,
+            "brown_outline_extra": brown_outline_img_extra,
+            "brown_outline": brown_outline_img,
+            "masked": masked_img,
+            "fill": fill_img,
+            "text": text_img,
+        },
+    )
+    text = ocr.text(image_from_array(text_img), offset=1)
+    if not text:
+        return 0
+    return int(text.lstrip("+"))
+
+
+def _recognize_dark_gold_effect(img: Image) -> int:
+    cv_img = imagetools.cv_image(
+        imagetools.resize(
+            imagetools.resize(img, height=24),
+            height=48,
+        )
+    )
+    sharpened_img = cv2.filter2D(
+        cv_img,
+        8,
+        np.array(
+            (
+                (0, -1, 0),
+                (-1, 5, -1),
+                (0, -1, 0),
+            )
+        ),
+    )
+    sharpened_img = imagetools.mix(sharpened_img, cv_img, 0.5)
+
+    white_outline_img = imagetools.constant_color_key(
+        sharpened_img,
+        (255, 255, 255),
+        (203, 231, 248),
+        # threshold=0.9,
+    )
+
+    masked_img = imagetools.inside_outline(cv_img, white_outline_img)
+
+    height = cv_img.shape[0]
+    outline_gradient = _gradient(
+        (
+            ((40, 134, 183), 0),
+            # ((40, 134, 183), round(height * 0.25)),
+            # ((184, 255, 255), round(height * 0.5)),
+            # ((88, 215, 251), round(height * 0.75)),
+            ((32, 74, 106), height),
+        )
+    ).astype(np.uint8)
+    outline_img = np.repeat(
+        np.expand_dims(outline_gradient, 1), cv_img.shape[1], axis=1
+    )
+    assert outline_img.shape == cv_img.shape
+
+    brown_outline_img_base = imagetools.color_key(cv_img, outline_img)
+    brown_outline_img_extra = imagetools.constant_color_key(
+        cv_img,
+        (73, 122, 157),
+        threshold=0.9,
+    )
+    brown_outline_img = np.array(
+        np.maximum(brown_outline_img_base, brown_outline_img_extra)
+    )
+    masked_img = imagetools.inside_outline(cv_img, brown_outline_img)
+
+    height = masked_img.shape[0]
+    fill_gradient = _gradient(
+        (
+            ((203, 246, 255), 0),
+            ((203, 246, 255), round(height * 0.25)),
+            ((121, 238, 255), round(height * 0.5)),
+            # ((88, 215, 251), round(height * 0.75)),
+            ((81, 186, 231), height),
+        )
+    ).astype(np.uint8)
+    fill_img = np.repeat(np.expand_dims(fill_gradient, 1), masked_img.shape[1], axis=1)
+    assert fill_img.shape == masked_img.shape
+
+    text_img = imagetools.color_key(masked_img, fill_img)
+    imagetools.fill_area(text_img, (0,), size_lt=8)
+
+    app.log.image(
+        "gold effect with dark outline",
+        cv_img,
+        level=app.DEBUG,
+        layers={
+            "sharpened": sharpened_img,
+            "white_outline": white_outline_img,
+            "outline": outline_img,
+            "brown_outline": brown_outline_img,
+            "masked": masked_img,
+            "fill": fill_img,
+            "text": text_img,
+        },
+    )
+    text = ocr.text(image_from_array(text_img), offset=1)
     if not text:
         return 0
     return int(text.lstrip("+"))
@@ -387,7 +569,13 @@ def _recognize_uaf_level_up(
         cv_img, (255, 255, 255), (191, 178, 180), threshold=0.85
     )
     white_img_extra = imagetools.constant_color_key(
-        cv_img, (151, 110, 119), (166, 121, 119), (201, 143, 119), threshold=0.95
+        cv_img,
+        ((87, 107, 177), 0.99),
+        (139, 110, 131),
+        (151, 110, 119),
+        (166, 121, 119),
+        (201, 143, 119),
+        threshold=0.95,
     )
     text_img = white_img + white_img_extra
     app.log.image(
@@ -441,8 +629,10 @@ def _iter_training_confirm_pos(ctx: Context) -> List[Tuple[int, int]]:
 def _iter_training_images(ctx: Context, static: bool):
     rp = action.resize_proxy()
     radius = rp.vector(30, 540)
-    tmpl, first_confirm_pos = action.wait_image(
-        _TRAINING_CONFIRM, templates.SINGLE_MODE_TRAINING_CONFIRM_LARK
+    tmpl, first_confirm_pos = (
+        action.wait_image(*_CONFIRM_TMPL)
+        if not static
+        else next(template.match(app.device.screenshot(), *_CONFIRM_TMPL))
     )
     yield app.device.screenshot(), first_confirm_pos
     if static:
@@ -455,7 +645,7 @@ def _iter_training_images(ctx: Context, static: bool):
             continue
         app.device.tap((*pos, *rp.vector2((20, 20), 540)))
         _, pos = (
-            action.wait_image_stable(tmpl, duration=0.06)
+            action.wait_image_stable(tmpl, duration=0.12)
             if ctx.scenario == ctx.SCENARIO_UAF_READY_GO
             else action.wait_image(tmpl)
         )
@@ -703,8 +893,8 @@ def _recognize_partner_icon(
 ) -> Optional[training.Partner]:
     rp = mathtools.ResizeProxy(img.width)
     icon_img = img.crop(bbox)
-    app.log.image("partner icon", icon_img, level=app.DEBUG)
     level = _recognize_partner_level(rp, icon_img)
+    app.log.image("partner icon (%s)" % level, icon_img, level=app.DEBUG)
 
     soul = -1
     has_training = False
@@ -821,6 +1011,9 @@ def _effect_recognitions(
         yield _bbox_groups(568, 593), _recognize_red_effect
     else:
         raise NotImplementedError(ctx.scenario)
+    if ctx.scenario == ctx.SCENARIO_UAF_READY_GO:
+        yield _bbox_groups(595, 623), _recognize_light_gold_effect
+        yield _bbox_groups(568, 593), _recognize_dark_gold_effect
 
 
 def _recognize_training(
@@ -845,12 +1038,13 @@ def _recognize_training(
 
         if ctx.scenario == ctx.SCENARIO_UAF_READY_GO:
             sport_genre = _recognize_uaf_genre(
-                tuple(cast.list_(img.getpixel(rp.vector2((10, 200), 540)), int))
+                tuple(cast.list_(img.getpixel(rp.vector2((10, 200), 540)), int))  # type: ignore
             )
             self.type = TrainingType(sport_genre * 5 + int(self.type) + 1)
             self.level = (
                 _recognize_uaf_level(rp, self, img)
-                if self.type not in ctx.training_levels or ctx.training_levels[self.type] != 100
+                if self.type not in ctx.training_levels
+                or ctx.training_levels[self.type] != 100
                 else 100
             )
             self.level_up = (
@@ -858,7 +1052,7 @@ def _recognize_training(
             )
         else:
             self.level = _recognize_level(
-                tuple(cast.list_(img.getpixel(rp.vector2((10, 200), 540)), int))
+                tuple(cast.list_(img.getpixel(rp.vector2((10, 200), 540)), int))  # type: ignore
             )
 
         for bbox_group, recognize in _effect_recognitions(ctx, rp):
