@@ -279,7 +279,7 @@ def _recognize_scenario(rp: mathtools.ResizeProxy, img: Image) -> Text:
         ),
         (templates.SINGLE_MODE_GRAND_LIVE_DATE_REMAIN, Context.SCENARIO_GRAND_LIVE),
         (templates.SINGLE_MODE_GRAND_LIVE_PERFORMANCE, Context.SCENARIO_GRAND_LIVE),
-        # (templates.SINGLE_MODE_AOHARU_CLASS_DETAIL_BUTTON, Context.SCENARIO_AOHARU), # MAYBE UAF TOO
+        (templates.SINGLE_MODE_AOHARU_DATE_REMAIN, Context.SCENARIO_AOHARU),
         (templates.SINGLE_MODE_CLASS_DETAIL_BUTTON, Context.SCENARIO_URA),
     )
     ret = Context.SCENARIO_UNKNOWN
