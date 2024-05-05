@@ -1,13 +1,13 @@
 {
   "ctx": {
     "date": [
-      0,
+      4,
       0,
       0
     ],
-    "mood": "NORMAL",
+    "mood": "GOOD",
     "scenario": "アオハル杯～輝け、チームの絆～",
-    "vitality": 0.0,
+    "vitality": 0.3162790697674419,
     "maxVitality": 100,
     "speed": 992,
     "stamina": 618,

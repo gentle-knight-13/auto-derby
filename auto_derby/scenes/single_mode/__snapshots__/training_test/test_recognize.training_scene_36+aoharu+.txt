@@ -1,1 +1,1 @@
-Training<gut=16 ski=7 spd=6 pow=6 vit=-24.0% fail=68% lv=3>
+TrainingType.GUTS<gut=16 ski=7 spd=6 pow=6 vit=-24.0% fail=68% lv=3>

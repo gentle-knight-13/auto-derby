@@ -477,6 +477,7 @@ def _recognize_failure_rate(
     text_img = imagetools.constant_color_key(
         fg_img,
         (255, 255, 255),
+        (255, 235, 208),
         (18, 218, 255),
     )
     app.log.image(
@@ -607,6 +608,12 @@ def _estimate_vitality(ctx: Context, trn: Training) -> float:
     return vit_data[trn.type][trn.level - 1] / ctx.max_vitality
 
 
+def _iter_training_type(ctx: Context) -> List[TrainingType]:
+    if ctx.scenario == ctx.SCENARIO_PROJECT_LARK:
+        return Training.ALL_TYPES_LARK  # type: ignore
+    return Training.ALL_TYPES  # type: ignore
+
+
 def _iter_training_confirm_pos(ctx: Context) -> List[Tuple[int, int]]:
     rp = action.resize_proxy()
     if ctx.scenario == ctx.SCENARIO_PROJECT_LARK:
@@ -616,6 +623,7 @@ def _iter_training_confirm_pos(ctx: Context) -> List[Tuple[int, int]]:
             rp.vector2((209, 835), 540),
             rp.vector2((297, 835), 540),
             rp.vector2((385, 835), 540),
+            rp.vector2((473, 835), 540),
         ]
     return [
         rp.vector2((78, 850), 540),
@@ -659,11 +667,12 @@ def _recognize_type_color(rp: mathtools.ResizeProxy, icon_img: Image) -> int:
     type_colors = (
         ((36, 170, 255), Partner.TYPE_SPEED),
         ((255, 106, 86), Partner.TYPE_STAMINA),
+        ((241, 128, 112), Partner.TYPE_STAMINA),
         ((255, 151, 27), Partner.TYPE_POWER),
         ((255, 96, 156), Partner.TYPE_GUTS),
         ((3, 191, 126), Partner.TYPE_WISDOM),
-        ((255, 179, 22), Partner.TYPE_FRIEND),
-        ((249, 255, 240), Partner.TYPE_GROUP),
+        ((254, 215, 133), Partner.TYPE_FRIEND),
+        ((151, 211, 154), Partner.TYPE_GROUP),
     )
     for color, v in type_colors:
         if (
@@ -1028,7 +1037,7 @@ def _recognize_training(
         rp.vector(40, 540)
         min_dist: Union[int, None] = None
         for t, center in zip(
-            Training.ALL_TYPES,
+            _iter_training_type(ctx),
             _iter_training_confirm_pos(ctx),
         ):
             x_dist = abs(self.confirm_position[0] - center[0])
@@ -1050,7 +1059,7 @@ def _recognize_training(
             self.level_up = (
                 _recognize_uaf_level_up(rp, self, img) if self.level != 100 else 0
             )
-        else:
+        elif self.type != TrainingType.SS_MATCH:
             self.level = _recognize_level(
                 tuple(cast.list_(img.getpixel(rp.vector2((10, 200), 540)), int))  # type: ignore
             )
@@ -1081,8 +1090,10 @@ def _recognize_training(
         # plugin hook
         self._use_estimate_vitality = True  # type: ignore
         self.vitality = _estimate_vitality(ctx, self)
-        self.failure_rate = _recognize_failure_rate(rp, self, img)
-        self.partners = tuple(_recognize_partners(ctx, img))
+        if self.type != TrainingType.SS_MATCH:
+            self.failure_rate = _recognize_failure_rate(rp, self, img)
+            self.partners = tuple(_recognize_partners(ctx, img))
+        # TODO: recognize SS match partners
         app.log.image("%s" % self, img, level=app.DEBUG)
     except:
         app.log.image(

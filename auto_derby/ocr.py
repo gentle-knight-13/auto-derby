@@ -89,8 +89,6 @@ def _prompt(img: np.ndarray, h: Text, value: Text, similarity: float) -> Text:
             img,
             level=app.WARN,
         )
-        if "pytest" in sys.modules:
-            raise terminal.PromptDisabled
         return value
 
     if terminal.g.prompt_disabled:

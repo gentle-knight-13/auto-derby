@@ -5,6 +5,7 @@ import time
 from typing import Callable, Iterable, Iterator, Text, Tuple, TypeVar, Union
 
 from . import app, mathtools, template
+from .infrastructure.image_device_service import ImageDeviceService
 
 
 def resize_proxy() -> mathtools.ResizeProxy:
@@ -45,7 +46,7 @@ def wait_image(
         try:
             return next(template.match(app.device.screenshot(max_age=0), *tmpl))
         except StopIteration:
-            if time.time() > deadline:
+            if time.time() > deadline or isinstance(app.device, ImageDeviceService):
                 raise TimeoutError()
             time.sleep(0.01)
 

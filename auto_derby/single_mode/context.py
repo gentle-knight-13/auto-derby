@@ -201,8 +201,14 @@ def _recognize_property(img: Image) -> int:
 
 def _recognize_max_property(img: Image) -> int:
     img = imagetools.resize(img, height=32)
-    cv_img = np.asarray(img.convert("L"))
-    _, binary_img = cv2.threshold(cv_img, 180, 255, cv2.THRESH_BINARY_INV)
+    cv_img = imagetools.cv_image(img)
+    binary_img = imagetools.constant_color_key(
+        cv_img,
+        (22, 64, 121),
+        (58, 94, 142),
+        (24, 115, 185),
+        ((78, 147, 201), 0.95),
+    )
     imagetools.fill_area(binary_img, (0,), size_lt=2)
     app.log.image(
         "property limit", cv_img, layers={"binary": binary_img}, level=app.DEBUG
@@ -351,6 +357,18 @@ class Context:
     SCENARIO_GRAND_MASTERS = "グランドマスターズ ―継ぐ者達へ―"
     SCENARIO_PROJECT_LARK = "Reach for the stars プロジェクトL'Arc"
     SCENARIO_UAF_READY_GO = "U.A.F. Ready GO! ～アスリートのキラメキ～"
+
+    @staticmethod
+    def scenario_from_str(name: Text) -> Text:
+        return {
+            "ura": Context.SCENARIO_URA,
+            "aoharu": Context.SCENARIO_AOHARU,
+            "climax": Context.SCENARIO_CLIMAX,
+            "grand-live": Context.SCENARIO_GRAND_LIVE,
+            "grand-masters": Context.SCENARIO_GRAND_MASTERS,
+            "lark": Context.SCENARIO_PROJECT_LARK,
+            "uaf": Context.SCENARIO_UAF_READY_GO,
+        }.get(name, Context.SCENARIO_UNKNOWN)
 
     @staticmethod
     def new() -> Context:

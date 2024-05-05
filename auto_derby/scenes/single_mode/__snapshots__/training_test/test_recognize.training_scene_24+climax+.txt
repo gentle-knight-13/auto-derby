@@ -1,1 +1,1 @@
-Training<pow=7 sta=5 ski=2 vit=-20.0% fail=0% lv=1 ptn=pow>
+TrainingType.POWER<pow=7 sta=5 ski=2 vit=-20.0% fail=0% lv=1 ptn=pow>

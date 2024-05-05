@@ -1,1 +1,1 @@
-Training<vit=-21.0% fail=17% lv=1 ptn=spd@2,spd@2>
+TrainingType.SPEED<spd=13 ski=7 pow=6 vit=-21.0% fail=17% lv=1 ptn=spd@2,spd@2>

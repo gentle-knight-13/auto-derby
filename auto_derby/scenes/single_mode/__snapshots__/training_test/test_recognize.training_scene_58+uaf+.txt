@@ -1,0 +1,1 @@
+TrainingType.FREE_STAMINA<sta=14 ski=8 +lv=6 spd=2 gut=2 wis=1 vit=0.0% fail=55% lv=5 ptn=oth@2,pow@2,spd@2!>

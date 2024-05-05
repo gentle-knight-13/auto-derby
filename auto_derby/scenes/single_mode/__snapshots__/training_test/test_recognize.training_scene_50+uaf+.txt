@@ -1,0 +1,1 @@
+TrainingType.FIGHT_GUTS<ski=11 gut=8 +lv=3 pow=2 spd=1 vit=0.0% fail=0% lv=1>

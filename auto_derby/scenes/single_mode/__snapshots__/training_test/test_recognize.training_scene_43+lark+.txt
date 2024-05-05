@@ -1,1 +1,1 @@
-Training<wis=16 ski=9 spd=3 vit=5.0% fail=0% lv=1 ptn=spd@2>
+TrainingType.WISDOM<wis=17 ski=9 spd=3 vit=5.0% fail=0% lv=1 ptn=spd@2>

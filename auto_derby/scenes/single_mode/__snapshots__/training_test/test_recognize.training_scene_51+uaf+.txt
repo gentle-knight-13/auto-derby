@@ -1,0 +1,1 @@
+TrainingType.SPHERE_WISDOM<wis=19 ski=9 spd=4 +lv=4 sta=1 vit=0.0% fail=0% lv=1 ptn=wis@1>

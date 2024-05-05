@@ -1,1 +1,1 @@
-Training<pow=14 sta=7 ski=5 vit=-20.0% fail=36% lv=1 ptn=spd@3^(17%),tm^(16%),grp^(16%)>
+TrainingType.POWER<pow=18 sta=8 ski=8 vit=-20.0% fail=36% lv=1 ptn=spd@3^(17%),tm^(16%),tm^(16%)>

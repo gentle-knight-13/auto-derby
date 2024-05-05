@@ -1,0 +1,39 @@
+{
+  "ctx": {
+    "date": [
+      1,
+      7,
+      2
+    ],
+    "mood": "VERY_GOOD",
+    "scenario": "U.A.F. Ready GO! ～アスリートのキラメキ～",
+    "vitality": 0.5579710144927537,
+    "maxVitality": 100,
+    "speed": 287,
+    "stamina": 203,
+    "power": 239,
+    "guts": 117,
+    "wisdom": 202,
+    "fanCount": 0,
+    "turf": "",
+    "dart": "",
+    "sprint": "",
+    "mile": "",
+    "intermediate": "",
+    "long": "",
+    "last": "",
+    "middle": "",
+    "head": "",
+    "lead": "",
+    "conditions": []
+  },
+  "scene": {
+    "hasHealthCare": false,
+    "hasScheduledRace": false,
+    "canGoOutWithFriend": false,
+    "hasShop": false,
+    "hasKnowledgeTable": false,
+    "hasLearnWisdom": false,
+    "hasLesson": false
+  }
+}

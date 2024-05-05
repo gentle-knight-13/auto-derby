@@ -1,0 +1,1 @@
+TrainingType.SPHERE_STAMINA<sta=15 ski=9 +lv=4 gut=2 spd=1 wis=1 vit=0.0% fail=0% lv=1 ptn=spd@2>
