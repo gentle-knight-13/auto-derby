@@ -221,7 +221,7 @@ class RaceMenuScene(Scene):
             ctx.SCENARIO_CLIMAX,
             ctx.SCENARIO_PROJECT_LARK,
         ):
-            fan_count_bbox = rp.vector4((53, 558, 159, 585), 720)
+            fan_count_bbox = rp.vector4((53, 558, 235, 585), 720)
             ctx.fan_count = _recognize_fan_count(
                 app.device.screenshot().crop(fan_count_bbox)
             )
