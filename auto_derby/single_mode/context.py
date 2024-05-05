@@ -589,15 +589,18 @@ class Context:
         winning_color_pos = rp.vector2((150, 470), 466)
         fan_count_bbox = rp.vector4((220, 523, 420, 540), 466)
 
-        self.is_after_winning = (
-            imagetools.compare_color(
-                screenshot.getpixel(winning_color_pos),
-                (244, 205, 52),
-            )
-            > 0.95
-        )
-
         self.fan_count = _recognize_fan_count(screenshot.crop(fan_count_bbox))
+
+        winning_color = screenshot.getpixel(winning_color_pos)
+        similarity = imagetools.compare_color(winning_color, (244, 205, 52))
+        self.is_after_winning = similarity > 0.95
+
+        if not self.is_after_winning and self.date[0] > 1 and self.fan_count > 1:
+            app.log.image(
+                "class detail before winning (%s, %s)" % (winning_color, similarity),
+                screenshot,
+                level=app.WARN,
+            )
 
     def update_by_character_detail(self, screenshot: Image) -> None:
         rp = mathtools.ResizeProxy(screenshot.width)
