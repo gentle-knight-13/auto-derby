@@ -1,7 +1,6 @@
 # -*- coding=UTF-8 -*-
 # pyright: strict
-"""umamusume pretty derby automation.  """
-
+"""umamusume pretty derby automation."""
 
 import argparse
 import logging
@@ -19,6 +18,7 @@ from . import __version__, app, clients, config, jobs, plugin, templates, versio
 from .infrastructure.client_device_service import ClientDeviceService
 from .infrastructure.logging_log_service import LoggingLogService
 from .infrastructure.multi_log_service import MultiLogService
+from .infrastructure.jsonl_log_service import JsonlLogService
 from .infrastructure.web_log_service import WebLogService
 
 
@@ -86,12 +86,12 @@ def main():
     config.apply()
 
     with app.cleanup as cleanup:
-        if not config.web_log_disabled:
-            app.log = MultiLogService(
-                app.log,
-                WebLogService(cleanup),
-            )
-            time.sleep(1)  # wait browser
+        app.log = MultiLogService(
+            app.log,
+            WebLogService(cleanup)
+            if not config.web_log_disabled
+            else JsonlLogService(cleanup),
+        )
 
         if not job:
             app.log.text(
