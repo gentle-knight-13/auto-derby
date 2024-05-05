@@ -207,6 +207,7 @@ def _recognize_max_property(img: Image) -> int:
         (22, 64, 121),
         (58, 94, 142),
         (24, 115, 185),
+        (89, 154, 204),
         ((78, 147, 201), 0.95),
     )
     imagetools.fill_area(binary_img, (0,), size_lt=2)
