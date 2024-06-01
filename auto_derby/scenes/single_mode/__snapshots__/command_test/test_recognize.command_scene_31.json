@@ -1,0 +1,39 @@
+{
+  "ctx": {
+    "date": [
+      2,
+      5,
+      2
+    ],
+    "mood": "GOOD",
+    "scenario": "Reach for the stars プロジェクトL'Arc",
+    "vitality": 0.5398550724637681,
+    "maxVitality": 100,
+    "speed": 502,
+    "stamina": 298,
+    "power": 474,
+    "guts": 345,
+    "wisdom": 448,
+    "fanCount": 0,
+    "turf": "",
+    "dart": "",
+    "sprint": "",
+    "mile": "",
+    "intermediate": "",
+    "long": "",
+    "last": "",
+    "middle": "",
+    "head": "",
+    "lead": "",
+    "conditions": []
+  },
+  "scene": {
+    "hasHealthCare": false,
+    "hasScheduledRace": false,
+    "canGoOutWithFriend": false,
+    "hasShop": false,
+    "hasKnowledgeTable": false,
+    "hasLearnWisdom": false,
+    "hasLesson": false
+  }
+}

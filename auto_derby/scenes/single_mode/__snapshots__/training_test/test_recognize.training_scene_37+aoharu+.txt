@@ -1,1 +1,1 @@
-Training<spd=36 pow=15 ski=14 vit=-25.0% fail=99% lv=4>
+TrainingType.SPEED<spd=36 pow=15 ski=14 vit=-25.0% fail=99% lv=4>

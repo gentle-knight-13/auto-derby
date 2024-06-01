@@ -1,0 +1,1 @@
+TrainingType.FIGHT_POWER<ski=12 pow=8 +lv=4 sta=2 gut=1 vit=0.0% fail=0% lv=1 ptn=oth,wis@1>

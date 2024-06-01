@@ -161,45 +161,37 @@ def compute(ctx: Context, trn: Training) -> float:
 
     target_level = g.target_levels.get(trn.type, trn.level)
     target_level_score = 0
-    if ctx.is_summer_camp:
-        pass
-    elif ctx.scenario == ctx.SCENARIO_UAF_READY_GO:
-        if t_now <= 71 and trn.type in trn.ALL_TYPES_UAF:
-
-            def target_lv(turn: int):
-                if turn <= 23:
-                    return 10
-                if turn <= 35:
-                    return 20
-                if turn <= 47:
-                    return 30
-                if turn <= 59:
-                    return 40
-                if turn <= 71:
-                    return 50
-                return 0
-
+    if ctx.scenario == ctx.SCENARIO_UAF_READY_GO:
+        if ctx.date[0] != 4 and trn.type in trn.ALL_TYPES_UAF:
             genre = (int(trn.type) - 2) // 5
-            target = target_lv(t_now)
             trainings = [i for i in ctx.trainings if (int(i.type) - 2) // 5 == genre]
             target_level_score = sum(
                 mathtools.integrate(
                     i.level,
                     i.level_up,
                     (
-                        (1, 6.0),
-                        (target, 2.0),
-                        (target + 5, 0.4),
-                        (60, 0.1),
-                        (100, -2.0),
+                        (1, 4.0),
+                        (50, 2.0),
+                        (60, 0.8),
+                        (100, 0.1),
                     ),
                 )
                 for i in trainings
             )
             genre_sum = {1: ctx.sphere_sum, 2: ctx.fight_sum, 3: ctx.free_sum}[genre]
-            target_level_score -= genre_sum - (
-                (ctx.sphere_sum + ctx.fight_sum + ctx.free_sum) / 3
+            all_genre_avg = (ctx.sphere_sum + ctx.fight_sum + ctx.free_sum) / 3
+            target_level_score += mathtools.interpolate(
+                int(genre_sum - all_genre_avg),
+                (
+                    (-50, 25),
+                    (-30, 10),
+                    (0, 0),
+                    (30, -10),
+                    (50, -25),
+                ),
             )
+    elif ctx.is_summer_camp:
+        pass
     elif trn.level < target_level:
         target_level_score += mathtools.interpolate(
             t_now,

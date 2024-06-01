@@ -32,6 +32,8 @@
     "hasScheduledRace": false,
     "canGoOutWithFriend": false,
     "hasShop": false,
+    "hasKnowledgeTable": false,
+    "hasLearnWisdom": false,
     "hasLesson": false
   }
 }

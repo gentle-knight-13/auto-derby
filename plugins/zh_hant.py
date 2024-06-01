@@ -419,6 +419,7 @@ def _recognize_course(img: Image) -> Course:
     _, binary_img = cv2.threshold(cv_img, 60, 255, cv2.THRESH_BINARY_INV)
     app.log.image("spec", cv_img, level=app.DEBUG, layers={"binary": binary_img})
     text = ocr.text(imagetools.pil_image(binary_img))
+    text = text.replace("月1", "川")
     stadium, text = text[:2], text[2:]
     if text[0] == "草":
         text = text[2:]

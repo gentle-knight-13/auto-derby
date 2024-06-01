@@ -204,8 +204,15 @@ def _recognize_property(img: Image) -> int:
 
 def _recognize_max_property(img: Image) -> int:
     img = imagetools.resize(img, height=32)
-    cv_img = np.asarray(img.convert("L"))
-    _, binary_img = cv2.threshold(cv_img, 180, 255, cv2.THRESH_BINARY_INV)
+    cv_img = imagetools.cv_image(img)
+    binary_img = imagetools.constant_color_key(
+        cv_img,
+        (22, 64, 121),
+        (58, 94, 142),
+        (24, 115, 185),
+        (89, 154, 204),
+        ((78, 147, 201), 0.95),
+    )
     imagetools.fill_area(binary_img, (0,), size_lt=2)
     app.log.image(
         "property limit", cv_img, layers={"binary": binary_img}, level=app.DEBUG
@@ -282,7 +289,7 @@ def _recognize_scenario(rp: mathtools.ResizeProxy, img: Image) -> Text:
         ),
         (templates.SINGLE_MODE_GRAND_LIVE_DATE_REMAIN, Context.SCENARIO_GRAND_LIVE),
         (templates.SINGLE_MODE_GRAND_LIVE_PERFORMANCE, Context.SCENARIO_GRAND_LIVE),
-        # (templates.SINGLE_MODE_AOHARU_CLASS_DETAIL_BUTTON, Context.SCENARIO_AOHARU), # MAYBE UAF TOO
+        (templates.SINGLE_MODE_AOHARU_DATE_REMAIN, Context.SCENARIO_AOHARU),
         (templates.SINGLE_MODE_CLASS_DETAIL_BUTTON, Context.SCENARIO_URA),
     )
     ret = Context.SCENARIO_UNKNOWN
@@ -354,6 +361,18 @@ class Context:
     SCENARIO_GRAND_MASTERS = "グランドマスターズ ―継ぐ者達へ―"
     SCENARIO_PROJECT_LARK = "Reach for the stars プロジェクトL'Arc"
     SCENARIO_UAF_READY_GO = "U.A.F. Ready GO! ～アスリートのキラメキ～"
+
+    @staticmethod
+    def scenario_from_str(name: Text) -> Text:
+        return {
+            "ura": Context.SCENARIO_URA,
+            "aoharu": Context.SCENARIO_AOHARU,
+            "climax": Context.SCENARIO_CLIMAX,
+            "grand-live": Context.SCENARIO_GRAND_LIVE,
+            "grand-masters": Context.SCENARIO_GRAND_MASTERS,
+            "lark": Context.SCENARIO_PROJECT_LARK,
+            "uaf": Context.SCENARIO_UAF_READY_GO,
+        }.get(name, Context.SCENARIO_UNKNOWN)
 
     @staticmethod
     def new() -> Context:
@@ -619,15 +638,18 @@ class Context:
         winning_color_pos = rp.vector2((150, 470), 466)
         fan_count_bbox = rp.vector4((220, 523, 420, 540), 466)
 
-        self.is_after_winning = (
-            imagetools.compare_color(
-                screenshot.getpixel(winning_color_pos),
-                (244, 205, 52),
-            )
-            > 0.95
-        )
-
         self.fan_count = _recognize_fan_count(screenshot.crop(fan_count_bbox))
+
+        winning_color = screenshot.getpixel(winning_color_pos)
+        similarity = imagetools.compare_color(winning_color, (244, 205, 52))
+        self.is_after_winning = similarity > 0.95
+
+        if not self.is_after_winning and self.date[0] > 1 and self.fan_count > 1:
+            app.log.image(
+                "class detail before winning (%s, %s)" % (winning_color, similarity),
+                screenshot,
+                level=app.WARN,
+            )
 
     def update_by_character_detail(self, screenshot: Image) -> None:
         rp = mathtools.ResizeProxy(screenshot.width)

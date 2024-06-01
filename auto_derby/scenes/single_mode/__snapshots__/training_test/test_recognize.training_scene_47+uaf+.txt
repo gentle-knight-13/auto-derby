@@ -1,0 +1,1 @@
+TrainingType.SPHERE_SPEED<spd=20 ski=8 +lv=5 pow=2 sta=1 wis=1 vit=0.0% fail=0% lv=1 ptn=oth,spd@2>

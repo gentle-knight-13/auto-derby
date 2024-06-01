@@ -201,12 +201,18 @@ class RaceCommand(Command):
         g.on_command(ctx, self)
         scene = RaceMenuScene.enter(ctx)
         if not self.selected:
-            if (
-                ctx.scenario == ctx.SCENARIO_CLIMAX
-                and self.race.grade > Race.GRADE_G1
-            ):
-                self.race = _choose_high_score_race(ctx, self.race, scene.find_race_with_rival(ctx))
-            scene.choose_race(ctx, self.race)
+            try:
+                if (
+                    ctx.scenario == ctx.SCENARIO_CLIMAX
+                    and self.race.grade > Race.GRADE_G1
+                ):
+                    self.race = _choose_high_score_race(ctx, self.race, scene.find_race_with_rival(ctx))
+                scene.choose_race(ctx, self.race)
+            except Exception as e:
+                app.log.text(
+                    "Choose race error: %s\n%s" % (self.race, e), level=app.ERROR
+                )
+                raise RuntimeError("Choose race error: %s" % e)
             self.selected = True
         race1 = self.race
         estimate_order = race1.estimate_order(ctx)

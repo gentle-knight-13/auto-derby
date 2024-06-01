@@ -1,0 +1,1 @@
+TrainingType.FREE_SPEED<spd=29 pow=7 ski=7 +lv=6 vit=0.0% fail=30% lv=5 ptn=oth@1,spd@2,spd@2,pow@1>

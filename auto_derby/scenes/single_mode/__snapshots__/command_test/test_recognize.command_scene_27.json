@@ -1,13 +1,13 @@
 {
   "ctx": {
     "date": [
-      0,
+      1,
       0,
       0
     ],
     "mood": "NORMAL",
     "scenario": "Reach for the stars プロジェクトL'Arc",
-    "vitality": 0.0,
+    "vitality": 0.6195652173913043,
     "maxVitality": 100,
     "speed": 101,
     "stamina": 156,

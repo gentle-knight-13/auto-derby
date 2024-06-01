@@ -1,0 +1,1 @@
+TrainingType.SS_MATCH<gut=37 ski=25 spd=9 sta=9 pow=5 wis=5 vit=0.0% fail=0% lv=0>

@@ -1,0 +1,1 @@
+TrainingType.FREE_WISDOM<wis=27 ski=12 spd=10 +lv=8 gut=1 vit=0.0% fail=24% lv=7 ptn=oth,wis@2!,wis@2>

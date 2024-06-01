@@ -7,7 +7,7 @@ import warnings
 from typing import Callable, Dict, Text
 
 from auto_derby.constants import TrainingType
-from auto_derby.infrastructure.web_log_service import WebLogService
+from auto_derby.infrastructure.web_log_service import JsonlLogService
 
 from . import ocr, plugin, single_mode, template, terminal, window, data
 from .clients import ADBClient, Client
@@ -49,7 +49,7 @@ def _default_on_single_mode_end(ctx: single_mode.Context) -> None:
 def _getenv_int(key: Text, d: int) -> int:
     try:
         return int(os.getenv(key, ""))
-    except:
+    except:  # noqa: E722
         return d
 
 
@@ -85,11 +85,11 @@ class config:
     web_log_disabled = os.getenv("AUTO_DERBY_WEB_LOG_DISABLED", "").lower() == "true"
     web_log_buffer_path = os.getenv(
         "AUTO_DERBY_WEB_LOG_BUFFER_PATH",
-        WebLogService.default_buffer_path,
+        JsonlLogService.default_buffer_path,
     )
     web_log_image_path = os.getenv(
         "AUTO_DERBY_WEB_LOG_IMAGE_PATH",
-        WebLogService.default_image_path,
+        JsonlLogService.default_image_path,
     )
     last_screenshot_save_path = os.getenv("AUTO_DERBY_LAST_SCREENSHOT_SAVE_PATH", "")
     pause_if_race_order_gt = int(os.getenv("AUTO_DERBY_PAUSE_IF_RACE_ORDER_GT", "5"))
@@ -136,9 +136,9 @@ class config:
         os.getenv("AUTO_DERBY_OCR_PROMPT_DISABLED", "").lower() == "true"
     )
     adb_key_path = os.getenv("AUTO_DERBY_ADB_KEY_PATH", ADBClient.key_path)
-    adb_action_wait = _getenv_int("AUTO_DERBY_ADB_ACTION_WAIT", ADBClient.action_wait)
+    adb_action_wait = _getenv_int("AUTO_DERBY_ADB_ACTION_WAIT", ADBClient.action_wait)  # type: ignore
 
-    on_limited_sale = lambda: terminal.pause(
+    on_limited_sale = lambda: terminal.pause(  # noqa: E731
         "Please handle limited shop manually before confirm in terminal.\n"
         "You can also try `limited_sale_buy_first_3` / `limited_sale_buy_everything` / `limited_sale_close` plugin."
     )
@@ -146,12 +146,12 @@ class config:
     on_single_mode_live = sc.g.on_winning_live
     on_single_mode_command = sc.g.on_command
     on_single_mode_race_result = sc.g.on_race_result
-    on_single_mode_crane_game: Callable[
-        [single_mode.Context], None
-    ] = _default_on_single_mode_crane_game
-    on_single_mode_end: Callable[
-        [single_mode.Context], None
-    ] = _default_on_single_mode_end
+    on_single_mode_crane_game: Callable[[single_mode.Context], None] = (
+        _default_on_single_mode_crane_game
+    )
+    on_single_mode_end: Callable[[single_mode.Context], None] = (
+        _default_on_single_mode_end
+    )
 
     terminal_pause_sound_path = os.path.expandvars(
         "${WinDir}/Media/Windows Background.wav"
@@ -213,8 +213,8 @@ class config:
         terminal.g.pause_sound_path = cls.terminal_pause_sound_path
         terminal.g.prompt_sound_path = cls.terminal_prompt_sound_path
         window.g.use_legacy_screenshot = cls.use_legacy_screenshot
-        WebLogService.default_image_path = cls.web_log_image_path
-        WebLogService.default_buffer_path = cls.web_log_buffer_path
+        JsonlLogService.default_image_path = cls.web_log_image_path
+        JsonlLogService.default_buffer_path = cls.web_log_buffer_path
 
 
 config.apply()

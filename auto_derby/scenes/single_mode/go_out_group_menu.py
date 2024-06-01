@@ -4,14 +4,33 @@
 from __future__ import annotations
 
 import traceback
-from typing import Iterator, Tuple
+from typing import Iterator, Text, Tuple
 
+import cv2
 from PIL.Image import Image
 
-from ... import action, app, imagetools, mathtools, template, templates
+from ... import action, app, imagetools, mathtools, ocr, template, templates
 from ...single_mode import Context, go_out
 from ..scene import Scene, SceneHolder
 from ..vertical_scroll import VerticalScroll
+
+
+def _recognize_name(img: Image) -> Text: # type: ignore
+    img = imagetools.resize(img, height=48)
+    cv_img = imagetools.cv_image(img.convert("L"))
+    _, binary_img = cv2.threshold(cv_img, 120, 255, cv2.THRESH_BINARY_INV)
+
+    app.log.image(
+        "name",
+        cv_img,
+        layers={
+            "binary": binary_img,
+        },
+        level=app.DEBUG,
+    )
+
+    # FIXME: OCR is not accurate good enough for names
+    return ocr.text(imagetools.pil_image(binary_img))
 
 
 def _recognize_item(rp: mathtools.ResizeProxy, img: Image) -> go_out.Option:
@@ -37,7 +56,8 @@ def _recognize_item(rp: mathtools.ResizeProxy, img: Image) -> go_out.Option:
             is_gray = imagetools.compare_color(img.getpixel(pos), (231, 227, 225)) > 0.9
             if not is_gray:
                 v.current_event_count += 1
-        # FIXME: I don't set it because option name recognition doesn't work.
+        name_bbox = rp.vector4((95, 16, 316, 40), 540)
+        v.name = _recognize_name(img.crop(name_bbox))
         app.log.image("recognize: %s" % v, img, level=app.DEBUG)
         return v
     except:
@@ -49,23 +69,18 @@ def _recognize_item(rp: mathtools.ResizeProxy, img: Image) -> go_out.Option:
 
 def _recognize_menu(img: Image) -> Iterator[go_out.Option]:
     rp = mathtools.ResizeProxy(img.width)
-    for _, pos in template.match(img, templates.SINGLE_MODE_GO_OUT_OPTION_EVENT_PROCESS):
+    item_pos: set[Tuple[int, int]] = set()
+    for _, pos in template.match(img, templates.SINGLE_MODE_GO_OUT_OPTION_LEFT_TOP):
+        item_pos.add(pos)
+    for _, pos in template.match(
+        img, templates.SINGLE_MODE_GO_OUT_OPTION_EVENT_PROCESS
+    ):
         x, y = pos
         x -= rp.vector(138, 540)
         y -= rp.vector(71, 540)
-        bbox = (
-            x,
-            y,
-            x + rp.vector(500, 540),
-            y + rp.vector(100, 540),
-
-        )
-        option = _recognize_item(rp, img.crop(bbox))
-        option.position = (x + rp.vector(102, 540), y + rp.vector(46, 540))
-        option.bbox = bbox
-        yield option
-    for _, pos in template.match(img, templates.SINGLE_MODE_GO_OUT_OPTION_LEFT_TOP):
-        x, y = pos
+        if not any((x - x2) ** 2 + (y - y2) ** 2 < 9 for x2, y2 in item_pos):
+            item_pos.add((x, y))
+    for x, y in item_pos:
         bbox = (
             x,
             y,
@@ -95,7 +110,9 @@ class GoOutGroupMenuScene(Scene):
 
     @classmethod
     def _enter(cls, ctx: SceneHolder) -> Scene:
-        action.wait_image_stable(templates.SINGLE_MODE_GO_OUT_OPTION_EVENT_PROCESS, duration=0.2)
+        action.wait_image_stable(
+            templates.SINGLE_MODE_GO_OUT_OPTION_EVENT_PROCESS, duration=0.2
+        )
         return cls()
 
     def recognize(self, ctx: Context, static: bool = False) -> None:

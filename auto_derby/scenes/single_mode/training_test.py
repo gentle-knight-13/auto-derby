@@ -1,3 +1,4 @@
+import re
 from auto_derby.single_mode.context import Context
 import time
 import timeit
@@ -19,18 +20,9 @@ def test_recognize(name: Text):
     _test.use_screenshot(f"single_mode/{name}.png")
     ctx = Context.new()
     ctx.scenario = ctx.SCENARIO_URA
-    if "+aoharu+" in name:
-        ctx.scenario = ctx.SCENARIO_AOHARU
-    if "+climax+" in name:
-        ctx.scenario = ctx.SCENARIO_CLIMAX
-    if "+grand-masters+" in name:
-        ctx.scenario = ctx.SCENARIO_GRAND_MASTERS
-    if "+grand+live+" in name:
-        ctx.scenario = ctx.SCENARIO_GRAND_LIVE
-    if "+lark+" in name:
-        ctx.scenario = ctx.SCENARIO_PROJECT_LARK
-    if "+uaf+" in name:
-        ctx.scenario = ctx.SCENARIO_UAF_READY_GO
+    scenario_str = re.search(r"\+([\w-]+)\+$", name)
+    if scenario_str:
+        ctx.scenario = Context.scenario_from_str(scenario_str.group(1))
     scene = TrainingScene()
     scene.recognize_v2(ctx, static=True)
     (training,) = scene.trainings

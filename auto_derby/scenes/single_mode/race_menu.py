@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import time
-from typing import Iterator, Tuple
+from typing import Iterator, Optional, Tuple
 
 
 from ...single_mode import Context, Race, Course
@@ -231,6 +231,14 @@ class RaceMenuScene(Scene):
             templates.SINGLE_MODE_RACE_MENU_FAN_ICON,
             templates.SINGLE_MODE_RACE_MENU_FAN_ICON_LARK,
         )
+        if isinstance(ctx, single_mode.Context) and ctx.scenario not in (
+            ctx.SCENARIO_CLIMAX,
+            ctx.SCENARIO_PROJECT_LARK,
+        ):
+            fan_count_bbox = rp.vector4((53, 558, 235, 585), 720)
+            ctx.fan_count = _recognize_fan_count(
+                app.device.screenshot().crop(fan_count_bbox)
+            )
         return cls()
 
     def visible_courses(self, ctx: Context) -> Iterator[Tuple[Course, Tuple[int, int]]]:
@@ -238,7 +246,16 @@ class RaceMenuScene(Scene):
             yield course, pos
 
     def first_race(self, ctx: single_mode.Context) -> Race:
-        return next(_race_by_course(ctx, next(self.visible_courses(ctx))[0]))
+        try:
+            course = next(self.visible_courses(ctx))[0]
+        except StopIteration:
+            raise RuntimeError("no visible race, expected at least one")
+        try:
+            return next(_race_by_course(ctx, course))
+        except StopIteration:
+            raise RuntimeError(
+                "first race not found\ncourse: %s\nctx: %s %s" % (course, ctx, ctx.date)
+            )
 
     def choose_race(self, ctx: single_mode.Context, race: Race) -> None:
         time.sleep(0.2)  # wait animation

@@ -200,13 +200,18 @@ def color_key(
 
 
 def constant_color_key(
-    img: np.ndarray, *colors: Tuple[int, ...], threshold: float = 0.8, bit_size: int = 8
+    img: np.ndarray, *colors: Union[Tuple[int, ...], Tuple[Tuple[int, ...], float]], threshold: float = 0.8, bit_size: int = 8
 ) -> np.ndarray:
     ret = np.zeros(img.shape[:2], dtype=img.dtype)
 
     for color in colors:
+        if len(color) == 2 and isinstance(color[1], float):
+            _t = color[1]
+            color = color[0]
+        else:
+            _t = threshold
         match_img = color_key(
-            img, np.full_like(img, color), threshold=threshold, bit_size=bit_size
+            img, np.full_like(img, color), threshold=_t, bit_size=bit_size
         )
         ret = np.array(np.maximum(ret, match_img))
 
@@ -466,9 +471,10 @@ def rect_from_bbox(bbox: Tuple[int, int, int, int]) -> Tuple[int, int, int, int]
 
 
 def auto_crop(cv_img: np.ndarray) -> np.ndarray:
+    gray_img = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY) if cv_img.ndim == 3 else cv_img
     l, t, r, b = bbox_from_rect(
         cv2.boundingRect(
-            cv2.findNonZero(cv_img),
+            cv2.findNonZero(gray_img),
         )
     )
     return cv_img[t:b, l:r]

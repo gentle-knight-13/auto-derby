@@ -117,6 +117,8 @@ SINGLE_MODE_AOHARU_FORMAL_RACE_BANNER = "single_mode_aoharu_formal_race_banner.p
 SINGLE_MODE_AOHARU_FORMAL_RACE_BANNER_POS = (
     "single_mode_aoharu_formal_race_banner.pos.png"
 )
+SINGLE_MODE_AOHARU_DATE_REMAIN = "single_mode_aoharu_date_remain.png"
+SINGLE_MODE_AOHARU_DATE_REMAIN_POS = "single_mode_aoharu_date_remain.pos.png"
 SINGLE_MODE_AOHARU_MAIN_RACE_BUTTON = "single_mode_aoharu_main_race_button.png"
 SINGLE_MODE_AOHARU_MAIN_RACE_BUTTON_POS = "single_mode_aoharu_main_race_button.pos.png"
 SINGLE_MODE_AOHARU_RACE_RESULT_BUTTON = "single_mode_aoharu_race_result_button.png"
@@ -252,6 +254,9 @@ SINGLE_MODE_GRAND_MASTERS_COMMAND_GO_OUT = (
 )
 SINGLE_MODE_GRAND_MASTERS_GREEN_CONTINUE_BUTTON = (
     "single_mode_grand_masters_green_continue_button.png"
+)
+SINGLE_MODE_GRAND_MASTERS_GREEN_CONTINUE_BUTTON_POS = (
+    "single_mode_grand_masters_green_continue_button.pos.png"
 )
 SINGLE_MODE_GRAND_MASTERS_GUR_BUTTON = "single_mode_grand_masters_gur_button.png"
 SINGLE_MODE_GRAND_MASTERS_KNOWLEDGE_TABLE_BUTTON = (

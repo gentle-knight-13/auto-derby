@@ -39,9 +39,9 @@ class GoOutCommand(Command):
         g.on_command(ctx, self)
         CommandScene.enter(ctx)
         action.tap_image(go_out.command_template(ctx))
-        time.sleep(0.5)
-        rp = action.resize_proxy()
-        if action.count_image(templates.SINGLE_MODE_GO_OUT_MENU_TITLE):
+        try:
+            action.wait_image_stable(templates.SINGLE_MODE_GO_OUT_MENU_TITLE, duration=0.2, timeout=0.5)
+            rp = action.resize_proxy()
             if (
                 self.option.position == (0, 0)
                 and self.option.type == go_out.Option.TYPE_MAIN
@@ -59,6 +59,8 @@ class GoOutCommand(Command):
                     option = scene.go_out_options[0]
                     app.device.tap((*option.position, *rp.vector2((200, 20), 540)))
                     self.option.current_group_event_count += 1
+        except TimeoutError:
+            pass
 
         if self.option.total_event_count > 0:
             self.option.current_event_count += 1
