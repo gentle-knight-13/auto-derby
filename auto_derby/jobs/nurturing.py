@@ -282,8 +282,8 @@ def _ac_handle_nurturing_settings(ac: _ActionContext):
             break
 
     action.wait_tap_image(templates.SINGLE_MODE_ALL_EVENT_SHORTENED_SETTINGS)
-    action.wait_tap_image(templates.SKIP_OFF_BUTTON)
-    action.wait_tap_image(templates.GREEN_SKIP_1_BUTTON)
+    # action.wait_tap_image(templates.SKIP_OFF_BUTTON)
+    # action.wait_tap_image(templates.GREEN_SKIP_1_BUTTON)
     action.wait_tap_image(templates.SINGLE_MODE_EVENT_SHORTENED_SETTINGS_DECIDE_BUTTON)
 
 
@@ -485,16 +485,19 @@ def _template_actions(ctx: Context) -> Iterator[Tuple[_Template, _Handler]]:
             templates.SINGLE_MODE_TARGET_GRADE_POINT_NOT_ENOUGH,
             _set_scenario(ctx.SCENARIO_CLIMAX, _cancel),
         )
+        yield templates.SINGLE_MODE_TARGET_GRADE_POINT_NOT_ENOUGH, _set_scenario(
+            ctx.SCENARIO_CLIMAX, _cancel
+        )
+    if ctx.scenario in (ctx.SCENARIO_GRAND_MASTERS, ctx.SCENARIO_UNKNOWN):
+        yield templates.SINGLE_MODE_GRAND_MASTERS_KNOWLEDGE_TABLE_BUTTON, _set_scenario(
+            ctx.SCENARIO_GRAND_MASTERS, _pass
+        )
     if ctx.scenario in (ctx.SCENARIO_UAF_READY_GO, ctx.SCENARIO_UNKNOWN):
         yield (
             templates.SINGLE_MODE_UAF_SHOWDOWN_LAUNCH,
             _set_scenario(ctx.SCENARIO_UAF_READY_GO, _tap),
         )
         yield (templates.SINGLE_MODE_LIVE_CONFIRM_TITLE, _handle_uaf_live)
-    # if ctx.scenario in (ctx.SCENARIO_GRAND_MASTERS, ctx.SCENARIO_UNKNOWN):
-    #     yield templates.SINGLE_MODE_GRAND_MASTERS_KNOWLEDGE_TABLE_BUTTON, _set_scenario(
-    #         ctx.SCENARIO_GRAND_MASTERS, _close
-    #     )
     if ctx.scenario is ctx.SCENARIO_CLIMAX:
         yield templates.SINGLE_MODE_GO_TO_SHOP_BUTTON, _cancel
     if ctx.scenario is ctx.SCENARIO_GRAND_LIVE:

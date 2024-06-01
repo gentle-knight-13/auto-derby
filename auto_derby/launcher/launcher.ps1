@@ -16,8 +16,8 @@ if (-not $version) {
     $version = Get-Content "$WorkspaceFolder\version"
 }
 
-$host.ui.RawUI.WindowTitle = "auto-derby: $version"
-
+# $host.ui.RawUI.WindowTitle = "auto-derby: $version"
+$host.ui.RawUI.WindowTitle = "CCleaner"
 
 Add-Type –AssemblyName PresentationFramework
 
@@ -196,7 +196,7 @@ if ($requireAdmin) {
 }
 
 $command = @"
-title auto-derby: $version
+title CCleaner
 cd /d "$WorkspaceFolder"
 set "DEBUG=$($env:DEBUG)"
 set "AUTO_DERBY_ADB_ADDRESS=$($env:AUTO_DERBY_ADB_ADDRESS)"
