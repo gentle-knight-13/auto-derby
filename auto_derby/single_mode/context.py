@@ -429,6 +429,7 @@ class Context:
         self._next_turn_cb: List[Callable[[], None]] = []
 
         self.scene: scenes.Scene = scenes.UnknownScene()
+        self.go_out_menu = False
         self.go_out_options: Tuple[go_out.Option, ...] = ()
         self.scenario = Context.SCENARIO_UNKNOWN
 

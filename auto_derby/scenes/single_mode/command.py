@@ -284,9 +284,10 @@ class CommandScene(Scene):
         self.has_scheduled_race = (
             action.count_image(templates.SINGLE_MODE_SCHEDULED_RACE_OPENING_BANNER) > 0
         )
-        self.can_go_out_with_friend = (
+        self.can_go_out_with_friend = ctx.go_out_menu or (
             action.count_image(templates.SINGLE_MODE_GO_OUT_FRIEND_ICON) > 0
         )
+        ctx.go_out_menu = self.can_go_out_with_friend
         if ctx.scenario == ctx.SCENARIO_CLIMAX:
             self.has_shop = action.count_image(templates.SINGLE_MODE_COMMAND_SHOP) > 0
         if ctx.scenario == ctx.SCENARIO_GRAND_MASTERS:
@@ -317,14 +318,8 @@ class CommandScene(Scene):
         if not self.can_go_out_with_friend:
             return
 
-        action.wait_tap_image(single_mode.go_out.command_template(ctx))
         try:
-            action.wait_image(
-                template.Specification(
-                    templates.SINGLE_MODE_GO_OUT_MENU_TITLE, threshold=0.8
-                ),
-                timeout=1.0,
-            )
+            action.wait_tap_image(single_mode.go_out.command_template(ctx), timeout=0.5)
             scene = GoOutMenuScene().enter(ctx)
             scene.recognize(ctx)
             self.enter(ctx)
@@ -366,5 +361,5 @@ class CommandScene(Scene):
             self.recognize_class(ctx)
         if ctx.turf == ctx.STATUS_NONE or ctx.date[1:] == (4, 1):
             self.recognize_status(ctx)
-        if not ctx.go_out_options:
+        if self.can_go_out_with_friend:
             self.recognize_go_out_options(ctx)
