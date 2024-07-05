@@ -43,6 +43,7 @@ def _year4_date_text(ctx: Context) -> Iterator[Text]:
         ctx.SCENARIO_AOHARU,
         ctx.SCENARIO_GRAND_LIVE,
         ctx.SCENARIO_UAF_READY_GO,
+        ctx.SCENARIO_DAIHOSHOKUSAI,
         ctx.SCENARIO_UNKNOWN,
     ):
         yield "ファイナルズ開催中"
