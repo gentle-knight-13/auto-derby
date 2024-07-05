@@ -294,6 +294,16 @@ def _handle_fan_not_enough(ac: _ActionContext):
 
 def _handle_target_race(ac: _ActionContext):
     ctx = ac.ctx
+    if ctx.scenario in (ctx.SCENARIO_DAIHOSHOKUSAI, ctx.SCENARIO_UNKNOWN):
+        try:
+            action.wait_tap_image(
+                templates.SINGLE_MODE_DAIHOSHOKUSAI_COMMAND_TASTING,
+                timeout=1,
+            )
+            ac.ctx.scenario = ctx.SCENARIO_DAIHOSHOKUSAI
+            return
+        except TimeoutError:
+            pass
     if ctx.scenario in (ctx.SCENARIO_UAF_READY_GO, ctx.SCENARIO_UNKNOWN):
         try:
             action.wait_tap_image(

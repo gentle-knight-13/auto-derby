@@ -21,11 +21,14 @@ from ...single_mode.training import Partner
 from ..scene import Scene, SceneHolder
 from .command import CommandScene
 
-_TRAINING_CONFIRM = template.Specification(
-    templates.SINGLE_MODE_TRAINING_CONFIRM, threshold=0.8
+_CONFIRM_TMPL = (
+    template.Specification(templates.SINGLE_MODE_TRAINING_CONFIRM, threshold=0.8),
+    templates.SINGLE_MODE_TRAINING_CONFIRM_LARK,
 )
-
-_CONFIRM_TMPL = (_TRAINING_CONFIRM, templates.SINGLE_MODE_TRAINING_CONFIRM_LARK)
+_CONFIRM_TMPL_NAME = [
+    tmpl.name if isinstance(tmpl, template.Specification) else tmpl
+    for tmpl in _CONFIRM_TMPL
+]
 
 
 def _gradient(colors: Tuple[Tuple[Tuple[int, int, int], int], ...]) -> np.ndarray:
@@ -456,12 +459,13 @@ def _recognize_uaf_genre(rgb_color: Tuple[int, ...]) -> int:
 
 
 def _recognize_failure_rate(
-    rp: mathtools.ResizeProxy, trn: Training, img: Image
+    ctx: Context, rp: mathtools.ResizeProxy, trn: Training, img: Image
 ) -> float:
     x, y = trn.confirm_position
     bbox = (
         x + rp.vector(15, 540),
-        y + rp.vector(-155, 540),
+        y
+        + rp.vector(-139 if ctx.scenario == ctx.SCENARIO_DAIHOSHOKUSAI else -155, 540),
         x + rp.vector(75, 540),
         y + rp.vector(-107, 540),
     )
@@ -479,6 +483,7 @@ def _recognize_failure_rate(
         (255, 255, 255),
         (255, 235, 208),
         (18, 218, 255),
+        (195, 230, 255),
     )
     app.log.image(
         "failure rate",
@@ -624,6 +629,14 @@ def _iter_training_confirm_pos(ctx: Context) -> List[Tuple[int, int]]:
             rp.vector2((297, 835), 540),
             rp.vector2((385, 835), 540),
             rp.vector2((473, 835), 540),
+        ]
+    if ctx.scenario == ctx.SCENARIO_DAIHOSHOKUSAI:
+        return [
+            rp.vector2((33, 835), 540),
+            rp.vector2((121, 835), 540),
+            rp.vector2((209, 835), 540),
+            rp.vector2((297, 835), 540),
+            rp.vector2((385, 835), 540),
         ]
     return [
         rp.vector2((78, 850), 540),
@@ -968,6 +981,10 @@ def _recognize_partners(ctx: Context, img: Image) -> Iterator[training.Partner]:
             rp.vector4((448, 147, 516, 220), 540),
             rp.vector(86, 540),
         ),
+        ctx.SCENARIO_DAIHOSHOKUSAI: (  # Todo: check correctness
+            rp.vector4((448, 147, 516, 220), 540),
+            rp.vector(86, 540),
+        ),
     }[ctx.scenario]
     icons_bottom = rp.vector(578, 540)
     while icon_bbox[2] < icons_bottom:
@@ -1018,6 +1035,8 @@ def _effect_recognitions(
     ):
         yield _bbox_groups(595, 623), _recognize_base_effect
         yield _bbox_groups(568, 593), _recognize_red_effect
+    elif ctx.scenario == ctx.SCENARIO_DAIHOSHOKUSAI:
+        yield _bbox_groups(595, 623), _recognize_base_effect
     else:
         raise NotImplementedError(ctx.scenario)
     if ctx.scenario == ctx.SCENARIO_UAF_READY_GO:
@@ -1091,7 +1110,7 @@ def _recognize_training(
         self._use_estimate_vitality = True  # type: ignore
         self.vitality = _estimate_vitality(ctx, self)
         if self.type != TrainingType.SS_MATCH:
-            self.failure_rate = _recognize_failure_rate(rp, self, img)
+            self.failure_rate = _recognize_failure_rate(ctx, rp, self, img)
             self.partners = tuple(_recognize_partners(ctx, img))
         # TODO: recognize SS match partners
         app.log.image("%s" % self, img, level=app.DEBUG)
@@ -1117,9 +1136,9 @@ class TrainingScene(Scene):
             tmpl, pos = action.wait_image(
                 templates.SINGLE_MODE_COMMAND_TRAINING,
                 templates.SINGLE_MODE_COMMAND_TRAINING_LARK,
-                _TRAINING_CONFIRM,
+                *_CONFIRM_TMPL,
             )
-            if tmpl.name == _TRAINING_CONFIRM.name:
+            if tmpl.name in _CONFIRM_TMPL_NAME:
                 break
             app.device.tap(action.template_rect(tmpl, pos))
         return cls()

@@ -222,6 +222,10 @@ def _recognize_max_property(img: Image) -> int:
 def _recognize_scenario(rp: mathtools.ResizeProxy, img: Image) -> Text:
     spec = (
         (
+            templates.SINGLE_MODE_DAIHOSHOKUSAI_DATE_REMAIN,
+            Context.SCENARIO_DAIHOSHOKUSAI,
+        ),
+        (
             templates.SINGLE_MODE_COMMAND_DISCUSS,
             Context.SCENARIO_UAF_READY_GO,
         ),
@@ -308,6 +312,7 @@ def _date_bbox(ctx: Context, rp: mathtools.ResizeProxy):
         ctx.SCENARIO_GRAND_MASTERS,
         ctx.SCENARIO_PROJECT_LARK,
         ctx.SCENARIO_UAF_READY_GO,
+        ctx.SCENARIO_DAIHOSHOKUSAI,
     ):
         return rp.vector4((125, 32, 278, 48), 540)
     if ctx.scenario == ctx.SCENARIO_CLIMAX:
@@ -358,6 +363,7 @@ class Context:
     SCENARIO_GRAND_MASTERS = "グランドマスターズ ―継ぐ者達へ―"
     SCENARIO_PROJECT_LARK = "Reach for the stars プロジェクトL'Arc"
     SCENARIO_UAF_READY_GO = "U.A.F. Ready GO! ～アスリートのキラメキ～"
+    SCENARIO_DAIHOSHOKUSAI = "収穫ッ！満腹ッ！大豊食祭"
 
     @staticmethod
     def scenario_from_str(name: Text) -> Text:
@@ -369,6 +375,7 @@ class Context:
             "grand-masters": Context.SCENARIO_GRAND_MASTERS,
             "lark": Context.SCENARIO_PROJECT_LARK,
             "uaf": Context.SCENARIO_UAF_READY_GO,
+            "daihoshokusai": Context.SCENARIO_DAIHOSHOKUSAI,
         }.get(name, Context.SCENARIO_UNKNOWN)
 
     @staticmethod

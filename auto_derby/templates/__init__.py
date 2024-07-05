@@ -99,6 +99,8 @@ SINGLE_MODE_AOHARU_CLASS_DETAIL_BUTTON = "single_mode_aoharu_class_detail_button
 SINGLE_MODE_AOHARU_CLASS_DETAIL_BUTTON_POS = (
     "single_mode_aoharu_class_detail_button.pos.png"
 )
+SINGLE_MODE_AOHARU_DATE_REMAIN = "single_mode_aoharu_date_remain.png"
+SINGLE_MODE_AOHARU_DATE_REMAIN_POS = "single_mode_aoharu_date_remain.pos.png"
 SINGLE_MODE_AOHARU_FINAL_BANNER = "single_mode_aoharu_final_banner.png"
 SINGLE_MODE_AOHARU_FINAL_BATTLE_BUTTON = "single_mode_aoharu_final_battle_button.png"
 SINGLE_MODE_AOHARU_FINAL_BATTLE_BUTTON_POS = (
@@ -108,8 +110,6 @@ SINGLE_MODE_AOHARU_FORMAL_RACE_BANNER = "single_mode_aoharu_formal_race_banner.p
 SINGLE_MODE_AOHARU_FORMAL_RACE_BANNER_POS = (
     "single_mode_aoharu_formal_race_banner.pos.png"
 )
-SINGLE_MODE_AOHARU_DATE_REMAIN = "single_mode_aoharu_date_remain.png"
-SINGLE_MODE_AOHARU_DATE_REMAIN_POS = "single_mode_aoharu_date_remain.pos.png"
 SINGLE_MODE_AOHARU_MAIN_RACE_BUTTON = "single_mode_aoharu_main_race_button.png"
 SINGLE_MODE_AOHARU_MAIN_RACE_BUTTON_POS = "single_mode_aoharu_main_race_button.pos.png"
 SINGLE_MODE_AOHARU_RACE_RESULT_BUTTON = "single_mode_aoharu_race_result_button.png"
@@ -193,6 +193,16 @@ SINGLE_MODE_CRANE_GAME_PLAY_GUIDE_BUTTON = (
 )
 SINGLE_MODE_CRANE_GAME_PLAY_GUIDE_BUTTON_POS = (
     "single_mode_crane_game_play_guide_button.pos.png"
+)
+SINGLE_MODE_DAIHOSHOKUSAI_COMMAND_TASTING = (
+    "single_mode_daihoshokusai_command_tasting.png"
+)
+SINGLE_MODE_DAIHOSHOKUSAI_COMMAND_TASTING_POS = (
+    "single_mode_daihoshokusai_command_tasting.pos.png"
+)
+SINGLE_MODE_DAIHOSHOKUSAI_DATE_REMAIN = "single_mode_daihoshokusai_date_remain.png"
+SINGLE_MODE_DAIHOSHOKUSAI_DATE_REMAIN_POS = (
+    "single_mode_daihoshokusai_date_remain.pos.png"
 )
 SINGLE_MODE_END_BUTTON = "single_mode_end_button.png"
 SINGLE_MODE_END_BUTTON_POS = "single_mode_end_button.pos.png"
