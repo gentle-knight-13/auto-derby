@@ -301,6 +301,16 @@ def _handle_target_race(ac: _ActionContext):
                 timeout=1,
             )
             ac.ctx.scenario = ctx.SCENARIO_DAIHOSHOKUSAI
+
+            while True:
+                tmpl, pos = action.wait_image(
+                    templates.SKIP_BUTTON,
+                    templates.SINGLE_MODE_CONTINUE,
+                    templates.SINGLE_MODE_DAIHOSHOKUSAI_GREEN_TASTING_BUTTON, # appear when fields can be level up
+                )
+                app.device.tap(action.template_rect(tmpl, pos))
+                if tmpl.name == templates.SINGLE_MODE_CONTINUE:
+                    break
             return
         except TimeoutError:
             pass

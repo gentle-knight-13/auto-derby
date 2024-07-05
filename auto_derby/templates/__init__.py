@@ -204,6 +204,12 @@ SINGLE_MODE_DAIHOSHOKUSAI_DATE_REMAIN = "single_mode_daihoshokusai_date_remain.p
 SINGLE_MODE_DAIHOSHOKUSAI_DATE_REMAIN_POS = (
     "single_mode_daihoshokusai_date_remain.pos.png"
 )
+SINGLE_MODE_DAIHOSHOKUSAI_GREEN_TASTING_BUTTON = (
+    "single_mode_daihoshokusai_green_tasting_button.png"
+)
+SINGLE_MODE_DAIHOSHOKUSAI_GREEN_TASTING_BUTTON_POS = (
+    "single_mode_daihoshokusai_green_tasting_button.pos.png"
+)
 SINGLE_MODE_END_BUTTON = "single_mode_end_button.png"
 SINGLE_MODE_END_BUTTON_POS = "single_mode_end_button.pos.png"
 SINGLE_MODE_FANS_NOT_ENOUGH = "single_mode_fans_not_enough.png"
