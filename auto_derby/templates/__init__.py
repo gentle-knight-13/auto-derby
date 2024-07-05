@@ -210,6 +210,12 @@ SINGLE_MODE_DAIHOSHOKUSAI_GREEN_TASTING_BUTTON = (
 SINGLE_MODE_DAIHOSHOKUSAI_GREEN_TASTING_BUTTON_POS = (
     "single_mode_daihoshokusai_green_tasting_button.pos.png"
 )
+SINGLE_MODE_DAIHOSHOKUSAI_OPENING_BUTTON = (
+    "single_mode_daihoshokusai_opening_button.png"
+)
+SINGLE_MODE_DAIHOSHOKUSAI_OPENING_BUTTON_POS = (
+    "single_mode_daihoshokusai_opening_button.pos.png"
+)
 SINGLE_MODE_END_BUTTON = "single_mode_end_button.png"
 SINGLE_MODE_END_BUTTON_POS = "single_mode_end_button.pos.png"
 SINGLE_MODE_FANS_NOT_ENOUGH = "single_mode_fans_not_enough.png"

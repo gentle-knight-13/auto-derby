@@ -494,6 +494,11 @@ def _template_actions(ctx: Context) -> Iterator[Tuple[_Template, _Handler]]:
     #     yield templates.SINGLE_MODE_GRAND_MASTERS_KNOWLEDGE_TABLE_BUTTON, _set_scenario(
     #         ctx.SCENARIO_GRAND_MASTERS, _close
     #     )
+    if ctx.scenario in (ctx.SCENARIO_DAIHOSHOKUSAI, ctx.SCENARIO_UNKNOWN):
+        yield (
+            templates.SINGLE_MODE_DAIHOSHOKUSAI_OPENING_BUTTON,
+            _set_scenario(ctx.SCENARIO_DAIHOSHOKUSAI, _tap),
+        )
     if ctx.scenario is ctx.SCENARIO_CLIMAX:
         yield templates.SINGLE_MODE_GO_TO_SHOP_BUTTON, _cancel
     if ctx.scenario is ctx.SCENARIO_GRAND_LIVE:
