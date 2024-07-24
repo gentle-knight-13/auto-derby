@@ -565,7 +565,7 @@ class Plugin(auto_derby.Plugin):
         auto_derby.scenes.single_mode.race_menu._menu_item_bbox = _menu_item_bbox
         # limited_sale.buy_first_n = buy_first_n
         single_mode.race.game_data._spec_bbox = _spec_bbox
-        single_mode.race.race.JSONLRepository._from_po = _from_po
+        # single_mode.race.race.JSONLRepository._from_po = _from_po
         ocr.text = text
 
 
