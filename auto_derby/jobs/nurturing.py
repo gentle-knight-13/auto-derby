@@ -313,6 +313,30 @@ def _handle_fan_not_enough(ac: _ActionContext):
 
 def _handle_target_race(ac: _ActionContext):
     ctx = ac.ctx
+    if ctx.scenario in (ctx.SCENARIO_DAIHOSHOKUSAI, ctx.SCENARIO_UNKNOWN):
+        try:
+            action.wait_tap_image(
+                templates.SINGLE_MODE_DAIHOSHOKUSAI_COMMAND_TASTING,
+                timeout=1,
+            )
+            ac.ctx.scenario = ctx.SCENARIO_DAIHOSHOKUSAI
+
+            while True:
+                tmpl, pos = action.wait_image(
+                    templates.SKIP_BUTTON,
+                    templates.GREEN_NEXT_BUTTON,
+                    templates.SINGLE_MODE_RACE_NEXT_BUTTON,
+                    templates.SINGLE_MODE_DAIHOSHOKUSAI_GREEN_TASTING_BUTTON,  # appear when fields can be level up
+                )
+                app.device.tap(action.template_rect(tmpl, pos))
+                if tmpl.name in (
+                    templates.GREEN_NEXT_BUTTON,
+                    templates.SINGLE_MODE_RACE_NEXT_BUTTON,
+                ):
+                    break
+            return
+        except TimeoutError:
+            pass
     if ctx.scenario in (ctx.SCENARIO_UAF_READY_GO, ctx.SCENARIO_UNKNOWN):
         try:
             action.wait_tap_image(
@@ -438,7 +462,7 @@ def _handle_grand_masters_race(ac: _ActionContext):
     ).execute(ctx)
 
 
-def _handle_uaf_live(ac: _ActionContext):
+def _skip_live(ac: _ActionContext):
     try:
         action.wait_tap_image(templates.SINGLE_MODE_SKIP_TITLE_BUTTON, timeout=1)
     except TimeoutError:
@@ -497,7 +521,12 @@ def _template_actions(ctx: Context) -> Iterator[Tuple[_Template, _Handler]]:
             templates.SINGLE_MODE_UAF_SHOWDOWN_LAUNCH,
             _set_scenario(ctx.SCENARIO_UAF_READY_GO, _tap),
         )
-        yield (templates.SINGLE_MODE_LIVE_CONFIRM_TITLE, _handle_uaf_live)
+    if ctx.scenario in (ctx.SCENARIO_DAIHOSHOKUSAI, ctx.SCENARIO_UAF_READY_GO, ctx.SCENARIO_UNKNOWN):
+        yield (templates.SINGLE_MODE_LIVE_CONFIRM_TITLE, _skip_live)
+    # if ctx.scenario in (ctx.SCENARIO_GRAND_MASTERS, ctx.SCENARIO_UNKNOWN):
+    #     yield templates.SINGLE_MODE_GRAND_MASTERS_KNOWLEDGE_TABLE_BUTTON, _set_scenario(
+    #         ctx.SCENARIO_GRAND_MASTERS, _close
+    #     )
     if ctx.scenario is ctx.SCENARIO_CLIMAX:
         yield templates.SINGLE_MODE_GO_TO_SHOP_BUTTON, _cancel
     if ctx.scenario is ctx.SCENARIO_GRAND_LIVE:

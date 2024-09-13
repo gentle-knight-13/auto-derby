@@ -111,13 +111,13 @@ def _recognize_item(rp: mathtools.ResizeProxy, img: Image) -> go_out.Option:
 
 def _recognize_menu(img: Image) -> Iterator[go_out.Option]:
     rp = mathtools.ResizeProxy(img.width)
-    for _, pos in template.match(img, templates.SINGLE_MODE_GO_OUT_OPTION_LEFT_TOP):
+    for _, pos in template.match(img, templates.SINGLE_MODE_GO_OUT_OPTION_LEFT_BOTTOM):
         x, y = pos
         bbox = (
             x,
-            y,
+            y - rp.vector(90, 540),
             x + rp.vector(500, 540),
-            y + rp.vector(100, 540),
+            y + rp.vector(10, 540),
         )
         option = _recognize_item(rp, img.crop(bbox))
         option.position = (x + rp.vector(102, 540), y + rp.vector(46, 540))

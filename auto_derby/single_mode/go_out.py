@@ -57,9 +57,9 @@ class Option:
         return f"Option<name={self.name},type={type_text},event={self.current_event_count}/{self.total_event_count},pos={self.position}>"
 
     def disabled(self, ctx: Context) -> bool:
-        if (
-            self.total_event_count > 0
-            and self.current_event_count >= self.total_event_count
+        if self.total_event_count > 0 and (
+            self.current_event_count >= self.total_event_count
+            or self.current_group_event_count >= self.total_event_count
         ):
             return True
         return False

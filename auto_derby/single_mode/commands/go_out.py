@@ -38,9 +38,12 @@ class GoOutCommand(Command):
     def execute(self, ctx: Context) -> None:
         g.on_command(ctx, self)
         CommandScene.enter(ctx)
-        action.tap_image(go_out.command_template(ctx))
+        _tmpl = go_out.command_template(ctx)
+        while action.tap_image(_tmpl):
+            time.sleep(0.5)
         try:
-            action.wait_image_stable(templates.SINGLE_MODE_GO_OUT_MENU_TITLE, duration=0.2, timeout=0.5)
+            action.wait_image(templates.SINGLE_MODE_GO_OUT_MENU_TITLE, timeout=0.5)
+            ctx.go_out_menu = True
             rp = action.resize_proxy()
             if (
                 self.option.position == (0, 0)
@@ -64,13 +67,6 @@ class GoOutCommand(Command):
 
         if self.option.total_event_count > 0:
             self.option.current_event_count += 1
-
-        if (
-            self.option.type == self.option.TYPE_GROUP
-            and self.option.current_event_count >= self.option.total_event_count
-        ):
-            app.log.text("reset go_out_options", level=app.LogLevel.DEBUG)
-            ctx.go_out_options = ()
         return
 
     def score(self, ctx: Context) -> float:
