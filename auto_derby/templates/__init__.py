@@ -312,6 +312,9 @@ SINGLE_MODE_LIVE_CONFIRM_TITLE_POS = "single_mode_live_confirm_title.pos.png"
 SINGLE_MODE_MECHA_UMAMUSUME_CAN_ACTIVATE_OVERDRIVE = (
     "single_mode_mecha_umamusume_can_activate_overdrive.png"
 )
+SINGLE_MODE_MECHA_UMAMUSUME_CAN_ACTIVATE_OVERDRIVE_POS = (
+    "single_mode_mecha_umamusume_can_activate_overdrive.pos.png"
+)
 SINGLE_MODE_MECHA_UMAMUSUME_OPENING_BUTTON = (
     "single_mode_mecha_umamusume_opening_button.png"
 )

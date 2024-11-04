@@ -36,6 +36,7 @@
     "hasShop": true,
     "hasKnowledgeTable": false,
     "hasLearnWisdom": false,
-    "hasLesson": false
+    "hasLesson": false,
+    "hasOverdrive": false
   }
 }
