@@ -309,6 +309,25 @@ SINGLE_MODE_ITEM_USE_BUTTON = "single_mode_item_use_button.png"
 SINGLE_MODE_LIVE_BUTTON = "single_mode_live_button.png"
 SINGLE_MODE_LIVE_CONFIRM_TITLE = "single_mode_live_confirm_title.png"
 SINGLE_MODE_LIVE_CONFIRM_TITLE_POS = "single_mode_live_confirm_title.pos.png"
+SINGLE_MODE_MECHA_UMAMUSUME_CAN_ACTIVATE_OVERDRIVE = (
+    "single_mode_mecha_umamusume_can_activate_overdrive.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_OPENING_BUTTON = (
+    "single_mode_mecha_umamusume_opening_button.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_OVERDRIVE_BUTTON = (
+    "single_mode_mecha_umamusume_overdrive_button.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_SUPER_OVERDRIVE = (
+    "single_mode_mecha_umamusume_super_overdrive.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_SUPER_OVERDRIVE_BUTTON = (
+    "single_mode_mecha_umamusume_super_overdrive_button.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_TUNING_EFFECT = (
+    "single_mode_mecha_umamusume_tuning_effect.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_UGE_BUTTON = "single_mode_mecha_umamusume_uge_button.png"
 SINGLE_MODE_OPTION1 = "single_mode_option1.png"
 SINGLE_MODE_OPTION1_POS = "single_mode_option1.pos.png"
 SINGLE_MODE_OPTION2 = "single_mode_option2.png"
