@@ -1,0 +1,1 @@
+TrainingType.WISDOM<wis=65 ski=27 spd=12 vit=5.0% fail=0% lv=3 ptn=wis@5,sta@5! gear=1>

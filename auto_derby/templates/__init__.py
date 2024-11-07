@@ -315,6 +315,7 @@ SINGLE_MODE_MECHA_UMAMUSUME_CAN_ACTIVATE_OVERDRIVE = (
 SINGLE_MODE_MECHA_UMAMUSUME_CAN_ACTIVATE_OVERDRIVE_POS = (
     "single_mode_mecha_umamusume_can_activate_overdrive.pos.png"
 )
+SINGLE_MODE_MECHA_UMAMUSUME_GEAR = "single_mode_mecha_umamusume_gear.png"
 SINGLE_MODE_MECHA_UMAMUSUME_OPENING_BUTTON = (
     "single_mode_mecha_umamusume_opening_button.png"
 )

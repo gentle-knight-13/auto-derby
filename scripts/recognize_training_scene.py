@@ -53,6 +53,7 @@ def main():
         "grand-masters": Context.SCENARIO_GRAND_MASTERS,
         "lark": Context.SCENARIO_PROJECT_LARK,
         "uaf": Context.SCENARIO_UAF_READY_GO,
+        "mecha": Context.SCENARIO_MECHA_UMAMUSUME,
     }.get(args.scenario, args.scenario)
     image = PIL.Image.open(image_path)
     app.device = ImageDeviceService(image)
