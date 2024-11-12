@@ -316,11 +316,44 @@ SINGLE_MODE_MECHA_UMAMUSUME_CAN_ACTIVATE_OVERDRIVE_POS = (
     "single_mode_mecha_umamusume_can_activate_overdrive.pos.png"
 )
 SINGLE_MODE_MECHA_UMAMUSUME_GEAR = "single_mode_mecha_umamusume_gear.png"
+SINGLE_MODE_MECHA_UMAMUSUME_GREEN_COMPLETE_BUTTON = (
+    "single_mode_mecha_umamusume_green_complete_button.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_GREEN_COMPLETE_BUTTON_POS = (
+    "single_mode_mecha_umamusume_green_complete_button.pos.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_GREEN_CONFIRM_BUTTON = (
+    "single_mode_mecha_umamusume_green_confirm_button.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_GREEN_CONFIRM_BUTTON_POS = (
+    "single_mode_mecha_umamusume_green_confirm_button.pos.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_ENERGY = (
+    "single_mode_mecha_umamusume_mecha_energy.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_ENERGY_POS = (
+    "single_mode_mecha_umamusume_mecha_energy.pos.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_CHEST_CORE = (
+    "single_mode_mecha_umamusume_mecha_tuning_chest_core.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_HEAD_CORE = (
+    "single_mode_mecha_umamusume_mecha_tuning_head_core.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_LEG_CORE = (
+    "single_mode_mecha_umamusume_mecha_tuning_leg_core.png"
+)
 SINGLE_MODE_MECHA_UMAMUSUME_OPENING_BUTTON = (
     "single_mode_mecha_umamusume_opening_button.png"
 )
 SINGLE_MODE_MECHA_UMAMUSUME_OVERDRIVE_BUTTON = (
     "single_mode_mecha_umamusume_overdrive_button.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_RESET_BUTTON = (
+    "single_mode_mecha_umamusume_reset_button.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_RESET_BUTTON_POS = (
+    "single_mode_mecha_umamusume_reset_button.pos.png"
 )
 SINGLE_MODE_MECHA_UMAMUSUME_SUPER_OVERDRIVE = (
     "single_mode_mecha_umamusume_super_overdrive.png"
