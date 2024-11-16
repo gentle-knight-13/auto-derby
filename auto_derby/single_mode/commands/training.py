@@ -30,7 +30,8 @@ class TrainingCommand(Command):
         rp = action.resize_proxy()
         w, h = rp.vector2((30, 80), 540)
         action.wait_image(
-            templates.SINGLE_MODE_TRAINING_CONFIRM, templates.SINGLE_MODE_TRAINING_CONFIRM_LARK
+            templates.SINGLE_MODE_TRAINING_CONFIRM,
+            templates.SINGLE_MODE_TRAINING_CONFIRM_LARK,
         )
         current_training = Training.from_training_scene_v2(ctx, app.device.screenshot())
         if current_training.type != self.training.type:
@@ -61,7 +62,7 @@ def _item_can_improve_failure_rate(i: item.Item):
 def default_ignore_training_commands(ctx: Context) -> bool:
     if any(_item_can_improve_failure_rate(i) for i in ctx.items):
         return False
-    if ctx.vitality < 0.2:
+    if ctx.vitality < 0.40:
         return True
     return False
 

@@ -1,6 +1,7 @@
 {
   "mechaCore": 3,
   "mechaEnergy": 30,
+  "mechaEvent": 5,
   "wisdomResearchChip": 0,
   "skillHintChip": 0,
   "proficiencyChip": 0,

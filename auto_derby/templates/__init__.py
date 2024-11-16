@@ -83,6 +83,7 @@ ROULETTE_DERBY_TAP_BUTTON_DISABLED_POS = "roulette_derby_tap_button_disabled.pos
 RP_NOT_ENOUGH = "rp_not_enough.png"
 SCROLL_TO_END = "scroll_to_end.png"
 SCROLL_TO_END_POS = "scroll_to_end.pos.png"
+SINGLE_MODE_ACTIVATE_BUTTON = "single_mode_activate_button.png"
 SINGLE_MODE_AOHARU_AUTO_FORMATION_TITLE = "single_mode_aoharu_auto_formation_title.png"
 SINGLE_MODE_AOHARU_AUTO_FORMATION_TITLE_POS = (
     "single_mode_aoharu_auto_formation_title.pos.png"
@@ -299,6 +300,7 @@ SINGLE_MODE_GRAND_MASTERS_RED_WISDOM = "single_mode_grand_masters_red_wisdom.png
 SINGLE_MODE_GRAND_MASTERS_WBC_BUTTON = "single_mode_grand_masters_wbc_button.png"
 SINGLE_MODE_GRAND_MASTERS_WISDOM_PIECE = "single_mode_grand_masters_wisdom_piece.png"
 SINGLE_MODE_GRAND_MASTERS_YELLOW_WISDOM = "single_mode_grand_masters_yellow_wisdom.png"
+SINGLE_MODE_GREEN_LIVE_BUTTON = "single_mode_green_live_button.png"
 SINGLE_MODE_ITEM_MENU_BUTTON = "single_mode_item_menu_button.png"
 SINGLE_MODE_ITEM_MENU_BUTTON_POS = "single_mode_item_menu_button.pos.png"
 SINGLE_MODE_ITEM_MENU_CURRENT_QUANTITY = "single_mode_item_menu_current_quantity.png"
@@ -319,14 +321,8 @@ SINGLE_MODE_MECHA_UMAMUSUME_GEAR = "single_mode_mecha_umamusume_gear.png"
 SINGLE_MODE_MECHA_UMAMUSUME_GREEN_COMPLETE_BUTTON = (
     "single_mode_mecha_umamusume_green_complete_button.png"
 )
-SINGLE_MODE_MECHA_UMAMUSUME_GREEN_COMPLETE_BUTTON_POS = (
-    "single_mode_mecha_umamusume_green_complete_button.pos.png"
-)
 SINGLE_MODE_MECHA_UMAMUSUME_GREEN_CONFIRM_BUTTON = (
     "single_mode_mecha_umamusume_green_confirm_button.png"
-)
-SINGLE_MODE_MECHA_UMAMUSUME_GREEN_CONFIRM_BUTTON_POS = (
-    "single_mode_mecha_umamusume_green_confirm_button.pos.png"
 )
 SINGLE_MODE_MECHA_UMAMUSUME_MECHA_ENERGY = (
     "single_mode_mecha_umamusume_mecha_energy.png"
@@ -406,9 +402,6 @@ SINGLE_MODE_MECHA_UMAMUSUME_OVERDRIVE_BUTTON = (
 SINGLE_MODE_MECHA_UMAMUSUME_RESET_BUTTON = (
     "single_mode_mecha_umamusume_reset_button.png"
 )
-SINGLE_MODE_MECHA_UMAMUSUME_RESET_BUTTON_POS = (
-    "single_mode_mecha_umamusume_reset_button.pos.png"
-)
 SINGLE_MODE_MECHA_UMAMUSUME_SUPER_OVERDRIVE = (
     "single_mode_mecha_umamusume_super_overdrive.png"
 )
@@ -429,6 +422,8 @@ SINGLE_MODE_OPTION4 = "single_mode_option4.png"
 SINGLE_MODE_OPTION4_POS = "single_mode_option4.pos.png"
 SINGLE_MODE_OPTION5 = "single_mode_option5.png"
 SINGLE_MODE_OPTION5_POS = "single_mode_option5.pos.png"
+SINGLE_MODE_OPTION6 = "single_mode_option6.png"
+SINGLE_MODE_OPTION6_POS = "single_mode_option6.pos.png"
 SINGLE_MODE_RACE_DETAIL_BUTTON = "single_mode_race_detail_button.png"
 SINGLE_MODE_RACE_DETAIL_BUTTON_POS = "single_mode_race_detail_button.pos.png"
 SINGLE_MODE_RACE_DETAIL_NO1_FAN_COUNT = "single_mode_race_detail_no1_fan_count.png"
@@ -481,7 +476,6 @@ SINGLE_MODE_UAF_SPORT_GENRE_POS = "single_mode_uaf_sport_genre.pos.png"
 SINGLE_MODE_URA_FINALS = "single_mode_ura_finals.png"
 SINGLE_MODE_URA_FINALS_POS = "single_mode_ura_finals.pos.png"
 SKIP_BUTTON = "skip_button.png"
-SKIP_BUTTON_POS = "skip_button.pos.png"
 TEAM_RACE_ALL_RACE_RESULT_BUTTON = "team_race_all_race_result_button.png"
 TEAM_RACE_ALL_RACE_RESULT_BUTTON_POS = "team_race_all_race_result_button.pos.png"
 TEAM_RACE_BUTTON = "team_race_button.png"

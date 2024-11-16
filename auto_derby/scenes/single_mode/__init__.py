@@ -8,3 +8,4 @@ from .shop import ShopScene
 from .item_menu import ItemMenuScene
 from .knowledge_table_menu import KnowledgeTableMenuScene
 from .grand_masters_race_menu import GrandMastersRaceMenuScene
+from .mecha_tuning_menu import MechaTuningMenu

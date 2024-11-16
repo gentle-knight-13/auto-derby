@@ -147,7 +147,7 @@ def _recognize_base_effect(img: Image) -> int:
     if hash_sim > 0.9:
         return 100
     text = ocr.text(image_from_array(text_img))
-    if not text:
+    if not text or text == "+":
         return 0
     return int(text.lstrip("+"))
 
@@ -274,7 +274,7 @@ def _recognize_red_effect(img: Image) -> int:
         },
     )
     text = ocr.text(image_from_array(text_img))
-    if not text:
+    if not text or text == "+":
         return 0
     return int(text.lstrip("+"))
 
@@ -338,7 +338,7 @@ def _recognize_light_gold_effect(img: Image) -> int:
         },
     )
     text = ocr.text(image_from_array(text_img), offset=1)
-    if not text:
+    if not text or text == "+":
         return 0
     return int(text.lstrip("+"))
 
@@ -429,7 +429,7 @@ def _recognize_dark_gold_effect(img: Image) -> int:
         },
     )
     text = ocr.text(image_from_array(text_img), offset=1)
-    if not text:
+    if not text or text == "+":
         return 0
     return int(text.lstrip("+"))
 

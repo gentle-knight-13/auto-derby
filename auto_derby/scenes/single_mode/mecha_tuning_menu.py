@@ -14,7 +14,6 @@ from auto_derby import imagetools, mathtools, ocr
 
 from ... import action, app, template, templates
 from ..scene import Scene, SceneHolder
-from .command import CommandScene
 
 
 class MechaTuningCore(IntEnum):
@@ -147,21 +146,6 @@ DEFAULT_MECHA_TURING_PLAN = {
         (MechaTuningCore.CHEST, MechaTuningChip.GUTS_RESEARCH),
     ],
     MechaTuningEvent.FIFTH_AFTER: [
-        (MechaTuningCore.HEAD, MechaTuningChip.SKILL_HINT),
-        (MechaTuningCore.HEAD, MechaTuningChip.SKILL_HINT),
-        (MechaTuningCore.HEAD, MechaTuningChip.SKILL_HINT),
-        (MechaTuningCore.HEAD, MechaTuningChip.SKILL_HINT),
-        (MechaTuningCore.HEAD, MechaTuningChip.SKILL_HINT),
-        (MechaTuningCore.HEAD, MechaTuningChip.WISDOM_RESEARCH),
-        (MechaTuningCore.HEAD, MechaTuningChip.WISDOM_RESEARCH),
-        (MechaTuningCore.HEAD, MechaTuningChip.WISDOM_RESEARCH),
-        (MechaTuningCore.HEAD, MechaTuningChip.WISDOM_RESEARCH),
-        (MechaTuningCore.HEAD, MechaTuningChip.WISDOM_RESEARCH),
-        (MechaTuningCore.HEAD, MechaTuningChip.PROFICIENCY),
-        (MechaTuningCore.HEAD, MechaTuningChip.PROFICIENCY),
-        (MechaTuningCore.HEAD, MechaTuningChip.PROFICIENCY),
-        (MechaTuningCore.HEAD, MechaTuningChip.PROFICIENCY),
-        (MechaTuningCore.HEAD, MechaTuningChip.PROFICIENCY),
         (MechaTuningCore.LEG, MechaTuningChip.SPEED_RESEARCH),
         (MechaTuningCore.LEG, MechaTuningChip.SPEED_RESEARCH),
         (MechaTuningCore.LEG, MechaTuningChip.SPEED_RESEARCH),
@@ -183,7 +167,22 @@ DEFAULT_MECHA_TURING_PLAN = {
         (MechaTuningCore.CHEST, MechaTuningChip.FRIENDSHIP_BOOST),
         (MechaTuningCore.CHEST, MechaTuningChip.FRIENDSHIP_BOOST),
         (MechaTuningCore.CHEST, MechaTuningChip.STAMINA_RESEARCH),
+        (MechaTuningCore.CHEST, MechaTuningChip.STAMINA_RESEARCH),
+        (MechaTuningCore.CHEST, MechaTuningChip.STAMINA_RESEARCH),
+        (MechaTuningCore.CHEST, MechaTuningChip.STAMINA_RESEARCH),
+        (MechaTuningCore.CHEST, MechaTuningChip.STAMINA_RESEARCH),
         (MechaTuningCore.CHEST, MechaTuningChip.GUTS_RESEARCH),
+        (MechaTuningCore.CHEST, MechaTuningChip.GUTS_RESEARCH),
+        (MechaTuningCore.CHEST, MechaTuningChip.GUTS_RESEARCH),
+        (MechaTuningCore.CHEST, MechaTuningChip.GUTS_RESEARCH),
+        (MechaTuningCore.CHEST, MechaTuningChip.GUTS_RESEARCH),
+        (MechaTuningCore.HEAD, MechaTuningChip.PROFICIENCY),
+        (MechaTuningCore.HEAD, MechaTuningChip.PROFICIENCY),
+        (MechaTuningCore.HEAD, MechaTuningChip.PROFICIENCY),
+        (MechaTuningCore.HEAD, MechaTuningChip.PROFICIENCY),
+        (MechaTuningCore.HEAD, MechaTuningChip.PROFICIENCY),
+        (MechaTuningCore.HEAD, MechaTuningChip.SKILL_HINT),
+        (MechaTuningCore.HEAD, MechaTuningChip.SKILL_HINT),
     ],
 }
 
@@ -297,7 +296,7 @@ def _recognize_mecha_energy(rp: mathtools.ResizeProxy, img: Image) -> int:
     crop_img = img.crop(bbox)
 
     # FIXME: "pt" cannot be properly recognized, so as a workaround, the image is resized and recognized.
-    crop_img = imagetools.resize(crop_img, width=480, height=272)
+    crop_img = imagetools.resize(crop_img, width=520, height=260)
     cv_img = imagetools.cv_image(crop_img.convert("L"))
     _, binary_img = cv2.threshold(cv_img, 120, 255, cv2.THRESH_BINARY_INV)
     app.log.image(
@@ -343,6 +342,7 @@ class MechaTuningMenu(Scene):
     def to_dict(self) -> Dict[Text, Any]:
         return {
             "mechaCore": self.mecha_core,
+            "mechaEvent": self.mecha_event.tuning_count,
             "mechaEnergy": self.mecha_energy,
             "wisdomResearchChip": self.wisdom_research_chip,
             "skillHintChip": self.skill_hint_chip,
@@ -364,14 +364,6 @@ class MechaTuningMenu(Scene):
 
     @classmethod
     def _enter(cls, ctx: SceneHolder) -> Scene:
-        CommandScene.enter(ctx)
-        action.wait_tap_image(
-            templates.SINGLE_MODE_MECHA_UMAMUSUME_GREEN_CONFIRM_BUTTON,
-        )
-        # action.wait_image(templates.SINGLE_MODE_MECHA_UMAMUSUME_GREEN_COMPLETE_BUTTON)
-        action.wait_tap_image(
-            templates.SINGLE_MODE_MECHA_UMAMUSUME_GREEN_COMPLETE_BUTTON
-        )
         return cls()
 
     def __get_mecha_tuning_event(
@@ -408,7 +400,9 @@ class MechaTuningMenu(Scene):
             self.can_use_friendship_boost_chip or self.can_use_skill_point_chip
         ):
             return MechaTuningEvent.FIFTH_AFTER
-
+        app.log.text(
+            f"{tuning_count}, {self.can_use_friendship_boost_chip}, {self.can_use_skill_point_chip}"
+        )
         raise ValueError(f"Failed to calculate the tuning count: {tuning_count}")
 
     def __choice_mecha_core(
@@ -454,26 +448,44 @@ class MechaTuningMenu(Scene):
     def __apply_tuning_plan(self) -> None:
         _validate_tuning_plan_combinations(self.mecha_tuning_plan)
 
-        action.wait_tap_image(
-            templates.SINGLE_MODE_MECHA_UMAMUSUME_RESET_BUTTON,
-        )
-        time.sleep(0.1)
+        time.sleep(1)
+        if action.count_image(templates.CLOSE_BUTTON) > 0:
+            action.wait_tap_image(templates.CLOSE_BUTTON)
 
-        self.recognize()
-        for core, chip in self.mecha_tuning_plan[self.mecha_event]:
-            self.__choice_mecha_core(core)
-            self.__choice_mecha_tuning_chip(chip)
+        retry = 3
+        while retry > 0:
+            action.wait_tap_image(templates.SINGLE_MODE_MECHA_UMAMUSUME_RESET_BUTTON)
+            time.sleep(0.2)
+            self.recognize()
+            for core, chip in self.mecha_tuning_plan[self.mecha_event]:
+                self.__choice_mecha_core(core)
+                self.__choice_mecha_tuning_chip(chip)
 
-        # recognize updated tuning
-        self.recognize()
+            # recognize updated tuning
+            self.recognize(skip_event_update=True)
+            retry -= 1
+            if (
+                action.count_image(
+                    templates.SINGLE_MODE_MECHA_UMAMUSUME_GREEN_CONFIRM_BUTTON
+                )
+                > 0
+            ):
+                action.wait_tap_image(
+                    templates.SINGLE_MODE_MECHA_UMAMUSUME_GREEN_CONFIRM_BUTTON,
+                )
+                action.wait_tap_image(
+                    templates.SINGLE_MODE_MECHA_UMAMUSUME_GREEN_COMPLETE_BUTTON
+                )
+                return
+
+            TimeoutError("Failed to apply tuning plan")
 
     def apply_tuning_plan(self) -> None:
         # Use the default tuning plan.
         # Allow the tuning plan to be modified via a plugin.
         self.__apply_tuning_plan()
 
-    def recognize(self, static: bool = False) -> None:
-        _validate_tuning_plan_combinations(self.mecha_tuning_plan)
+    def recognize(self, skip_event_update: bool = False, static: bool = False) -> None:
         rp = action.resize_proxy()
         img = app.device.screenshot()
 
@@ -481,7 +493,9 @@ class MechaTuningMenu(Scene):
         self.mecha_core = _recognize_mecha_tuning_core(img)
 
         self.__choice_mecha_core(MechaTuningCore.HEAD, static)
-        chips = _recognize_mecha_tuning_chips(MechaTuningCore.HEAD, rp, img)
+        chips = _recognize_mecha_tuning_chips(
+            MechaTuningCore.HEAD, rp, app.device.screenshot()
+        )
         for chip, (pt, can_use) in chips.items():
             if chip == MechaTuningChip.WISDOM_RESEARCH:
                 self.wisdom_research_chip = pt
@@ -492,7 +506,9 @@ class MechaTuningMenu(Scene):
                 self.can_use_proficiency_chip = can_use
 
         self.__choice_mecha_core(MechaTuningCore.CHEST, static)
-        chips = _recognize_mecha_tuning_chips(MechaTuningCore.CHEST, rp, img)
+        chips = _recognize_mecha_tuning_chips(
+            MechaTuningCore.CHEST, rp, app.device.screenshot()
+        )
         for chip, (pt, can_use) in chips.items():
             if chip == MechaTuningChip.STAMINA_RESEARCH:
                 self.stamina_research_chip = pt
@@ -503,7 +519,9 @@ class MechaTuningMenu(Scene):
                 self.can_use_friendship_boost_chip = can_use
 
         self.__choice_mecha_core(MechaTuningCore.LEG, static)
-        chips = _recognize_mecha_tuning_chips(MechaTuningCore.LEG, rp, img)
+        chips = _recognize_mecha_tuning_chips(
+            MechaTuningCore.LEG, rp, app.device.screenshot()
+        )
         for chip, (pt, can_use) in chips.items():
             if chip == MechaTuningChip.SPEED_RESEARCH:
                 self.speed_research_chip = pt
@@ -513,4 +531,5 @@ class MechaTuningMenu(Scene):
                 self.skill_point_chip = pt
                 self.can_use_skill_point_chip = can_use
 
-        self.mecha_event = self.__get_mecha_tuning_event()
+        if not skip_event_update:
+            self.mecha_event = self.__get_mecha_tuning_event()

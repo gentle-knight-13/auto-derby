@@ -6,6 +6,9 @@ import logging
 import time
 from typing import Callable, Iterator, List, Text, Tuple, Union
 
+from auto_derby.scenes.single_mode.training import TrainingScene
+from auto_derby.single_mode.commands.training import TrainingCommand
+
 from .. import action, app, config, template, templates
 from ..constants import RacePrediction
 from ..scenes.single_mode import (
@@ -18,6 +21,7 @@ from ..scenes.single_mode import (
     ShopScene,
     KnowledgeTableMenuScene,
     GrandMastersRaceMenuScene,
+    MechaTuningMenu,
 )
 from ..scenes.single_mode.item_menu import ItemMenuScene
 from ..single_mode import Context, commands, event, item, Race
@@ -28,6 +32,7 @@ ALL_OPTIONS = [
     templates.SINGLE_MODE_OPTION3,
     templates.SINGLE_MODE_OPTION4,
     templates.SINGLE_MODE_OPTION5,
+    templates.SINGLE_MODE_OPTION6,
 ]
 
 
@@ -116,6 +121,21 @@ def _handle_knowledge_table(
     return is_learn
 
 
+def _handle_overdrive(
+    ctx: Context, cs: CommandScene, command: commands.Command
+) -> bool:
+    if not cs.has_overdrive:
+        return False
+    is_training = isinstance(command, commands.TrainingCommand)
+    if is_training:
+        action.wait_tap_image(
+            templates.SINGLE_MODE_MECHA_UMAMUSUME_CAN_ACTIVATE_OVERDRIVE
+        )
+        action.wait_tap_image(templates.SINGLE_MODE_ACTIVATE_BUTTON)
+        action.wait_image(templates.SINGLE_MODE_MECHA_UMAMUSUME_OVERDRIVE_BUTTON)
+    return is_training
+
+
 class _CommandPlan:
     def __init__(
         self,
@@ -182,6 +202,14 @@ def _handle_turn(ctx: Context):
         scene = CommandScene.enter(ctx)
         scene.recognize(ctx)
         turn_commands = tuple(commands.from_context(ctx))
+    if _handle_overdrive(ctx, scene, plan.command):
+        scene = TrainingScene.enter(ctx)
+        scene.recognize_v2(ctx)
+        for i in scene.trainings:
+            command = TrainingCommand(i)
+            for turn_command in turn_commands:
+                if turn_command.name() == command.name():
+                    turn_command = command
 
     ctx.next_turn()
     app.log.text("context: %s" % ctx)
@@ -294,6 +322,30 @@ def _handle_fan_not_enough(ac: _ActionContext):
 
 def _handle_target_race(ac: _ActionContext):
     ctx = ac.ctx
+    if ctx.scenario in (ctx.SCENARIO_MECHA_UMAMUSUME, ctx.SCENARIO_UNKNOWN):
+        try:
+            action.wait_tap_image(
+                templates.SINGLE_MODE_MECHA_UMAMUSUME_UGE_BUTTON,
+                timeout=1,
+            )
+            ac.ctx.scenario = ctx.SCENARIO_MECHA_UMAMUSUME
+
+            while True:
+                tmpl, pos = action.wait_image_stable(
+                    templates.SKIP_BUTTON,
+                    templates.GREEN_NEXT_BUTTON,
+                    templates.SINGLE_MODE_RACE_NEXT_BUTTON,
+                )
+                app.device.tap(action.template_rect(tmpl, pos))
+                if tmpl.name in (
+                    templates.GREEN_NEXT_BUTTON,
+                    templates.SINGLE_MODE_RACE_NEXT_BUTTON,
+                ):
+                    action.wait_tap_image(templates.GREEN_NEXT_BUTTON)
+                    break
+            return
+        except TimeoutError:
+            pass
     if ctx.scenario in (ctx.SCENARIO_DAIHOSHOKUSAI, ctx.SCENARIO_UNKNOWN):
         try:
             action.wait_tap_image(
@@ -442,6 +494,12 @@ def _handle_grand_masters_race(ac: _ActionContext):
     ).execute(ctx)
 
 
+def _handle_mecha_tuning(ac: _ActionContext):
+    ctx = ac.ctx
+    scene = MechaTuningMenu.enter(ctx)
+    scene.apply_tuning_plan()
+
+
 def _skip_live(ac: _ActionContext):
     try:
         action.wait_tap_image(templates.SINGLE_MODE_SKIP_BUTTON, timeout=1)
@@ -493,8 +551,14 @@ def _template_actions(ctx: Context) -> Iterator[Tuple[_Template, _Handler]]:
             templates.SINGLE_MODE_UAF_SHOWDOWN_LAUNCH,
             _set_scenario(ctx.SCENARIO_UAF_READY_GO, _tap),
         )
-    if ctx.scenario in (ctx.SCENARIO_DAIHOSHOKUSAI, ctx.SCENARIO_UAF_READY_GO, ctx.SCENARIO_UNKNOWN):
+    if ctx.scenario in (
+        ctx.SCENARIO_DAIHOSHOKUSAI,
+        ctx.SCENARIO_UAF_READY_GO,
+        ctx.SCENARIO_MECHA_UMAMUSUME,
+        ctx.SCENARIO_UNKNOWN,
+    ):
         yield (templates.SINGLE_MODE_LIVE_CONFIRM_TITLE, _skip_live)
+        yield (templates.SINGLE_MODE_GREEN_LIVE_BUTTON, _skip_live)
     # if ctx.scenario in (ctx.SCENARIO_GRAND_MASTERS, ctx.SCENARIO_UNKNOWN):
     #     yield templates.SINGLE_MODE_GRAND_MASTERS_KNOWLEDGE_TABLE_BUTTON, _set_scenario(
     #         ctx.SCENARIO_GRAND_MASTERS, _close
@@ -503,6 +567,23 @@ def _template_actions(ctx: Context) -> Iterator[Tuple[_Template, _Handler]]:
         yield (
             templates.SINGLE_MODE_DAIHOSHOKUSAI_OPENING_BUTTON,
             _set_scenario(ctx.SCENARIO_DAIHOSHOKUSAI, _tap),
+        )
+    if ctx.scenario in (ctx.SCENARIO_MECHA_UMAMUSUME, ctx.SCENARIO_UNKNOWN):
+        yield (
+            templates.SINGLE_MODE_MECHA_UMAMUSUME_OPENING_BUTTON,
+            _set_scenario(ctx.SCENARIO_MECHA_UMAMUSUME, _tap),
+        )
+        yield (
+            templates.SINGLE_MODE_MECHA_UMAMUSUME_SUPER_OVERDRIVE,
+            _set_scenario(ctx.SCENARIO_MECHA_UMAMUSUME, _tap),
+        )
+        yield (
+            templates.SINGLE_MODE_MECHA_UMAMUSUME_SUPER_OVERDRIVE_BUTTON,
+            _set_scenario(ctx.SCENARIO_MECHA_UMAMUSUME, _tap),
+        )
+        yield (
+            templates.SINGLE_MODE_MECHA_UMAMUSUME_TUNING_EFFECT,
+            _set_scenario(ctx.SCENARIO_MECHA_UMAMUSUME, _handle_mecha_tuning),
         )
     if ctx.scenario is ctx.SCENARIO_CLIMAX:
         yield templates.SINGLE_MODE_GO_TO_SHOP_BUTTON, _cancel

@@ -317,7 +317,10 @@ class CommandScene(Scene):
             )
         if ctx.scenario == ctx.SCENARIO_MECHA_UMAMUSUME:
             self.has_overdrive = (
-                action.count_image(templates.SINGLE_MODE_MECHA_UMAMUSUME_CAN_ACTIVATE_OVERDRIVE) > 0
+                action.count_image(
+                    templates.SINGLE_MODE_MECHA_UMAMUSUME_CAN_ACTIVATE_OVERDRIVE
+                )
+                > 0
             )
 
     def recognize_go_out_options(self, ctx: single_mode.Context) -> None:
