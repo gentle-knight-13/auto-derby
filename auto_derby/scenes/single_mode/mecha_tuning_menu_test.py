@@ -16,7 +16,7 @@ from .mecha_tuning_menu import MechaTuningMenu
 def test_recognize(name: Text):
     _test.use_screenshot(f"single_mode/{name}.png")
     scene = MechaTuningMenu()
-    scene.recognize()
+    scene.recognize(static=True)
     _test.snapshot_match(
         scene,
         name=name,

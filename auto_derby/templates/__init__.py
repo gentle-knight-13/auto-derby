@@ -337,11 +337,65 @@ SINGLE_MODE_MECHA_UMAMUSUME_MECHA_ENERGY_POS = (
 SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_CHEST_CORE = (
     "single_mode_mecha_umamusume_mecha_tuning_chest_core.png"
 )
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_FRIEND_BOOST_CHIP = (
+    "single_mode_mecha_umamusume_mecha_tuning_friend_boost_chip.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_FRIEND_BOOST_CHIP_POS = (
+    "single_mode_mecha_umamusume_mecha_tuning_friend_boost_chip.pos.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_GUTS_CHIP = (
+    "single_mode_mecha_umamusume_mecha_tuning_guts_chip.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_GUTS_CHIP_POS = (
+    "single_mode_mecha_umamusume_mecha_tuning_guts_chip.pos.png"
+)
 SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_HEAD_CORE = (
     "single_mode_mecha_umamusume_mecha_tuning_head_core.png"
 )
 SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_LEG_CORE = (
     "single_mode_mecha_umamusume_mecha_tuning_leg_core.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_POWER_CHIP = (
+    "single_mode_mecha_umamusume_mecha_tuning_power_chip.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_POWER_CHIP_POS = (
+    "single_mode_mecha_umamusume_mecha_tuning_power_chip.pos.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_PROFICIENCY_CHIP = (
+    "single_mode_mecha_umamusume_mecha_tuning_proficiency_chip.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_PROFICIENCY_CHIP_POS = (
+    "single_mode_mecha_umamusume_mecha_tuning_proficiency_chip.pos.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_SKILL_HINT_CHIP = (
+    "single_mode_mecha_umamusume_mecha_tuning_skill_hint_chip.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_SKILL_HINT_CHIP_POS = (
+    "single_mode_mecha_umamusume_mecha_tuning_skill_hint_chip.pos.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_SKILL_POINT_CHIP = (
+    "single_mode_mecha_umamusume_mecha_tuning_skill_point_chip.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_SKILL_POINT_CHIP_POS = (
+    "single_mode_mecha_umamusume_mecha_tuning_skill_point_chip.pos.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_SPEED_CHIP = (
+    "single_mode_mecha_umamusume_mecha_tuning_speed_chip.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_SPEED_CHIP_POS = (
+    "single_mode_mecha_umamusume_mecha_tuning_speed_chip.pos.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_STAMINA_CHIP = (
+    "single_mode_mecha_umamusume_mecha_tuning_stamina_chip.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_STAMINA_CHIP_POS = (
+    "single_mode_mecha_umamusume_mecha_tuning_stamina_chip.pos.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_WISDOM_CHIP = (
+    "single_mode_mecha_umamusume_mecha_tuning_wisdom_chip.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_WISDOM_CHIP_POS = (
+    "single_mode_mecha_umamusume_mecha_tuning_wisdom_chip.pos.png"
 )
 SINGLE_MODE_MECHA_UMAMUSUME_OPENING_BUTTON = (
     "single_mode_mecha_umamusume_opening_button.png"

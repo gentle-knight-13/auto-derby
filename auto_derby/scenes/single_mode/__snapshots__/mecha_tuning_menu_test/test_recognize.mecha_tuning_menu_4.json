@@ -1,5 +1,5 @@
 {
-  "turning": 1,
+  "mechaCore": 1,
   "mechaEnergy": 18,
   "wisdomResearchChip": 0,
   "skillHintChip": 0,
@@ -10,7 +10,7 @@
   "speedResearchChip": 0,
   "powerResearchChip": 0,
   "skillPointChip": 0,
-  "canUseProficiencyChip": 0,
+  "canUseProficiencyChip": 1,
   "canUseFriendshipBoostChip": 0,
   "canUseSkillPointChip": 0
 }
