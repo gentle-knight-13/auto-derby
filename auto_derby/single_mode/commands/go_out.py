@@ -43,7 +43,6 @@ class GoOutCommand(Command):
             time.sleep(0.5)
         try:
             action.wait_image(templates.SINGLE_MODE_GO_OUT_MENU_TITLE, timeout=0.5)
-            ctx.go_out_menu = True
             rp = action.resize_proxy()
             if (
                 self.option.position == (0, 0)

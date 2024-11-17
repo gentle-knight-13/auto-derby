@@ -37,11 +37,12 @@ def main():
         "aoharu": Context.SCENARIO_AOHARU,
         "climax": Context.SCENARIO_CLIMAX,
         "uaf": Context.SCENARIO_UAF_READY_GO,
+        "mecha": Context.SCENARIO_MECHA_UMAMUSUME,
     }.get(args.scenario, args.scenario)
 
     image = PIL.Image.open(image_path)
     app.device = ImageDeviceService(image)
-    
+
     with app.cleanup as cleanup:
         app.log = MultiLogService(
             app.log,
@@ -49,7 +50,7 @@ def main():
         )
         ctx = Context.new()
         ctx.scenario = scenario
-    
+
         scene = GoOutMenuScene()
         scene.recognize(ctx)
         for option in ctx.go_out_options:

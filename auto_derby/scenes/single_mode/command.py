@@ -286,7 +286,7 @@ class CommandScene(Scene):
         self.has_scheduled_race = (
             action.count_image(templates.SINGLE_MODE_SCHEDULED_RACE_OPENING_BANNER) > 0
         )
-        self.can_go_out_with_friend = ctx.go_out_menu or (
+        self.can_go_out_with_friend = (
             action.count_image(templates.SINGLE_MODE_GO_OUT_FRIEND_ICON) > 0
         )
         ctx.go_out_menu = self.can_go_out_with_friend
