@@ -205,11 +205,15 @@ def _handle_turn(ctx: Context):
     if _handle_overdrive(ctx, scene, plan.command):
         scene = TrainingScene.enter(ctx)
         scene.recognize_v2(ctx)
-        for i in scene.trainings:
-            command = TrainingCommand(i)
-            for turn_command in turn_commands:
-                if turn_command.name() == command.name():
-                    turn_command = command
+        new_commands = tuple(TrainingCommand(i) for i in scene.trainings)
+        turn_commands = (
+            tuple(
+                turn_command
+                for turn_command in turn_commands
+                if not isinstance(turn_command, TrainingCommand)
+            )
+            + new_commands
+        )
 
     ctx.next_turn()
     app.log.text("context: %s" % ctx)
