@@ -136,6 +136,14 @@ def get_choice(event_screen: Image) -> int:
     else:
         ret = _prompt_choice(event_id)
     app.log.image("event: id=%s choice=%d" % (event_id, ret), event_screen)
+
+    images_path = os.path.join(
+        os.path.dirname(g.data_path), "single_mode_choice_images"
+    )
+    if not os.path.exists(images_path):
+        os.makedirs(images_path)
+    imagetools.pil_image(cv_event_name_img).save(f"{images_path}/{event_id}.png")
+
     return ret
 
 

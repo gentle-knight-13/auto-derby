@@ -215,6 +215,12 @@ def compute(ctx: Context, trn: Training) -> float:
             ),
         )
 
+    # TODO: Research level needs to be considered
+    research_level_score = 0
+    if ctx.scenario == ctx.SCENARIO_MECHA_UMAMUSUME:
+        if trn.gear:
+            research_level_score += 20
+
     has_hint = any(i for i in trn.partners if i.has_hint)
     hint = 3 if has_hint else 0
     return (
@@ -229,6 +235,7 @@ def compute(ctx: Context, trn: Training) -> float:
             + target_level_score
             + hint
             + live_performance
+            + research_level_score
         )
         * success_rate
         + vit

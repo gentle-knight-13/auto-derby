@@ -47,6 +47,7 @@ def _year4_date_text(ctx: Context) -> Iterator[Text]:
         ctx.SCENARIO_GRAND_LIVE,
         ctx.SCENARIO_UAF_READY_GO,
         ctx.SCENARIO_DAIHOSHOKUSAI,
+        ctx.SCENARIO_MECHA_UMAMUSUME,
         ctx.SCENARIO_UNKNOWN,
     ):
         yield "ファイナルズ開催中"
@@ -226,6 +227,30 @@ def _recognize_max_property(img: Image) -> int:
 def _recognize_scenario(rp: mathtools.ResizeProxy, img: Image) -> Text:
     spec = (
         (
+            templates.SINGLE_MODE_MECHA_UMAMUSUME_OVERDRIVE_BUTTON,
+            Context.SCENARIO_MECHA_UMAMUSUME,
+        ),
+        (
+            templates.SINGLE_MODE_MECHA_UMAMUSUME_OPENING_BUTTON,
+            Context.SCENARIO_MECHA_UMAMUSUME,
+        ),
+        (
+            templates.SINGLE_MODE_MECHA_UMAMUSUME_SUPER_OVERDRIVE,
+            Context.SCENARIO_MECHA_UMAMUSUME,
+        ),
+        (
+            templates.SINGLE_MODE_MECHA_UMAMUSUME_SUPER_OVERDRIVE_BUTTON,
+            Context.SCENARIO_MECHA_UMAMUSUME,
+        ),
+        (
+            templates.SINGLE_MODE_MECHA_UMAMUSUME_TUNING_EFFECT,
+            Context.SCENARIO_MECHA_UMAMUSUME,
+        ),
+        (
+            templates.SINGLE_MODE_MECHA_UMAMUSUME_UGE_BUTTON,
+            Context.SCENARIO_MECHA_UMAMUSUME,
+        ),
+        (
             templates.SINGLE_MODE_DAIHOSHOKUSAI_DATE_REMAIN,
             Context.SCENARIO_DAIHOSHOKUSAI,
         ),
@@ -317,6 +342,7 @@ def _date_bbox(ctx: Context, rp: mathtools.ResizeProxy):
         ctx.SCENARIO_PROJECT_LARK,
         ctx.SCENARIO_UAF_READY_GO,
         ctx.SCENARIO_DAIHOSHOKUSAI,
+        ctx.SCENARIO_MECHA_UMAMUSUME,
     ):
         return rp.vector4((125, 32, 278, 48), 540)
     if ctx.scenario == ctx.SCENARIO_CLIMAX:
@@ -368,6 +394,7 @@ class Context:
     SCENARIO_PROJECT_LARK = "Reach for the stars プロジェクトL'Arc"
     SCENARIO_UAF_READY_GO = "U.A.F. Ready GO! ～アスリートのキラメキ～"
     SCENARIO_DAIHOSHOKUSAI = "収穫ッ！満腹ッ！大豊食祭"
+    SCENARIO_MECHA_UMAMUSUME = "走れ！メカウマ娘"
 
     @staticmethod
     def scenario_from_str(name: Text) -> Text:
@@ -380,6 +407,7 @@ class Context:
             "lark": Context.SCENARIO_PROJECT_LARK,
             "uaf": Context.SCENARIO_UAF_READY_GO,
             "daihoshokusai": Context.SCENARIO_DAIHOSHOKUSAI,
+            "mecha": Context.SCENARIO_MECHA_UMAMUSUME,
         }.get(name, Context.SCENARIO_UNKNOWN)
 
     @staticmethod

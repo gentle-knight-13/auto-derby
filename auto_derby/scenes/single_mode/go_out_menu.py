@@ -120,7 +120,7 @@ def _recognize_menu(img: Image) -> Iterator[go_out.Option]:
             y + rp.vector(10, 540),
         )
         option = _recognize_item(rp, img.crop(bbox))
-        option.position = (x + rp.vector(102, 540), y + rp.vector(46, 540))
+        option.position = (x + rp.vector(50, 540), y - rp.vector(50, 540))
         option.bbox = bbox
         yield option
 

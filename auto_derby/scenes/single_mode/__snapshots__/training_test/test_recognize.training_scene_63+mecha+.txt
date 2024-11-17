@@ -1,0 +1,1 @@
+TrainingType.SPEED<spd=131 ski=77 pow=33 vit=-23.0% fail=0% lv=3 ptn=spd@5!,spd@5!,sta@5 gear=1>

@@ -72,7 +72,9 @@ RACE_RESULT_NO8 = "race_result_no8.png"
 RACE_RUNNING_STYLE_CHANGE_BUTTON = "race_running_style_change_button.png"
 RACE_RUNNING_STYLE_CHANGE_BUTTON_POS = "race_running_style_change_button.pos.png"
 RACE_RUNNING_STYLE_CHANGE_GRAY_BUTTON = "race_running_style_change_gray_button.png"
-RACE_RUNNING_STYLE_CHANGE_GRAY_BUTTON_POS = "race_running_style_change_gray_button.pos.png"
+RACE_RUNNING_STYLE_CHANGE_GRAY_BUTTON_POS = (
+    "race_running_style_change_gray_button.pos.png"
+)
 RACE_START_BUTTON = "race_start_button.png"
 RETRY_BUTTON = "retry_button.png"
 RETURN_BUTTON = "return_button.png"
@@ -92,6 +94,7 @@ SCROLL_TO_END_POS = "scroll_to_end.pos.png"
 SINGLE_MODE_ALL_EVENT_SHORTENED_SETTINGS = (
     "single_mode_all_event_shortened_settings.png"
 )
+SINGLE_MODE_ACTIVATE_BUTTON = "single_mode_activate_button.png"
 SINGLE_MODE_AOHARU_AUTO_FORMATION_TITLE = "single_mode_aoharu_auto_formation_title.png"
 SINGLE_MODE_AOHARU_AUTO_FORMATION_TITLE_POS = (
     "single_mode_aoharu_auto_formation_title.pos.png"
@@ -312,6 +315,7 @@ SINGLE_MODE_GRAND_MASTERS_RED_WISDOM = "single_mode_grand_masters_red_wisdom.png
 SINGLE_MODE_GRAND_MASTERS_WBC_BUTTON = "single_mode_grand_masters_wbc_button.png"
 SINGLE_MODE_GRAND_MASTERS_WISDOM_PIECE = "single_mode_grand_masters_wisdom_piece.png"
 SINGLE_MODE_GRAND_MASTERS_YELLOW_WISDOM = "single_mode_grand_masters_yellow_wisdom.png"
+SINGLE_MODE_GREEN_LIVE_BUTTON = "single_mode_green_live_button.png"
 SINGLE_MODE_ITEM_MENU_BUTTON = "single_mode_item_menu_button.png"
 SINGLE_MODE_ITEM_MENU_BUTTON_POS = "single_mode_item_menu_button.pos.png"
 SINGLE_MODE_ITEM_MENU_CURRENT_QUANTITY = "single_mode_item_menu_current_quantity.png"
@@ -322,6 +326,107 @@ SINGLE_MODE_ITEM_USE_BUTTON = "single_mode_item_use_button.png"
 SINGLE_MODE_LIVE_BUTTON = "single_mode_live_button.png"
 SINGLE_MODE_LIVE_CONFIRM_TITLE = "single_mode_live_confirm_title.png"
 SINGLE_MODE_LIVE_CONFIRM_TITLE_POS = "single_mode_live_confirm_title.pos.png"
+SINGLE_MODE_MECHA_UMAMUSUME_CAN_ACTIVATE_OVERDRIVE = (
+    "single_mode_mecha_umamusume_can_activate_overdrive.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_CAN_ACTIVATE_OVERDRIVE_POS = (
+    "single_mode_mecha_umamusume_can_activate_overdrive.pos.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_GEAR = "single_mode_mecha_umamusume_gear.png"
+SINGLE_MODE_MECHA_UMAMUSUME_GREEN_COMPLETE_BUTTON = (
+    "single_mode_mecha_umamusume_green_complete_button.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_GREEN_CONFIRM_BUTTON = (
+    "single_mode_mecha_umamusume_green_confirm_button.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_ENERGY = (
+    "single_mode_mecha_umamusume_mecha_energy.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_ENERGY_POS = (
+    "single_mode_mecha_umamusume_mecha_energy.pos.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_CHEST_CORE = (
+    "single_mode_mecha_umamusume_mecha_tuning_chest_core.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_FRIEND_BOOST_CHIP = (
+    "single_mode_mecha_umamusume_mecha_tuning_friend_boost_chip.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_FRIEND_BOOST_CHIP_POS = (
+    "single_mode_mecha_umamusume_mecha_tuning_friend_boost_chip.pos.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_GUTS_CHIP = (
+    "single_mode_mecha_umamusume_mecha_tuning_guts_chip.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_GUTS_CHIP_POS = (
+    "single_mode_mecha_umamusume_mecha_tuning_guts_chip.pos.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_HEAD_CORE = (
+    "single_mode_mecha_umamusume_mecha_tuning_head_core.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_LEG_CORE = (
+    "single_mode_mecha_umamusume_mecha_tuning_leg_core.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_POWER_CHIP = (
+    "single_mode_mecha_umamusume_mecha_tuning_power_chip.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_POWER_CHIP_POS = (
+    "single_mode_mecha_umamusume_mecha_tuning_power_chip.pos.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_PROFICIENCY_CHIP = (
+    "single_mode_mecha_umamusume_mecha_tuning_proficiency_chip.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_PROFICIENCY_CHIP_POS = (
+    "single_mode_mecha_umamusume_mecha_tuning_proficiency_chip.pos.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_SKILL_HINT_CHIP = (
+    "single_mode_mecha_umamusume_mecha_tuning_skill_hint_chip.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_SKILL_HINT_CHIP_POS = (
+    "single_mode_mecha_umamusume_mecha_tuning_skill_hint_chip.pos.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_SKILL_POINT_CHIP = (
+    "single_mode_mecha_umamusume_mecha_tuning_skill_point_chip.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_SKILL_POINT_CHIP_POS = (
+    "single_mode_mecha_umamusume_mecha_tuning_skill_point_chip.pos.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_SPEED_CHIP = (
+    "single_mode_mecha_umamusume_mecha_tuning_speed_chip.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_SPEED_CHIP_POS = (
+    "single_mode_mecha_umamusume_mecha_tuning_speed_chip.pos.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_STAMINA_CHIP = (
+    "single_mode_mecha_umamusume_mecha_tuning_stamina_chip.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_STAMINA_CHIP_POS = (
+    "single_mode_mecha_umamusume_mecha_tuning_stamina_chip.pos.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_WISDOM_CHIP = (
+    "single_mode_mecha_umamusume_mecha_tuning_wisdom_chip.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_MECHA_TUNING_WISDOM_CHIP_POS = (
+    "single_mode_mecha_umamusume_mecha_tuning_wisdom_chip.pos.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_OPENING_BUTTON = (
+    "single_mode_mecha_umamusume_opening_button.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_OVERDRIVE_BUTTON = (
+    "single_mode_mecha_umamusume_overdrive_button.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_RESET_BUTTON = (
+    "single_mode_mecha_umamusume_reset_button.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_SUPER_OVERDRIVE = (
+    "single_mode_mecha_umamusume_super_overdrive.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_SUPER_OVERDRIVE_BUTTON = (
+    "single_mode_mecha_umamusume_super_overdrive_button.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_TUNING_EFFECT = (
+    "single_mode_mecha_umamusume_tuning_effect.png"
+)
+SINGLE_MODE_MECHA_UMAMUSUME_UGE_BUTTON = "single_mode_mecha_umamusume_uge_button.png"
 SINGLE_MODE_OPTION1 = "single_mode_option1.png"
 SINGLE_MODE_OPTION1_POS = "single_mode_option1.pos.png"
 SINGLE_MODE_OPTION2 = "single_mode_option2.png"
@@ -332,6 +437,8 @@ SINGLE_MODE_OPTION4 = "single_mode_option4.png"
 SINGLE_MODE_OPTION4_POS = "single_mode_option4.pos.png"
 SINGLE_MODE_OPTION5 = "single_mode_option5.png"
 SINGLE_MODE_OPTION5_POS = "single_mode_option5.pos.png"
+SINGLE_MODE_OPTION6 = "single_mode_option6.png"
+SINGLE_MODE_OPTION6_POS = "single_mode_option6.pos.png"
 SINGLE_MODE_RACE_DETAIL_BUTTON = "single_mode_race_detail_button.png"
 SINGLE_MODE_RACE_DETAIL_BUTTON_POS = "single_mode_race_detail_button.pos.png"
 SINGLE_MODE_RACE_DETAIL_NO1_FAN_COUNT = "single_mode_race_detail_no1_fan_count.png"
@@ -384,7 +491,6 @@ SINGLE_MODE_UAF_SPORT_GENRE_POS = "single_mode_uaf_sport_genre.pos.png"
 SINGLE_MODE_URA_FINALS = "single_mode_ura_finals.png"
 SINGLE_MODE_URA_FINALS_POS = "single_mode_ura_finals.pos.png"
 SKIP_BUTTON = "skip_button.png"
-SKIP_BUTTON_POS = "skip_button.pos.png"
 SKIP_OFF_BUTTON = "skip_off_button.png"
 TEAM_RACE_ALL_RACE_RESULT_BUTTON = "team_race_all_race_result_button.png"
 TEAM_RACE_ALL_RACE_RESULT_BUTTON_POS = "team_race_all_race_result_button.pos.png"

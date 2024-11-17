@@ -203,6 +203,7 @@ class CommandScene(Scene):
         self.has_knowledge_table = False
         self.has_learn_wisdom = False
         self.has_lesson = False
+        self.has_overdrive = False
 
     @classmethod
     def name(cls):
@@ -241,6 +242,7 @@ class CommandScene(Scene):
             "hasKnowledgeTable": self.has_knowledge_table,
             "hasLearnWisdom": self.has_learn_wisdom,
             "hasLesson": self.has_lesson,
+            "hasOverdrive": self.has_overdrive,
         }
 
     def recognize_class(self, ctx: single_mode.Context):
@@ -284,7 +286,7 @@ class CommandScene(Scene):
         self.has_scheduled_race = (
             action.count_image(templates.SINGLE_MODE_SCHEDULED_RACE_OPENING_BANNER) > 0
         )
-        self.can_go_out_with_friend = ctx.go_out_menu or (
+        self.can_go_out_with_friend = (
             action.count_image(templates.SINGLE_MODE_GO_OUT_FRIEND_ICON) > 0
         )
         ctx.go_out_menu = self.can_go_out_with_friend
@@ -312,6 +314,13 @@ class CommandScene(Scene):
         if ctx.scenario == ctx.SCENARIO_GRAND_LIVE:
             self.has_lesson = (
                 action.count_image(templates.SINGLE_MODE_COMMAND_LESSON) > 0
+            )
+        if ctx.scenario == ctx.SCENARIO_MECHA_UMAMUSUME:
+            self.has_overdrive = (
+                action.count_image(
+                    templates.SINGLE_MODE_MECHA_UMAMUSUME_CAN_ACTIVATE_OVERDRIVE
+                )
+                > 0
             )
 
     def recognize_go_out_options(self, ctx: single_mode.Context) -> None:

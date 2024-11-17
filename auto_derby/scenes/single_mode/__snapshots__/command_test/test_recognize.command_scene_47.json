@@ -1,0 +1,40 @@
+{
+  "ctx": {
+    "date": [
+      1,
+      0,
+      0
+    ],
+    "mood": "GOOD",
+    "scenario": "走れ！メカウマ娘",
+    "vitality": 0.7681159420289855,
+    "maxVitality": 100,
+    "speed": 192,
+    "stamina": 196,
+    "power": 108,
+    "guts": 102,
+    "wisdom": 125,
+    "fanCount": 0,
+    "turf": "",
+    "dart": "",
+    "sprint": "",
+    "mile": "",
+    "intermediate": "",
+    "long": "",
+    "last": "",
+    "middle": "",
+    "head": "",
+    "lead": "",
+    "conditions": []
+  },
+  "scene": {
+    "hasHealthCare": false,
+    "hasScheduledRace": false,
+    "canGoOutWithFriend": false,
+    "hasShop": false,
+    "hasKnowledgeTable": false,
+    "hasLearnWisdom": false,
+    "hasLesson": false,
+    "hasOverdrive": true
+  }
+}

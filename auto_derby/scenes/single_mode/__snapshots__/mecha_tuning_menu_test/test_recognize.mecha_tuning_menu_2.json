@@ -1,0 +1,17 @@
+{
+  "mechaCore": 2,
+  "mechaEvent": 1,
+  "mechaEnergy": 6,
+  "wisdomResearchChip": 0,
+  "skillHintChip": 0,
+  "proficiencyChip": 0,
+  "staminaResearchChip": 0,
+  "gutsResearchChip": 0,
+  "friendshipBoostChip": 0,
+  "speedResearchChip": 0,
+  "powerResearchChip": 0,
+  "skillPointChip": 0,
+  "canUseProficiencyChip": 0,
+  "canUseFriendshipBoostChip": 0,
+  "canUseSkillPointChip": 0
+}

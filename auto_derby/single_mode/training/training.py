@@ -99,8 +99,10 @@ class Training:
         self.vocal: int = 0
         self.visual: int = 0
         self.mental: int = 0
-        
         self.level_up: int = 0
+
+        self.gear: bool = False
+        # TODO: Add research level variables
 
     def clone(self) -> Training:
         obj = copy.copy(self)
@@ -138,6 +140,7 @@ class Training:
                 + (f"fail={self.failure_rate*100:.0f}% ")
                 + f"lv={self.level} "
                 + (f"ptn={partner_text} " if partner_text else "")
+                + (f"gear={int(self.gear)} " if self.gear else "")
             ).strip()
             + ">"
         )

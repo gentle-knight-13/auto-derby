@@ -77,9 +77,9 @@ def _recognize_base_effect(img: Image) -> int:
         (103, 147, 223),
         (59, 142, 226),
         (44, 91, 167),
-        threshold=0.85,
+        threshold=0.80,
     )
-    _, non_brown_img = cv2.threshold(brown_img, 120, 255, cv2.THRESH_BINARY_INV)
+    _, non_brown_img = cv2.threshold(brown_img, 125, 255, cv2.THRESH_BINARY_INV)
     border_brown_img = imagetools.border_flood_fill(non_brown_img)
     brown_outline_img = cv2.copyTo(brown_img, 255 - border_brown_img)
 
@@ -147,7 +147,7 @@ def _recognize_base_effect(img: Image) -> int:
     if hash_sim > 0.9:
         return 100
     text = ocr.text(image_from_array(text_img))
-    if not text:
+    if not text or text == "+":
         return 0
     return int(text.lstrip("+"))
 
@@ -274,7 +274,7 @@ def _recognize_red_effect(img: Image) -> int:
         },
     )
     text = ocr.text(image_from_array(text_img))
-    if not text:
+    if not text or text == "+":
         return 0
     return int(text.lstrip("+"))
 
@@ -301,7 +301,7 @@ def _recognize_light_gold_effect(img: Image) -> int:
     brown_outline_img_extra = imagetools.constant_color_key(
         cv_img,
         (22, 103, 163),
-        threshold=0.9,
+        threshold=0.85,
     )
     brown_outline_img = np.array(
         np.maximum(brown_outline_img_base, brown_outline_img_extra)
@@ -313,7 +313,7 @@ def _recognize_light_gold_effect(img: Image) -> int:
         (
             ((255, 255, 255), 0),
             ((184, 255, 255), round(height * 0.5)),
-            # ((88, 215, 251), round(height * 0.75)),
+            ((88, 215, 251), round(height * 0.75)),
             ((80, 192, 247), height),
         )
     ).astype(np.uint8)
@@ -338,9 +338,9 @@ def _recognize_light_gold_effect(img: Image) -> int:
         },
     )
     text = ocr.text(image_from_array(text_img), offset=1)
-    if not text:
+    if not text or text == "+":
         return 0
-    return int(text.lstrip("+"))
+    return int(text.lstrip("+")) * 2
 
 
 def _recognize_dark_gold_effect(img: Image) -> int:
@@ -429,9 +429,9 @@ def _recognize_dark_gold_effect(img: Image) -> int:
         },
     )
     text = ocr.text(image_from_array(text_img), offset=1)
-    if not text:
+    if not text or text == "+":
         return 0
-    return int(text.lstrip("+"))
+    return int(text.lstrip("+")) * 2
 
 
 def _recognize_level(rgb_color: Tuple[int, ...]) -> int:
@@ -910,6 +910,32 @@ def _recognize_soul(
     return max(0, min(1, 1 - (empty_avg / (fg_avg - outline_avg))))
 
 
+def _recognize_gear(rp: mathtools.ResizeProxy, trn: Training, img: Image) -> bool:
+    x, y = trn.confirm_position
+    bbox = (
+        x + rp.vector(-27, 540),
+        y + rp.vector(-120, 540),
+        x + rp.vector(0, 540),
+        y + rp.vector(-90, 540),
+    )
+
+    gear_img = img.crop(bbox)
+    app.log.image(
+        "mecha gear",
+        gear_img,
+        level=app.DEBUG,
+    )
+
+    return any(
+        template.match(
+            gear_img,
+            template.Specification(
+                templates.SINGLE_MODE_MECHA_UMAMUSUME_GEAR, threshold=0.75
+            ),
+        )
+    )
+
+
 def _recognize_partner_icon(
     ctx: Context, img: Image, bbox: Tuple[int, int, int, int]
 ) -> Optional[training.Partner]:
@@ -985,6 +1011,10 @@ def _recognize_partners(ctx: Context, img: Image) -> Iterator[training.Partner]:
             rp.vector4((448, 147, 516, 220), 540),
             rp.vector(86, 540),
         ),
+        ctx.SCENARIO_MECHA_UMAMUSUME: (  # Todo: check correctness
+            rp.vector4((448, 147, 516, 220), 540),
+            rp.vector(86, 540),
+        ),
     }[ctx.scenario]
     icons_bottom = rp.vector(578, 540)
     while icon_bbox[2] < icons_bottom:
@@ -1032,6 +1062,7 @@ def _effect_recognitions(
         ctx.SCENARIO_GRAND_MASTERS,
         ctx.SCENARIO_PROJECT_LARK,
         ctx.SCENARIO_UAF_READY_GO,
+        ctx.SCENARIO_MECHA_UMAMUSUME,
     ):
         yield _bbox_groups(595, 623), _recognize_base_effect
         yield _bbox_groups(568, 593), _recognize_red_effect
@@ -1039,7 +1070,10 @@ def _effect_recognitions(
         yield _bbox_groups(595, 623), _recognize_base_effect
     else:
         raise NotImplementedError(ctx.scenario)
-    if ctx.scenario == ctx.SCENARIO_UAF_READY_GO:
+    if ctx.scenario in (
+        ctx.SCENARIO_UAF_READY_GO,
+        ctx.SCENARIO_MECHA_UMAMUSUME,
+    ):
         yield _bbox_groups(595, 623), _recognize_light_gold_effect
         yield _bbox_groups(568, 593), _recognize_dark_gold_effect
 
@@ -1104,6 +1138,10 @@ def _recognize_training(
             self.vocal += _recognize(363, 390)
             self.visual += _recognize(412, 439)
             self.mental += _recognize(461, 488)
+
+        if ctx.scenario == ctx.SCENARIO_MECHA_UMAMUSUME:
+            self.gear = _recognize_gear(rp, self, img)
+            # TODO: Recognize the level of research
 
         # TODO: recognize vitality
         # plugin hook
