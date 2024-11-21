@@ -340,7 +340,7 @@ def _recognize_light_gold_effect(img: Image) -> int:
     text = ocr.text(image_from_array(text_img), offset=1)
     if not text or text == "+":
         return 0
-    return int(text.lstrip("+")) * 2
+    return int(int(text.lstrip("+")) * 1.3)
 
 
 def _recognize_dark_gold_effect(img: Image) -> int:
@@ -431,7 +431,7 @@ def _recognize_dark_gold_effect(img: Image) -> int:
     text = ocr.text(image_from_array(text_img), offset=1)
     if not text or text == "+":
         return 0
-    return int(text.lstrip("+")) * 2
+    return int(int(text.lstrip("+")) * 1.3)
 
 
 def _recognize_level(rgb_color: Tuple[int, ...]) -> int:

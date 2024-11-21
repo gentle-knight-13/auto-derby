@@ -131,8 +131,14 @@ def _handle_overdrive(
         action.wait_tap_image(
             templates.SINGLE_MODE_MECHA_UMAMUSUME_CAN_ACTIVATE_OVERDRIVE
         )
-        action.wait_tap_image(templates.SINGLE_MODE_ACTIVATE_BUTTON)
+        tmpl, pos = action.wait_tap_image(templates.SINGLE_MODE_ACTIVATE_BUTTON)
+
+        # Skip overdrive animation
+        time.sleep(0.3)
+        app.device.tap(action.template_rect(tmpl, pos))
+
         action.wait_image(templates.SINGLE_MODE_MECHA_UMAMUSUME_OVERDRIVE_BUTTON)
+
     return is_training
 
 
