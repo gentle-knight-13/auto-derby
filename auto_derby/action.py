@@ -132,6 +132,7 @@ def wait_tap_image(
     random_tap((pos[0] + x, pos[1] + y, w - x, h - y))
     return tmpl, pos
 
+
 def get_random_pos() -> Tuple[int, int]:
     random.seed()
     x = random.randint(-3, 3)
@@ -149,8 +150,9 @@ def random_tap(rect: Tuple[int, int, int, int]):
     y += random_y
     w -= random_x
     h -= random_y
-    from random import randint
-    time.sleep(randint(0, 2))
+    import random
+
+    time.sleep(random.uniform(0.0, 1.0))
     app.device.tap((x, y, w, h))
 
 
